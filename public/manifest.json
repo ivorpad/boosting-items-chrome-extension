@@ -1,0 +1,22 @@
+{
+  "manifest_version": 2,
+  "name": "Boosting Items",
+  "version": "0.1",
+  "description": "Boosting Items",
+  "permissions": [
+    "https://themeforest.net/admin/awesome_proofing/*",
+    "https://codecanyon.net/admin/awesome_proofing/*",
+    "notifications",
+    "storage",
+    "tabs"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*/*admin/awesome_proofing*"
+      ],
+      "css": ["/static/css/main.css"],
+      "js": ["/static/js/main.js"]
+    }
+  ]
+}
