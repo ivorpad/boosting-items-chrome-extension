@@ -1,18 +1,45 @@
 import React, { Component } from 'react';
-// import logo from './logo.svg';
 import './App.css';
+import Boosting from './Boosting';
+import NotableFor from './NotableFor';
+import Promotions from './Promotions';
+
+// TODO: Remove
+const removeItemBundleCountTemp = () => {
+  Array.from(document.querySelectorAll('.e-form__label')).filter(function(v, i) {
+   return v.innerText === 'Item Bundle Count';
+  })[0].parentNode.remove();
+}
+
+removeItemBundleCountTemp();
 
 class App extends Component {
+
+  state = {
+    greeting: 'Hi reviewer, this is your name:',
+    reviewerName: '',
+  }
+
+  componentDidMount() {
+    const intercomSetup = document.getElementById('intercom-setup');
+    const { name } = JSON.parse(intercomSetup.getAttribute('data-intercom-settings-payload'));
+
+    this.setState({
+      reviewerName: name,
+    });
+  }
+
   render() {
     return (
       <div className="App">
-        <header className="App-header">
-          <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ii0xMS41IC0xMC4yMzE3NCAyMyAyMC40NjM0OCI+CiAgPHRpdGxlPlJlYWN0IExvZ288L3RpdGxlPgogIDxjaXJjbGUgY3g9IjAiIGN5PSIwIiByPSIyLjA1IiBmaWxsPSIjNjFkYWZiIi8+CiAgPGcgc3Ryb2tlPSIjNjFkYWZiIiBzdHJva2Utd2lkdGg9IjEiIGZpbGw9Im5vbmUiPgogICAgPGVsbGlwc2Ugcng9IjExIiByeT0iNC4yIi8+CiAgICA8ZWxsaXBzZSByeD0iMTEiIHJ5PSI0LjIiIHRyYW5zZm9ybT0icm90YXRlKDYwKSIvPgogICAgPGVsbGlwc2Ugcng9IjExIiByeT0iNC4yIiB0cmFuc2Zvcm09InJvdGF0ZSgxMjApIi8+CiAgPC9nPgo8L3N2Zz4K" className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
+          
+          <Boosting />
+          <NotableFor />
+          <Promotions />
+
+          {/*this.state.greeting} {this.state.reviewerName*/}
+
+
       </div>
     );
   }

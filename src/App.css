@@ -1,28 +1,24 @@
-.App {
-  text-align: center;
+.boosting_multiselect {
+  display: flex;
+  justify-content: space-between;
 }
 
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 80px;
+.boosting_multiselect .notable_for {
+    border: 1px solid #bbbbbb;
+    border-radius: 5px;
+    width: 250px;
+    padding: 3px;
 }
 
-.App-header {
-  background-color: #222;
-  height: 150px;
-  padding: 20px;
-  color: white;
+.boosting_multicheckbox {
+    display: flex;
+    margin-top: 40px;
 }
 
-.App-title {
-  font-size: 1.5em;
+.boosting_multicheckbox .form-controls {
+  margin-left: 35px;
 }
 
-.App-intro {
-  font-size: large;
-}
-
-@keyframes App-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+.boosting_multicheckbox .form-controls label {
+  margin-left: 10px;
 }
