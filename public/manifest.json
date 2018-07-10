@@ -3,13 +3,28 @@
   "name": "Boosting Items",
   "version": "0.1",
   "description": "Boosting Items",
+  "browser_action": {
+  	"default_icon": "favicon.ico",
+  	"default_popup": "popup.html",
+  	"default_title": "Boosting"
+  },
   "permissions": [
     "https://themeforest.net/admin/awesome_proofing/*",
     "https://codecanyon.net/admin/awesome_proofing/*",
     "notifications",
     "storage",
-    "tabs"
+    "tabs",
+    "identity",
+    "notifications",
+    "storage",
+    "activeTab",
+    "background",
+    "https://docs.google.com/spreadsheets/",
+    "https://googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/*"
+
   ],
+  "content_security_policy": "script-src 'self' https://apis.google.com; object-src 'self'",
   "content_scripts": [
     {
       "matches": [
@@ -18,5 +33,24 @@
       "css": ["/static/css/main.css"],
       "js": ["/static/js/main.js"]
     }
-  ]
+  ],
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "oauth2": {
+  	"client_id": "345564432721-drsesjhol80uitrh41rpmt3smje3cate.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/drive.file",
+      "https://www.googleapis.com/auth/drive.readonly",
+      "https://www.googleapis.com/auth/drive.metadata.readonly",
+      "https://www.googleapis.com/auth/drive.metadata",
+      "https://www.googleapis.com/auth/drive.appdata",
+      "https://www.googleapis.com/auth/drive",
+      "https://www.googleapis.com/auth/spreadsheets",
+      "https://www.googleapis.com/auth/spreadsheets.readonly"
+    ]
+},
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsvWl1Ge/lpeeLeOKHBBxL2QmGjobmuGCeBYlncXRrYTvvZOUecFRcFDcf6I5bITEujLxoSBFEFrBPiyWjlQtGjJqrPaxY87U+dsaJijJ+wWjcxp2/9Ytmb4ULp5d/mscqX7+24gH/c6oSTe0yCO+yETnedws8O9/e4g1IJ+E5qgjB09BWv1FbzXlhvm15gyXLU5YbDop+w+Jau1wiLYnwSyX3Yhhb30XR6KNIttlBFFt7IQRSSUEc8prFGMX7XdTIRcjr8A56ms1XLvmuXg/w8Wz5mw/uwPyBtmR3sDx5LDDju2SNxJO/Gkf/gnncpP7qxuzpQnklS6HK9QY08OKCQIDAQAB"
 }

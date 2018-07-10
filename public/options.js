@@ -1,5 +1,5 @@
-let options = {
-  settings: 'hello chrome'
-}
+// let options = {
+//   settings: 'hello chrome'
+// }
 
-console.log(options.settings);
+// console.log(options.settings);

@@ -7,7 +7,7 @@ class Promotions extends Component {
            <legend>Promotions</legend>
              <div className="form-controls">
                <div>
-                 <input type="checkbox" id="scales" name="feature" value="scales" checked />
+                 <input type="checkbox" id="scales" name="feature" value="scales" />
                  <label for="scales">Stunning Drone Imagery</label>
                </div>
 

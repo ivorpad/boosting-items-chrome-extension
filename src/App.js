@@ -3,6 +3,9 @@ import './App.css';
 import Boosting from './Boosting';
 import NotableFor from './NotableFor';
 import Promotions from './Promotions';
+import Form from './Form';
+import { GoogleLogin } from 'react-google-login';
+
 
 // TODO: Remove
 const removeItemBundleCountTemp = () => {
@@ -11,7 +14,7 @@ const removeItemBundleCountTemp = () => {
   })[0].parentNode.remove();
 }
 
-removeItemBundleCountTemp();
+//removeItemBundleCountTemp();
 
 class App extends Component {
 
@@ -29,6 +32,7 @@ class App extends Component {
     });
   }
 
+
   render() {
     return (
       <div className="App">
@@ -36,7 +40,7 @@ class App extends Component {
           <Boosting />
           <NotableFor />
           <Promotions />
-
+          <Form />
           {/*this.state.greeting} {this.state.reviewerName*/}
 
 
