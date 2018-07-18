@@ -4,61 +4,77 @@ import Boosting from './Boosting';
 import NotableFor from './NotableFor';
 import Promotions from './Promotions';
 import Form from './Form';
-import axios from 'axios';
 
 // TODO: Remove
-const removeItemBundleCountTemp = () => {
+const removeItemBundleCount = () => {
   Array.from(document.querySelectorAll('.e-form__label')).filter(function(v, i) {
    return v.innerText === 'Item Bundle Count';
   })[0].parentNode.remove();
 }
 
-removeItemBundleCountTemp();
+removeItemBundleCount();
 
 
 class App extends Component {
 
   state = {
-    greeting: 'Hi reviewer, this is your name:',
     reviewerName: '',
     access_token: '',
-    sheetId: '10FeqhDufQ698lx9vAywzB02cT_XTJU7_r7ugQAQMr9M'
+    itemUrl: '',
+    itemName: '',
+    sheetId: '10FeqhDufQ698lx9vAywzB02cT_XTJU7_r7ugQAQMr9M',
+    data: {}
   }
-
-
-  // I need to find a way to send an error response object from content script to background.js
-  // if e.response.status === 401 then background.js will receive this status 
-  // and if it's 401 then we will generate a new token via getAuthToken({ interactive: false })
-  // after we get a new token we need to pass back this data to App.js
-  // to we can set a new state for access_token
-
   
   componentDidMount() {
-
     const intercomSetup = document.getElementById('intercom-setup');
     const { name } = JSON.parse(intercomSetup.getAttribute('data-intercom-settings-payload'));
+    const itemName = document.querySelector('.existing-value').innerText;
+    const itemUrl = document.querySelector('.submission-details > a').href;
 
     this.setState({
-      reviewerName: name
+      reviewerName: name,
+      itemName,
+      itemUrl,
+      access_token: localStorage.getItem('access_token') !== "null" ? localStorage.getItem('access_token') : null,
+      formData: {
+        boosting: "Good" 
+      }
     });
-     /*eslint-disable no-undef*/
-    chrome.storage.local.get(['token'], (result) => {
-      console.log('from App ' + result.token)
-      this.setState({
-        access_token: result.token
-      })
+  }
+
+  setToken = (access_token) => {
+    localStorage.setItem('access_token', access_token)
+
+    this.setState({
+      access_token
+    })
+  }
+
+  handleFormData = (values, key) => {  
+    this.setState(prevState => {
+      return { formData: {
+        ...prevState.formData,
+        [key]: values
+      } }
     });
   }
 
   render() {
     return (
       <div className="App">
-          {console.log(this.state)}
-          <Boosting />
-          <NotableFor />
-          <Promotions />
-          <Form token={this.state.access_token} sheetId={this.state.sheetId} name={this.state.reviewerName} />
-
+        <Boosting   handleFormData={this.handleFormData}/>
+        <NotableFor handleFormData={this.handleFormData}/>
+        <Promotions handleFormData={this.handleFormData} />
+        <Form 
+          access_token={this.state.access_token} 
+          sheetId={this.state.sheetId} 
+          reviewerName={this.state.reviewerName}
+          setToken={this.setToken}
+          itemName={this.state.itemName}
+          itemUrl={this.state.itemUrl}
+          formData={this.state.formData}
+        />
       </div>
     );
   }

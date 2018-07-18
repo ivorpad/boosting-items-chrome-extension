@@ -1,14 +1,21 @@
 import React, { Component } from 'react'
 import SHEET from './helpers/API';
+import moment from 'moment';
 
 
 export default class Form extends Component {
 
   state = {
     inputValue: '',
-    onFormSubmitted: false,
-    onFormSubmittedError: false
   }
+
+  static defaultProps = {
+  	formData: {
+      boosting: "",
+      notable_for: [],
+      promotions: []
+  	}
+  };
 
   handleInputChange = (e) => {
     this.setState({
@@ -17,7 +24,7 @@ export default class Form extends Component {
   }
 
   componentDidMount() {
-    const bigApproveButton = Array.from(document.getElementsByName('proofing_action')).filter(v => v.value === 'approve')[0];
+    const bigApproveButton = document.getElementById('approve').children['proofing_action'];
     bigApproveButton.addEventListener('click', this.handleApproveClick);
   }
 
@@ -25,29 +32,48 @@ export default class Form extends Component {
     e.preventDefault();
 
     const range = "Sheet1!A2";
-  
-    const data = {
-      "range": range,
-      "majorDimension": "ROWS",
-      "values": [
-        [this.state.inputValue, this.props.name],
-      ]
+    
+    const {
+    	itemUrl,
+    	itemName,
+    	reviewerName,
+    	formData
+    } = this.props
+
+    const dataToInsert = {
+    	"range": range,
+    	"majorDimension": "ROWS",
+    	"values": [
+    		[
+    			moment(Date.now()).format("MM-DD-YYYY"),
+    			itemUrl,
+    			itemName,
+    			reviewerName,
+    			formData.boosting,
+          this.validateFormDataArray(formData.notable_for) ? formData.notable_for.join(", ") : '-',
+          this.validateFormDataArray(formData.promotions) ? formData.promotions.join(", ") : '-'
+    		],
+    	]
     }
 
     // If the token is not null or undefined then set the Authorization header.
-    if(this.props.token) {
-      SHEET.defaults.headers.post['Authorization'] = `Bearer ${this.props.token}`
+    if (this.props.access_token) {
+    	SHEET.defaults.headers.post['Authorization'] = `Bearer ${this.props.access_token}`
     }
 
-    SHEET.post(`/${this.props.sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`, data)
-    .then(resp => console.log(resp))
-    .catch(e => console.log(e.response))
+    SHEET.post(`/${this.props.sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`, dataToInsert)
+    	.then(resp => {
+    		console.log(resp)
+    	})
+    	.catch(e => {
+    		console.log(e.response)
+    	})
   }
 
   handleGet = (e) => {
     e.preventDefault();
 
-    SHEET.defaults.headers.get['Authorization'] = `Bearer ${this.props.token}`
+    SHEET.defaults.headers.get['Authorization'] = `Bearer ${this.props.access_token}`
 
     SHEET.get(`${this.props.sheetId}/values/Sheet1!A1:D5?key=AIzaSyDvK1O8LuQKbBH8UBePNCib-vtNmiIbqs0`)
       .then(r => console.log(r))
@@ -56,9 +82,7 @@ export default class Form extends Component {
   }
 
   cloneAndChangeButtonAttr = () => {
-    const bigApproveButton = Array.from (
-    	document.getElementsByName('proofing_action')
-    ).filter(v => v.value === 'approve')[0];
+    const bigApproveButton = document.getElementById('approve').children['proofing_action'];
     const approveAction = document.getElementById('approve');
     let newButton = bigApproveButton.cloneNode(true);
     
@@ -73,6 +97,9 @@ export default class Form extends Component {
     approveAction.append(newButton);
   } 
 
+  validateFormDataArray = (array) => Array.isArray(array) && array.length > 0 && typeof(array) !== 'undefined';
+  
+
   // handle the form submission here.
   handleApproveClick = (e) => {
     
@@ -80,48 +107,86 @@ export default class Form extends Component {
 
     const range = "Sheet1!A2";
 
-    const data = {
+    const {
+      itemUrl,
+      itemName,
+      reviewerName,
+      formData
+    } = this.props
+
+    const dataToInsert = {
       "range": range,
       "majorDimension": "ROWS",
       "values": [
-        [this.state.inputValue, this.props.name],
+        [
+          moment(Date.now()).format("MM-DD-YYYY"),
+          itemUrl,
+          itemName,
+          reviewerName,
+          formData.boosting,
+          this.validateFormDataArray(formData.notable_for) ? formData.notable_for.join(", ") : '-',
+          this.validateFormDataArray(formData.promotions) ? formData.promotions.join(", ") : '-'
+        ],
       ]
     }
 
     // If the token is not null or undefined then set the Authorization header.
-    if (this.props.token) {
-      SHEET.defaults.headers.post['Authorization'] = `Bearer ${this.props.token}`
+    if (this.props.access_token) {
+      SHEET.defaults.headers.post['Authorization'] = `Bearer ${this.props.access_token}`
     }
 
-    SHEET.post(`/${this.props.sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`, data)
+    SHEET.post(`/${this.props.sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`, dataToInsert)
       .then(resp => {
         console.log(resp)
-        this.setState({
-          onFormSubmitted: true,
-          onFormSubmittedError: false
-        })
       })
       .catch(e => {
         console.log(e.response)
-        this.setState({
-          onFormSubmitted: true,
-          onFormSubmittedError: true
-        })
     })
   }
 
+  handleLogin = (e) => {
+    e.preventDefault();
+    /*eslint-disable no-undef*/
+    chrome.runtime.sendMessage({ type: 'login' }, function(response) {
+       if(response.access_token) {
+         this.props.setToken(response.access_token);
+       }
+    }.bind(this));
+    /*eslint-enable no-undef*/
+
+    
+  }
+
+  handleLogout = (e) => {
+    e.preventDefault();
+    /*eslint-disable no-undef*/
+    chrome.runtime.sendMessage({ type: 'logout' }, function(response) {
+      console.log(response, this);
+    }.bind(this));
+    /*eslint-enable no-undef*/ 
+
+    this.props.setToken(null)
+  }
+
   render() {
-    console.log(this.state)
     return (
       <div>
+        {
+          console.log(this.props.formData)
+        }
          <form onSubmit={this.handleSubmit}>
-           <input type="text" value={this.state.inputValue} onChange={this.handleInputChange}/>
-           <input id="google_login" type="submit" value="Login"/>
+           {/* <input type="text" value={this.state.inputValue} onChange={this.handleInputChange}/> */}
+           <input id="send_data" type="submit" value="Submit sample Data"/>
+         </form>
+          <br/>
+         <form onSubmit={this.handleGet}>
+            <input type="submit" value="Get sample data"/>
          </form>
 
-         <form onSubmit={this.handleGet}>
-            <input type="submit" value="get data"/>
-         </form>
+          <br/>
+
+            <button onClick={this.handleLogin}>Login</button>
+            <button onClick={this.handleLogout}>Logout</button>
       </div>
     )
   }

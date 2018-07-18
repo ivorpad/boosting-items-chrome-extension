@@ -21,10 +21,13 @@
     "background",
     "https://docs.google.com/spreadsheets/",
     "https://googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/*"
-
+    "https://www.googleapis.com/*",
+    "https://www.apis.google.com/*",
+    "*://*.google.com/*"
   ],
-  "content_security_policy": "script-src 'self' https://apis.google.com; object-src 'self'",
+  "web_accessible_resources": [
+    "/oauth2/*"
+  ],
   "content_scripts": [
     {
       "matches": [
@@ -35,12 +38,11 @@
     }
   ],
   "background": {
-    "scripts": [
-      "background.js"
-    ]
+    "page": "background.html"    
   },
+  "content_security_policy": "script-src 'self' https://apis.google.com; object-src 'self'",
   "oauth2": {
-  	"client_id": "345564432721-drsesjhol80uitrh41rpmt3smje3cate.apps.googleusercontent.com",
+  	"client_id": "345564432721-l2k4ahenncosfvv8t79k5vlt8so3hdck.apps.googleusercontent.com",
     "scopes": [
       "https://www.googleapis.com/auth/drive.file",
       "https://www.googleapis.com/auth/drive.readonly",

@@ -22,3 +22,7 @@
 .boosting_multicheckbox .form-controls label {
   margin-left: 10px;
 }
+
+#promotions label {
+	margin-left: 5px;
+}

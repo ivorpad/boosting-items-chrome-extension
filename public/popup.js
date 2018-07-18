@@ -1,56 +1,44 @@
 /*eslint-disable no-undef*/
 
-const login = document.getElementById('google_login');
-const logout = document.getElementById('google_logout');
 
 
+  function oauthSignIn() {
+  	// Google's OAuth 2.0 endpoint for requesting an access token
+  	var oauth2Endpoint = 'https://accounts.google.com/o/oauth2/v2/auth';
 
-// function init() {
+  	// Create <form> element to submit parameters to OAuth 2.0 endpoint.
+  	var form = document.createElement('form');
+  	form.setAttribute('method', 'GET'); // Send as a GET request.
+  	form.setAttribute('action', oauth2Endpoint);
 
-//   var sheetId;
+  	// Parameters to pass to OAuth 2.0 endpoint.
+  	var params = {
+  		'client_id': '345564432721-bheknq9uhhaghq7jlhok2esgje7qk5o3.apps.googleusercontent.com',
+  		'redirect_uri': 'http://localhost',
+  		'response_type': 'token',
+  		'scope': 'https://www.googleapis.com/auth/drive.metadata.readonly',
+  		'include_granted_scopes': 'true',
+  		'state': 'pass-through value'
+  	};
 
-  login.addEventListener('click', requestWithAuth);
-  logout.addEventListener('click', removeAuth);
-
-  function requestWithAuth() {
-    chrome.identity.getAuthToken({ 'interactive': true }, function(token) {
-      if (chrome.runtime.lastError) {
-        console.log(chrome.runtime.lastError); // return instead
-      }
-
-      console.log(token)
-
-      chrome.storage.local.set({token}, function() {
-        console.log('Value is set to ' + token);
-      });
-    });
+  // Add form parameters as hidden input values.
+  for (var p in params) {
+  	var input = document.createElement('input');
+  	input.setAttribute('type', 'hidden');
+  	input.setAttribute('name', p);
+  	input.setAttribute('value', params[p]);
+  	form.appendChild(input);
   }
 
-  function removeAuth() {
-
-    chrome.storage.local.get(['token'], (result) => {
-      removeToken(result.token);
-    });
-
-    function removeToken(token) {
-      console.log('removing token: ' + token);
-      if(token) {
-        fetch(`https://accounts.google.com/o/oauth2/revoke?token=${token}`)
-          .then(() => {
-            chrome.identity.removeCachedAuthToken({
-              'token': token
-            }, function () {
-              chrome.storage.local.remove(['token'], function(v) {
-                console.log('Value is set to ' + v);
-              });
-          })
-        });
-      }
-    }
-      // end
+  // Add form to page and submit it to open the OAuth 2.0 endpoint.
+  document.body.appendChild(form);
+  form.submit();
+  console.log('asa')
   }
-   
+  //oauthSignIn()
+  const login = document.getElementById('google_login');
 
+  login.addEventListener('click', oauthSignIn)
 
 
   // login.addEventListener('click', function () {

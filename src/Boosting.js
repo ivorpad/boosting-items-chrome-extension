@@ -10,18 +10,31 @@ const marks = {
   3: <strong>WOW!</strong>,
 };
 
-function log(value) {
-  console.log(value); //eslint-disable-line
-}
-
 class Boosting extends Component {
+
+    itemBoostingChange = (rating) => {
+      switch(rating) {
+        case 1:
+          return 'Great';
+        case 2:
+          return 'Exceptional';
+        case 3:
+          return 'WOW!'
+        default:
+          return 'Good';
+      }
+    }
+
+    handleItemRating = (rating) => {
+      this.props.handleFormData(this.itemBoostingChange(rating), 'boosting')
+    }
 
     render() {
         return (
           <div>
               <h3 style={ {paddingBottom: 5, textAlign:'left', fontWeight: 'bold', fontSize: 16} }>Boosting</h3>
               <div style={style}>
-                <Slider min={0} max={3} marks={marks} step={null} onChange={log} defaultValue={0} />
+                <Slider min={0} max={3} marks={marks} step={null} onChange={this.handleItemRating} defaultValue={0} />
               </div>
             </div>
         );
