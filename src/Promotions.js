@@ -13,7 +13,7 @@ class Promotions extends Component {
     }
     
     handleCheckboxChange = (e) => {
-      const { promotionsForm } = this.form;
+      const { promotions: promotionsForm } = this.form;
       const promotionsArr = [...promotionsForm];
       const checked = promotionsArr
                         .filter(input => input.checked === true)
