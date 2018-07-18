@@ -5,23 +5,18 @@ import moment from 'moment';
 
 export default class Form extends Component {
 
+  static defaultProps = {
+  	formData: {
+  		boosting: "",
+  		notable_for: [],
+  		promotions: []
+  	}
+  };
+
   state = {
     inputValue: '',
   }
 
-  static defaultProps = {
-  	formData: {
-      boosting: "",
-      notable_for: [],
-      promotions: []
-  	}
-  };
-
-  handleInputChange = (e) => {
-    this.setState({
-      inputValue: e.target.value
-    })
-  }
 
   componentDidMount() {
     const bigApproveButton = document.getElementById('approve').children['proofing_action'];
@@ -100,7 +95,6 @@ export default class Form extends Component {
   validateFormDataArray = (array) => Array.isArray(array) && array.length > 0 && typeof(array) !== 'undefined';
   
 
-  // handle the form submission here.
   handleApproveClick = (e) => {
     
     this.cloneAndChangeButtonAttr();
@@ -144,30 +138,6 @@ export default class Form extends Component {
     })
   }
 
-  handleLogin = (e) => {
-    e.preventDefault();
-    /*eslint-disable no-undef*/
-    chrome.runtime.sendMessage({ type: 'login' }, function(response) {
-       if(response.access_token) {
-         this.props.setToken(response.access_token);
-       }
-    }.bind(this));
-    /*eslint-enable no-undef*/
-
-    
-  }
-
-  handleLogout = (e) => {
-    e.preventDefault();
-    /*eslint-disable no-undef*/
-    chrome.runtime.sendMessage({ type: 'logout' }, function(response) {
-      console.log(response, this);
-    }.bind(this));
-    /*eslint-enable no-undef*/ 
-
-    this.props.setToken(null)
-  }
-
   render() {
     return (
       <div>
@@ -175,7 +145,6 @@ export default class Form extends Component {
           console.log(this.props.formData)
         }
          <form onSubmit={this.handleSubmit}>
-           {/* <input type="text" value={this.state.inputValue} onChange={this.handleInputChange}/> */}
            <input id="send_data" type="submit" value="Submit sample Data"/>
          </form>
           <br/>
@@ -185,8 +154,8 @@ export default class Form extends Component {
 
           <br/>
 
-            <button onClick={this.handleLogin}>Login</button>
-            <button onClick={this.handleLogout}>Logout</button>
+            <button onClick={this.props.handleLogin}>Login</button>
+            <button onClick={this.props.handleLogout}>Logout</button>
       </div>
     )
   }

@@ -51,6 +51,32 @@ class App extends Component {
     })
   }
 
+  handleLogin = (e) => {
+    e.preventDefault();
+    /*eslint-disable no-undef*/
+    chrome.runtime.sendMessage({
+      type: 'login'
+    }, function (response) {
+      if (response.access_token) {
+        this.setToken(response.access_token);
+      }
+    }.bind(this));
+    /*eslint-enable no-undef*/
+  }
+
+  handleLogout = (e) => {
+    e.preventDefault();
+    /*eslint-disable no-undef*/
+    chrome.runtime.sendMessage({
+      type: 'logout'
+    }, function (response) {
+      console.log(response, this);
+    }.bind(this));
+    /*eslint-enable no-undef*/
+
+    this.setToken(null)
+  }
+
   handleFormData = (values, key) => {  
     this.setState(prevState => {
       return { formData: {
@@ -74,6 +100,8 @@ class App extends Component {
           itemName={this.state.itemName}
           itemUrl={this.state.itemUrl}
           formData={this.state.formData}
+          handleLogin={this.handleLogin}
+          handleLogout={this.handleLogout}
         />
       </div>
     );
