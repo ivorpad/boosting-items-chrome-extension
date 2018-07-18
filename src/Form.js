@@ -1,9 +1,17 @@
 import React, { Component } from 'react'
 import SHEET from './helpers/API';
 import moment from 'moment';
+import { extractDomainName } from './helpers/helpers';
 
+const domain = extractDomainName(window.location.host)
 
 export default class Form extends Component {
+
+  constructor() {
+    super();
+    this.range = `${domain}!A2`;
+    this.market = domain;
+  }
 
   static defaultProps = {
   	formData: {
@@ -12,7 +20,7 @@ export default class Form extends Component {
   		promotions: []
   	}
   };
-
+  
   state = {
     inputValue: '',
   }
@@ -26,7 +34,8 @@ export default class Form extends Component {
   handleSubmit = (e) => {
     e.preventDefault();
 
-    const range = "Sheet1!A2";
+    const sheet = extractDomainName(window.location.host)
+    const range = `${sheet}!A2`;
     
     const {
     	itemUrl,
@@ -70,7 +79,7 @@ export default class Form extends Component {
 
     SHEET.defaults.headers.get['Authorization'] = `Bearer ${this.props.access_token}`
 
-    SHEET.get(`${this.props.sheetId}/values/Sheet1!A1:D5?key=AIzaSyDvK1O8LuQKbBH8UBePNCib-vtNmiIbqs0`)
+    SHEET.get(`${this.props.sheetId}/values/${this.market}!A1:D5?key=AIzaSyDvK1O8LuQKbBH8UBePNCib-vtNmiIbqs0`)
       .then(r => console.log(r))
       .catch(e => console.log(e.response))
 
@@ -99,8 +108,6 @@ export default class Form extends Component {
     
     this.cloneAndChangeButtonAttr();
 
-    const range = "Sheet1!A2";
-
     const {
       itemUrl,
       itemName,
@@ -109,7 +116,7 @@ export default class Form extends Component {
     } = this.props
 
     const dataToInsert = {
-      "range": range,
+      "range": this.range,
       "majorDimension": "ROWS",
       "values": [
         [
@@ -129,7 +136,7 @@ export default class Form extends Component {
       SHEET.defaults.headers.post['Authorization'] = `Bearer ${this.props.access_token}`
     }
 
-    SHEET.post(`/${this.props.sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`, dataToInsert)
+    SHEET.post(`/${this.props.sheetId}/values/${this.range}:append?valueInputOption=USER_ENTERED`, dataToInsert)
       .then(resp => {
         console.log(resp)
       })
@@ -141,9 +148,6 @@ export default class Form extends Component {
   render() {
     return (
       <div>
-        {
-          console.log(this.props.formData)
-        }
          <form onSubmit={this.handleSubmit}>
            <input id="send_data" type="submit" value="Submit sample Data"/>
          </form>
