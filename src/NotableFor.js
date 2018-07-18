@@ -1,7 +1,4 @@
 import React, { Component } from 'react';
-import axios from 'axios';
-
-const styles = { paddingTop: 20 }
 
 class NotableFor extends Component {
 
@@ -19,7 +16,7 @@ class NotableFor extends Component {
 
     render() {
         return (
-         <div className="boosting_multiselect inputs" style={styles}><label htmlFor="notable_for">Notable For:</label>
+         <div className="boosting_multiselect inputs" style={{ paddingTop: 20 }}><label htmlFor="notable_for">Notable For:</label>
             <select name="notable_for" id="notable_for" class="notable_for" multiple="multiple" onChange={this.handleOptionChange}>
               {this.props.isLoading ? <option disabled="disabled">loading data...</option> : this.props.highlightsData.map(({title}, index) => {
                 return(
