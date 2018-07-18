@@ -4,6 +4,7 @@ import Boosting from './Boosting';
 import NotableFor from './NotableFor';
 import Promotions from './Promotions';
 import Form from './Form';
+import axios from 'axios';
 
 // TODO: Remove
 const removeItemBundleCount = () => {
@@ -14,16 +15,21 @@ const removeItemBundleCount = () => {
 
 removeItemBundleCount();
 
-
 class App extends Component {
 
+  
   state = {
     reviewerName: '',
     access_token: '',
     itemUrl: '',
     itemName: '',
+    formData: {
+    	boosting: "Good" // default value
+    },
     sheetId: '10FeqhDufQ698lx9vAywzB02cT_XTJU7_r7ugQAQMr9M',
-    data: {}
+    highlights: [],
+    promotions: [],
+    isLoading: false,
   }
   
   componentDidMount() {
@@ -31,16 +37,34 @@ class App extends Component {
     const { name } = JSON.parse(intercomSetup.getAttribute('data-intercom-settings-payload'));
     const itemName = document.querySelector('.existing-value').innerText;
     const itemUrl = document.querySelector('.submission-details > a').href;
+    const baseUrl = "https://tfsnippets.ivorpad.com/wp-json/wp/v2";
+
 
     this.setState({
+      isLoading: true,
       reviewerName: name,
       itemName,
       itemUrl,
-      access_token: localStorage.getItem('access_token') !== "null" ? localStorage.getItem('access_token') : null,
-      formData: {
-        boosting: "Good" 
-      }
+      access_token: localStorage.getItem('access_token') !== "null" ? localStorage.getItem('access_token') : null
     });
+
+    axios.all([
+      axios.get(`${baseUrl}/post_type_promotion`),
+      axios.get(`${baseUrl}/post_type_highlight`)
+    ])
+    .then(axios.spread((promotionsResponse, highlightsResponse) => {
+      if (promotionsResponse.status === 200 && highlightsResponse.status === 200) {
+        const { data: promotions } = promotionsResponse
+        const { data: highlights } = highlightsResponse
+        this.setState({
+          promotions,
+          highlights,
+          isLoading: false
+        })
+      }
+    }))
+    .catch(e => console.log(e))
+
   }
 
   setToken = (access_token) => {
@@ -90,8 +114,19 @@ class App extends Component {
     return (
       <div className="App">
         <Boosting   handleFormData={this.handleFormData}/>
-        <NotableFor handleFormData={this.handleFormData}/>
-        <Promotions handleFormData={this.handleFormData} />
+
+        <NotableFor 
+          isLoading={this.state.isLoading} 
+          highlightsData={this.state.highlights} 
+          handleFormData={this.handleFormData}
+        />
+
+        <Promotions 
+          isLoading={this.state.isLoading} 
+          promotionsData={this.state.promotions} 
+          handleFormData={this.handleFormData} 
+        />
+
         <Form 
           access_token={this.state.access_token} 
           sheetId={this.state.sheetId} 

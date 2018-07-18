@@ -3,11 +3,7 @@ import axios from 'axios';
 
 class Promotions extends Component {
 
-    state = {
-      selectedCheckboxes: [],
-      isLoading: false,
-      checkboxesFetched: []
-    }    
+    state = { selectedCheckboxes: [] }    
 
     componentDidMount = () => {
       // workaround to fix undefined .settings in jQuery validation  
@@ -15,29 +11,11 @@ class Promotions extends Component {
       script.textContent = "$('#promotions').validate()";
       (document.head || document.documentElement).appendChild(script);
       script.parentNode.removeChild(script);
-
-      this.setState({
-        isLoading: true
-      })
-
-      axios.get(`https://tfsnippets.ivorpad.com/wp-json/wp/v2/post_type_promotion`)
-      .then(response => {
-        
-        if(response.status === 200) {
-          const titles = response.data.map(({title}) => title.rendered )
-          this.setState({
-            checkboxesFetched: titles,
-            isLoading: false
-          })
-        }
-      })
-      .catch(e => console.log(e))
     }
     
     handleCheckboxChange = (e) => {
-
-      const { promotions } = this.form;
-      const promotionsArr = [...promotions];
+      const { promotionsForm } = this.form;
+      const promotionsArr = [...promotionsForm];
       const checked = promotionsArr
                         .filter(input => input.checked === true)
                         .map(input => input.value)
@@ -51,12 +29,14 @@ class Promotions extends Component {
            <React.Fragment>
            <legend>Promotions</legend>
              <form id="promotions" ref={form => this.form = form} onChange={this.handleCheckboxChange}>
-              {this.state.isLoading ? 'loading...' : this.state.checkboxesFetched.map((title, index) => {
-                const slug = title.toLowerCase().split(" ").join("-");
+              {this.props.isLoading ? 'loading...' : this.props.promotionsData.map(({title}, index) => {
+      
+                const slug = title.rendered.toLowerCase().split(" ").join("-");
+                
                 return(
                   <div key={index}>
-                    <input type="checkbox" id={slug} name="promotions" value={title} />
-                    <label for={slug}>{title}</label>
+                    <input type="checkbox" id={slug} name="promotions" value={title.rendered} />
+                    <label for={slug}>{title.rendered}</label>
                   </div>
                 )
               })}

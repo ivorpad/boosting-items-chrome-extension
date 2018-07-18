@@ -25,7 +25,6 @@ export default class Form extends Component {
     inputValue: '',
   }
 
-
   componentDidMount() {
     const bigApproveButton = document.getElementById('approve').children['proofing_action'];
     bigApproveButton.addEventListener('click', this.handleApproveClick);

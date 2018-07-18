@@ -5,32 +5,7 @@ const styles = { paddingTop: 20 }
 
 class NotableFor extends Component {
 
-    state = {
-      selectedOptions: [],
-      optionsFetched: [],
-      isLoading: false
-    }
-
-    componentDidMount = () => {
-
-      this.setState({
-        isLoading: true
-      })
-
-      axios.get(`https://tfsnippets.ivorpad.com/wp-json/wp/v2/post_type_highlight`)
-        .then(response => {
-          
-          if(response.status === 200) {
-            const titles = response.data.map(({title}) => title.rendered )
-            this.setState({
-              optionsFetched: titles,
-              isLoading: false
-            })
-          }
-        })
-        .catch(e => console.log(e))
-    }
-    
+    state = { selectedOptions: [] }    
 
     handleOptionChange = (e) => {
       const selected = [...e.target.selectedOptions];
@@ -46,9 +21,9 @@ class NotableFor extends Component {
         return (
          <div className="boosting_multiselect inputs" style={styles}><label htmlFor="notable_for">Notable For:</label>
             <select name="notable_for" id="notable_for" class="notable_for" multiple="multiple" onChange={this.handleOptionChange}>
-              {this.state.isLoading ? <option disabled="disabled">loading data...</option> : this.state.optionsFetched.map((title, index) => {
+              {this.props.isLoading ? <option disabled="disabled">loading data...</option> : this.props.highlightsData.map(({title}, index) => {
                 return(
-                  <option key={index} value={title}>{title}</option>
+                  <option key={index} value={title.rendered}>{title.rendered}</option>
                 )
               })}
             </select>
