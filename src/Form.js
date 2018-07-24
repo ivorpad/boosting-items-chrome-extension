@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import SHEET from './helpers/API';
+import SheetApi from './helpers/API';
 import moment from 'moment';
 import { extractDomainName } from './helpers/helpers';
 
@@ -61,10 +61,10 @@ export default class Form extends Component {
 
     // If the token is not null or undefined then set the Authorization header.
     if (this.props.access_token) {
-    	SHEET.defaults.headers.post['Authorization'] = `Bearer ${this.props.access_token}`
+    	SheetApi.defaults.headers.post['Authorization'] = `Bearer ${this.props.access_token}`
     }
 
-    SHEET.post(`/${this.props.sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`, dataToInsert)
+    SheetApi.post(`/${this.props.sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`, dataToInsert)
     	.then(resp => {
     		console.log(resp)
     	})
@@ -76,9 +76,9 @@ export default class Form extends Component {
   handleGet = (e) => {
     e.preventDefault();
 
-    SHEET.defaults.headers.get['Authorization'] = `Bearer ${this.props.access_token}`
+    SheetApi.defaults.headers.get['Authorization'] = `Bearer ${this.props.access_token}`
 
-    SHEET.get(`${this.props.sheetId}/values/${this.market}!A1:D5?key=AIzaSyDvK1O8LuQKbBH8UBePNCib-vtNmiIbqs0`)
+    SheetApi.get(`${this.props.sheetId}/values/${this.market}!A1:D5?key=AIzaSyB96OBaegaOIfxM_xuXRf2ppUlEh9HKmbc`)
       .then(r => console.log(r))
       .catch(e => console.log(e.response))
 
@@ -132,10 +132,10 @@ export default class Form extends Component {
 
     // If the token is not null or undefined then set the Authorization header.
     if (this.props.access_token) {
-      SHEET.defaults.headers.post['Authorization'] = `Bearer ${this.props.access_token}`
+      SheetApi.defaults.headers.post['Authorization'] = `Bearer ${this.props.access_token}`
     }
 
-    SHEET.post(`/${this.props.sheetId}/values/${this.range}:append?valueInputOption=USER_ENTERED`, dataToInsert)
+    SheetApi.post(`/${this.props.sheetId}/values/${this.range}:append?valueInputOption=USER_ENTERED`, dataToInsert)
       .then(resp => {
         console.log(resp)
       })

@@ -38,11 +38,13 @@
     }
   ],
   "background": {
-    "page": "background.html"    
+    "page": "background.html",
+    "persistent": true 
   },
+  "options_page": "options.html",
   "content_security_policy": "script-src 'self' https://apis.google.com; object-src 'self'",
   "oauth2": {
-  	"client_id": "345564432721-l2k4ahenncosfvv8t79k5vlt8so3hdck.apps.googleusercontent.com",
+  	"client_id": "1065567962474-8cp6diuu5u7bvmrs6tofpbggl8c557li.apps.googleusercontent.com",
     "scopes": [
       "https://www.googleapis.com/auth/drive.file",
       "https://www.googleapis.com/auth/drive.readonly",
