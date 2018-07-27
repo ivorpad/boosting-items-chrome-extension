@@ -99,11 +99,10 @@ function Token() {
 					paramsString = redirectUri.substring(redirectUri.indexOf("?") + 1);
 					paramsSearch = new URLSearchParams(paramsString);
 
-					// TODO: Fix
-					// if (paramsObj(paramsSearch)[`${redirectURL}#state`] !== localStorage.getItem('state')) {
-					// 	console.log(`Invalid state parameter`);
-					// 	return;
-					// }
+					if (paramsObj(paramsSearch)[`${redirectURL}#state`] !== localStorage.getItem('state')) {
+						console.log(`Invalid state parameter`);
+						return;
+					}
 
 					const {
 						access_token
@@ -146,78 +145,68 @@ const TokenFactory = new Token();
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 	switch (request.type) {
-		case "refresh":
-			console.log("bg refresh");
-			chrome.storage.local.get(["access_token"], function (result) {
-				if (result.access_token) {
-					TokenFactory.tokenInfo(result.access_token).then(resp => {
-						//console.log()
-						console.log(
-							`interval set to: ${Number(resp.expires_in) * 1000 - 900000}`
-						);
-						interval = setInterval(function () {
-							TokenFactory.getNewToken(false).then(token => {
-								chrome.storage.local.set({
-										access_token: token
-                  },
-                  // noop function: required parameter not needed.
-									function () {}
-								);
-
-								console.log(token);
-
-								sendResponse({
-									startTokenRefresh: true
-								});
-							});
-						}, Number(resp.expires_in) * 1000 - 900000);
-					});
-				}
-			});
-			return true;
 		case "login":
 			console.log("prepare login");
 
-			var getToken = {
-				start: function () {
-					TokenFactory.getNewToken(true).then(token => {
-						console.log(token);
+			TokenFactory.getNewToken(true).then(token => {
+				console.log(token);
 
-						chrome.storage.local.set({
-								access_token: token
-							},
-							function () {}
-						);
+				chrome.storage.sync.set({
+					access_token: token,
+				});
 
-						sendResponse({
-							access_token: token,
-							isLoggedIn: true
+				sendResponse({
+					access_token: token,
+					isLoggedIn: true
+				});
+			});
+
+			return true;
+			case "refresh":
+				console.log("bg refresh");
+				chrome.storage.sync.get(["access_token"], function (result) {
+					if (result.access_token) {
+						
+						TokenFactory.tokenInfo(result.access_token)
+							.then(resp => {
+							console.log(`interval set to: ${Number(resp.expires_in) * 1000 - 900000}` );
+							interval = setInterval(function () {
+
+								TokenFactory.getNewToken(false).then(token => {
+									console.log('will get a new token')
+									chrome.storage.sync.set({ access_token: token });
+									console.log(token);
+									sendResponse({
+										startTokenRefresh: true
+									});
+								});
+							}, Number(resp.expires_in) * 1000 - 900000);
 						});
-					});
-				},
-
-				refresh: function () {
-					console.log("will get a new token after time");
-				}
-			};
-
-			getToken.start();
+					}
+				});
 			return true;
 		case "logout":
 			console.log("prepare logout");
 
-			chrome.storage.sync.get(["access_token"], function (result) {
-				fetch(
-					`https://accounts.google.com/o/oauth2/revoke?token=${
-            result.access_token
-          }`
-				);
-				localStorage.removeItem("state");
-				localStorage.removeItem("nonce");
-				localStorage.removeItem("login_hint");
-				localStorage.removeItem("start_token_refresh");
-			});
-
+				chrome.storage.sync.get(["access_token"], function (result) {
+					if (result.access_token) {
+						fetch(`https://accounts.google.com/o/oauth2/revoke?token=${result.access_token}`)
+							.then( r => {
+								chrome.storage.sync.remove('access_token', function() {
+									localStorage.removeItem("state");
+									localStorage.removeItem("nonce");
+									localStorage.removeItem("login_hint");
+									localStorage.removeItem("start_token_refresh");
+									sendResponse({
+										access_token: null,
+										isLoggedIn: false
+									});
+								})
+							})
+							.catch(err => console.log(err))
+					}
+				});
+			
 			clearInterval(interval);
 			// return true otherwise sendResponse() won't be async
 			return true;

@@ -20,11 +20,9 @@ const baseUrl = "https://tfsnippets.ivorpad.com/wp-json/wp/v2";
 
 class App extends Component {
 
-  // 10FeqhDufQ698lx9vAywzB02cT_XTJU7_r7ugQAQMr9M
 
   state = {
     reviewerName: '',
-    access_token: '',
     itemUrl: '',
     itemName: '',
     formData: {
@@ -34,8 +32,8 @@ class App extends Component {
     highlights: [],
     promotions: [],
     isLoading: false,
-    willRefreshToken: false,
-    startTokenRefresh: localStorage.getItem('start_token_refresh') || false
+    isLoggedIn: false,
+    startTokenRefresh: JSON.parse(localStorage.getItem('start_token_refresh')) // || false
   }
   
   componentDidMount() {
@@ -50,20 +48,6 @@ class App extends Component {
       itemName,
       itemUrl
     });
-
-    if(this.state.startTokenRefresh) {
-      /*eslint-disable no-undef*/
-      chrome.storage.local.get(['access_token'], function(result) {
-        this.setState({
-          access_token: result.access_token
-        })
-      }.bind(this))
-      /*eslint-enable no-undef*/
-    } else {
-      this.setState({
-        access_token: localStorage.getItem('access_token') !== "null" ? localStorage.getItem('access_token') : null
-      })
-    }
 
     axios.all([
       axios.get(`${baseUrl}/post_type_promotion`),
@@ -89,28 +73,26 @@ class App extends Component {
       })
     }.bind(this))
     /* eslint-enable no-undef */
+  }
 
+  componentWillMount = () => {
+    this.checkIfLoggedIn()
   }
 
   handleLogin = (e) => {
     e.preventDefault();
     
     /*eslint-disable no-undef*/
-
     chrome.runtime.sendMessage({
       type: 'login'
     }, function (response) {
       console.log(response)
+
+      this.setState({
+        isLoggedIn: response.isLoggedIn
+      });
+
       if (response.access_token) {
-
-        const {access_token} = response;
-
-        localStorage.setItem('access_token', access_token)
-
-        this.setState({
-          access_token,
-          willRefreshToken: true
-        });
         
         this.handleRefresh();
 
@@ -122,7 +104,6 @@ class App extends Component {
 
 
   handleRefresh = () => {
-
     /*eslint-disable no-undef*/
       chrome.runtime.sendMessage({
         type: 'refresh'
@@ -130,7 +111,7 @@ class App extends Component {
           console.log(response)
           localStorage.setItem('start_token_refresh', response.startTokenRefresh);
           this.setState({
-            startTokenRefresh: localStorage.getItem('start_token_refresh')
+            startTokenRefresh: JSON.parse(localStorage.getItem('start_token_refresh'))
           })
       }.bind(this))
     /*eslint-enable no-undef*/
@@ -143,10 +124,13 @@ class App extends Component {
       type: 'logout'
     }, function (response) {
       console.log(response);
+      this.setState({
+        isLoggedIn: response.isLoggedIn
+      })
     }.bind(this));
     /*eslint-enable no-undef*/
 
-    this.setToken(null)
+    //this.setToken(null)
   }
 
   handleFormData = (values, key) => {  
@@ -156,6 +140,29 @@ class App extends Component {
         [key]: values
       } }
     });
+  }
+
+  checkIfLoggedIn = () => {
+  	/*eslint-disable no-undef*/
+  	chrome.storage.sync.get(['access_token'], function (result) {
+  		fetch(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${result.access_token}`)
+  			.then(resp => resp.json())
+  			.then(val => {
+  				if (val.error_description) {
+  					throw new Error('Not logged in, please login to continue.')
+  				} else {
+            this.setState({
+              isLoggedIn: true
+            })
+          }
+  			})
+  			.catch(err => {
+  				this.setState({
+  					isLoggedIn: false
+  				})
+  			})
+  	}.bind(this))
+  	/*eslint-enable no-undef*/
   }
 
   render() {
@@ -187,6 +194,7 @@ class App extends Component {
           formData={this.state.formData}
           handleLogin={this.handleLogin}
           handleLogout={this.handleLogout}
+          isLoggedIn={this.state.isLoggedIn}
         />
       </div>
     );

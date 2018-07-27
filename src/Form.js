@@ -28,6 +28,7 @@ export default class Form extends Component {
   componentDidMount() {
     const bigApproveButton = document.getElementById('approve').children['proofing_action'];
     bigApproveButton.addEventListener('click', this.handleApproveClick);
+    //this.cleanTokenIfExpired()
   }
 
   handleSubmit = (e) => {
@@ -59,28 +60,44 @@ export default class Form extends Component {
     	]
     }
 
-    // If the token is not null or undefined then set the Authorization header.
-    if (this.props.access_token) {
-    	SheetApi.defaults.headers.post['Authorization'] = `Bearer ${this.props.access_token}`
-    }
 
-    SheetApi.post(`/${this.props.sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`, dataToInsert)
-    	.then(resp => {
-    		console.log(resp)
-    	})
-    	.catch(e => {
-    		console.log(e.response)
-    	})
+    /*eslint-disable no-undef*/
+    chrome.storage.sync.get(["access_token"], function(result) {
+        if (!result.access_token) {
+          return;
+        } 
+        console.log(result)
+        SheetApi.defaults.headers.post['Authorization'] = `Bearer ${result.access_token}`;
+        SheetApi.post(`/${this.props.sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`, dataToInsert)
+          .then(resp => {
+            console.log(resp)
+          })
+          .catch(e => {
+            console.log(e.response)
+          });
+      // }
+    }.bind(this));
+    /*eslint-enable no-undef*/
+
   }
 
   handleGet = (e) => {
     e.preventDefault();
 
-    SheetApi.defaults.headers.get['Authorization'] = `Bearer ${this.props.access_token}`
+    /*eslint-disable no-undef*/
+    chrome.storage.sync.get(["access_token"], function (result) {
 
-    SheetApi.get(`${this.props.sheetId}/values/${this.market}!A1:D5?key=AIzaSyB96OBaegaOIfxM_xuXRf2ppUlEh9HKmbc`)
-      .then(r => console.log(r))
-      .catch(e => console.log(e.response))
+    	if (!result.access_token) {
+    		return;
+      }
+
+      SheetApi.defaults.headers.get['Authorization'] = `Bearer ${result.access_token}`
+      SheetApi.get(`${this.props.sheetId}/values/${this.market}!A1:D5?key=AIzaSyB96OBaegaOIfxM_xuXRf2ppUlEh9HKmbc`)
+        .then(r => console.log(r))
+        .catch(e => console.log(e.response))
+    }.bind(this));
+    /*eslint-enable no-undef*/
+
 
   }
 
@@ -101,7 +118,6 @@ export default class Form extends Component {
   } 
 
   validateFormDataArray = (array) => Array.isArray(array) && array.length > 0 && typeof(array) !== 'undefined';
-  
 
   handleApproveClick = (e) => {
     
@@ -130,18 +146,22 @@ export default class Form extends Component {
       ]
     }
 
-    // If the token is not null or undefined then set the Authorization header.
-    if (this.props.access_token) {
-      SheetApi.defaults.headers.post['Authorization'] = `Bearer ${this.props.access_token}`
-    }
-
-    SheetApi.post(`/${this.props.sheetId}/values/${this.range}:append?valueInputOption=USER_ENTERED`, dataToInsert)
-      .then(resp => {
-        console.log(resp)
-      })
-      .catch(e => {
-        console.log(e.response)
-    })
+    /*eslint-disable no-undef*/
+    chrome.storage.sync.get(["access_token"], function (result) {
+    	if (!result.access_token) {
+    		return;
+    	}
+    	SheetApi.defaults.headers.post['Authorization'] = `Bearer ${result.access_token}`;
+    	SheetApi.post(`/${this.props.sheetId}/values/${this.range}:append?valueInputOption=USER_ENTERED`, dataToInsert)
+    		.then(resp => {
+    			console.log(resp)
+    		})
+    		.catch(e => {
+    			console.log(e.response)
+    		});
+    	// }
+    }.bind(this));
+    /*eslint-enable no-undef*/
   }
 
   render() {
@@ -157,8 +177,10 @@ export default class Form extends Component {
 
           <br/>
 
+          {this.props.isLoggedIn ? 
+            <button onClick={this.props.handleLogout}>Logout</button> :
             <button onClick={this.props.handleLogin}>Login</button>
-            <button onClick={this.props.handleLogout}>Logout</button>
+          }
       </div>
     )
   }
