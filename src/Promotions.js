@@ -29,7 +29,7 @@ class Promotions extends Component {
             <div className="promotions__form">
               <legend>Promotions</legend>
               <form id="promotions" ref={form => this.form = form} onChange={this.handleCheckboxChange}>
-                {this.props.isLoading ? 'loading...' : this.props.promotionsData.map(({title}, index) => {
+                {this.props.promotionsData.map(({title}, index) => {
         
                   const slug = title.rendered.toLowerCase().split(" ").join("-");
                   

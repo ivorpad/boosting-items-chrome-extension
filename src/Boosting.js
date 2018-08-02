@@ -33,7 +33,6 @@ class Boosting extends Component {
         return (
           <div className="boosting">
             <div className="boosting__slider">
-              <h3 style={ {paddingBottom: 5, textAlign:'left', fontWeight: 'bold', fontSize: 16} }>Boosting</h3>
               <div style={style}>
                 <Slider min={0} max={3} marks={marks} step={null} onChange={this.handleItemRating} defaultValue={0} />
               </div>

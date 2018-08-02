@@ -1,25 +1,17 @@
 import React, { Component } from 'react';
 import './App.css';
 import Boosting from './Boosting';
-import NotableFor from './NotableFor';
+import Highlights from './Highlights';
 import Promotions from './Promotions';
 import Button from './Button';
-import Form from './Form';
 import axios from 'axios';
 import SheetApi from './helpers/API';
 import moment from 'moment';
-import { extractDomainName } from './helpers/helpers';
+import { extractDomainName, removeItemBundleCount } from './helpers/helpers';
 
 const domain = extractDomainName(window.location.host)
 const range = `${domain}!A2`;
 const baseUrl = "https://tfsnippets.ivorpad.com/wp-json/wp/v2";
-
-// TODO: Remove
-const removeItemBundleCount = () => {
-  Array.from(document.querySelectorAll('.e-form__label')).filter(function(v, i) {
-   return v.innerText === 'Item Bundle Count';
-  })[0].parentNode.remove();
-}
 
 removeItemBundleCount();
 
@@ -168,22 +160,24 @@ class App extends Component {
   checkIfLoggedIn = () => {
   	/*eslint-disable no-undef*/
   	chrome.storage.sync.get(['access_token'], function (result) {
-  		fetch(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${result.access_token}`)
-  			.then(resp => resp.json())
-  			.then(val => {
-  				if (val.error_description) {
-  					throw new Error('Not logged in, please login to continue.')
-  				} else {
-            this.setState({
-              isLoggedIn: true
-            })
-          }
-  			})
-  			.catch(err => {
-  				this.setState({
-  					isLoggedIn: false
-  				})
-  			})
+      if(result.access_token) {
+        fetch(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${result.access_token}`)
+        	.then(resp => resp.json())
+        	.then(val => {
+        		if (val.error_description) {
+        			throw new Error('Not logged in, please login to continue.')
+        		} else {
+        			this.setState({
+        				isLoggedIn: true
+        			})
+        		}
+        	})
+        	.catch(err => {
+        		this.setState({
+        			isLoggedIn: false
+        		})
+        	})
+      }
   	}.bind(this))
   	/*eslint-enable no-undef*/
   }
@@ -254,31 +248,46 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <Boosting handleFormData={this.handleFormData}/>
+        
+        {this.state.isLoading ? 
+            <div> 
+              <p>
+                Loading...
+              </p> 
+            </div> :
+          
+            <React.Fragment>
+              
+              <hr className="app__separator" />
+              <h4 className="app__title">Staff Boosting</h4>
 
-        <NotableFor 
-          isLoading={this.state.isLoading} 
-          highlightsData={this.state.highlights} 
-          handleFormData={this.handleFormData}
-        />
+              <Boosting handleFormData={this.handleFormData}/>
 
-        <Promotions 
-          isLoading={this.state.isLoading} 
-          promotionsData={this.state.promotions} 
-          handleFormData={this.handleFormData} 
-        />
+              <Highlights
+                isLoading={this.state.isLoading} 
+                highlightsData={this.state.highlights} 
+                handleFormData={this.handleFormData}
+              />
 
-        {this.state.isLoggedIn ? 
-          <Button 
-            value={this.state.buttonText} 
-            isLoggedIn={this.state.isLoggedIn} 
-            handleLogout={this.handleLogout} 
-          /> :
-          <Button 
-            value={this.state.buttonText} 
-            isLoggedIn={this.state.isLoggedIn} 
-            handleLogin={this.handleLogin} 
-          />
+              <Promotions 
+                isLoading={this.state.isLoading} 
+                promotionsData={this.state.promotions} 
+                handleFormData={this.handleFormData} 
+              />
+
+              {this.state.isLoggedIn ? 
+                <Button 
+                  value={this.state.buttonText} 
+                  isLoggedIn={this.state.isLoggedIn} 
+                  handleLogout={this.handleLogout} 
+                /> :
+                <Button 
+                  value={this.state.buttonText} 
+                  isLoggedIn={this.state.isLoggedIn} 
+                  handleLogin={this.handleLogin} 
+                />
+              }
+            </React.Fragment>
         }
 
       </div>

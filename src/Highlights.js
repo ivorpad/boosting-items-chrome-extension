@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-class NotableFor extends Component {
+class Highlights extends Component {
 
     state = { selectedOptions: [] }    
 
@@ -17,9 +17,9 @@ class NotableFor extends Component {
     render() {
 
         return (
-         <div className="highlights" style={{ paddingTop: 20 }}><label htmlFor="notable_for">Notable For:</label>
+         <div className="highlights" style={{ paddingTop: 20 }}><label htmlFor="notable_for">Highlights:</label>
             <select name="notable_for" id="notable_for" class="highlights__select" multiple="multiple" onChange={this.handleOptionChange}>
-              {this.props.isLoading ? <option disabled="disabled">loading data...</option> : this.props.highlightsData.map(({ title }, index) => {
+              {this.props.highlightsData.map(({ title }, index) => {
                 return(
                   <option key={index} value={title.rendered}>{title.rendered}</option>
                 )
@@ -30,4 +30,4 @@ class NotableFor extends Component {
     }
 }
 
-export default NotableFor;
+export default Highlights;
