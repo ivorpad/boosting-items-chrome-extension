@@ -3,8 +3,16 @@ import './App.css';
 import Boosting from './Boosting';
 import NotableFor from './NotableFor';
 import Promotions from './Promotions';
+import Button from './Button';
 import Form from './Form';
 import axios from 'axios';
+import SheetApi from './helpers/API';
+import moment from 'moment';
+import { extractDomainName } from './helpers/helpers';
+
+const domain = extractDomainName(window.location.host)
+const range = `${domain}!A2`;
+const baseUrl = "https://tfsnippets.ivorpad.com/wp-json/wp/v2";
 
 // TODO: Remove
 const removeItemBundleCount = () => {
@@ -16,26 +24,29 @@ const removeItemBundleCount = () => {
 removeItemBundleCount();
 
 /*eslint-enable no-undef*/
-const baseUrl = "https://tfsnippets.ivorpad.com/wp-json/wp/v2";
+
 
 class App extends Component {
-
 
   state = {
     reviewerName: '',
     itemUrl: '',
     itemName: '',
-    formData: {
-    	boosting: "Good" // default value
-    },
     sheetId: '',
     highlights: [],
     promotions: [],
+    inputValue: '',
     isLoading: false,
     isLoggedIn: false,
-    startTokenRefresh: JSON.parse(localStorage.getItem('start_token_refresh')) // || false
+    startTokenRefresh: JSON.parse(localStorage.getItem('start_token_refresh')),
+    formData: {
+    	boosting: "Good",
+    	notable_for: [],
+    	promotions: []
+    },
+    buttonText: 'Login with Google'
   }
-  
+
   componentDidMount() {
     const intercomSetup = document.getElementById('intercom-setup');
     const { name } = JSON.parse(intercomSetup.getAttribute('data-intercom-settings-payload'));
@@ -76,7 +87,16 @@ class App extends Component {
   }
 
   componentWillMount = () => {
-    this.checkIfLoggedIn()
+    this.checkIfLoggedIn();
+    const bigApproveButton = document.getElementById('approve').children['proofing_action'];
+    bigApproveButton.addEventListener('click', this.handleApproveClick);
+
+    if(!this.state.isLoggedIn) {
+      this.setState({
+        buttonText: 'Logout'
+      })
+    }
+
   }
 
   handleLogin = (e) => {
@@ -168,6 +188,69 @@ class App extends Component {
   	/*eslint-enable no-undef*/
   }
 
+  cloneAndChangeButtonAttr = () => {
+    const bigApproveButton = document.getElementById('approve').children['proofing_action'];
+    const approveAction = document.getElementById('approve');
+    let newButton = bigApproveButton.cloneNode(true);
+
+    bigApproveButton.style.display = 'none';
+
+    newButton.name = '';
+    newButton.value = '';
+    newButton.innerText = 'Approving item...';
+    newButton.style.display = 'block';
+    newButton.setAttribute('disabled', true);
+
+    approveAction.append(newButton);
+  }
+
+  validateFormDataArray = (array) => Array.isArray(array) && array.length > 0 && typeof (array) !== 'undefined';
+
+  handleApproveClick = (e) => {
+
+   	this.cloneAndChangeButtonAttr();
+
+   	const {
+   		itemUrl,
+   		itemName,
+   		reviewerName,
+   		formData
+   	} = this.state
+
+   	const dataToInsert = {
+   		"range": range,
+   		"majorDimension": "ROWS",
+   		"values": [
+   			[
+   				moment(Date.now()).format("MM-DD-YYYY"),
+   				itemUrl,
+   				itemName,
+   				reviewerName,
+   				formData.boosting,
+   				this.validateFormDataArray(formData.notable_for) ? formData.notable_for.join(", ") : '-',
+   				this.validateFormDataArray(formData.promotions) ? formData.promotions.join(", ") : '-'
+   			],
+   		]
+   	}
+
+   	/*eslint-disable no-undef*/
+   	chrome.storage.sync.get(["access_token"], function (result) {
+   		if (!result.access_token) {
+   			return;
+   		}
+   		SheetApi.defaults.headers.post['Authorization'] = `Bearer ${result.access_token}`;
+   		SheetApi.post(`/${this.state.sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`, dataToInsert)
+   			.then(resp => {
+   				console.log(resp)
+   			})
+   			.catch(e => {
+   				console.log(e.response)
+   			});
+   		// }
+   	}.bind(this));
+   	/*eslint-enable no-undef*/
+   }
+
   render() {
     return (
       <div className="App">
@@ -185,18 +268,18 @@ class App extends Component {
           handleFormData={this.handleFormData} 
         />
 
-        <Form 
-          access_token={this.state.access_token} 
-          sheetId={this.state.sheetId} 
-          reviewerName={this.state.reviewerName}
-          setToken={this.setToken}
-          itemName={this.state.itemName}
-          itemUrl={this.state.itemUrl}
-          formData={this.state.formData}
-          handleLogin={this.handleLogin}
-          handleLogout={this.handleLogout}
-          isLoggedIn={this.state.isLoggedIn}
-        />
+        {this.state.isLoggedIn ? 
+          <Button 
+            value={this.state.buttonText} 
+            isLoggedIn={this.state.isLoggedIn} 
+            handleLogout={this.handleLogout} 
+          /> :
+          <Button 
+            value={this.state.buttonText} 
+            isLoggedIn={this.state.isLoggedIn} 
+            handleLogin={this.handleLogin} 
+          />
+        }
 
       </div>
     );
