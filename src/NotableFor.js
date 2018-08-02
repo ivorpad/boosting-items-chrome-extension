@@ -15,10 +15,11 @@ class NotableFor extends Component {
     }
 
     render() {
+
         return (
-         <div className="boosting_multiselect inputs" style={{ paddingTop: 20 }}><label htmlFor="notable_for">Notable For:</label>
-            <select name="notable_for" id="notable_for" class="notable_for" multiple="multiple" onChange={this.handleOptionChange}>
-              {this.props.isLoading ? <option disabled="disabled">loading data...</option> : this.props.highlightsData.map(({title}, index) => {
+         <div className="highlights" style={{ paddingTop: 20 }}><label htmlFor="notable_for">Notable For:</label>
+            <select name="notable_for" id="notable_for" class="highlights__select" multiple="multiple" onChange={this.handleOptionChange}>
+              {this.props.isLoading ? <option disabled="disabled">loading data...</option> : this.props.highlightsData.map(({ title }, index) => {
                 return(
                   <option key={index} value={title.rendered}>{title.rendered}</option>
                 )

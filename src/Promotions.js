@@ -25,22 +25,24 @@ class Promotions extends Component {
 
     render() {
         return (
-           <React.Fragment>
-           <legend>Promotions</legend>
-             <form id="promotions" ref={form => this.form = form} onChange={this.handleCheckboxChange}>
-              {this.props.isLoading ? 'loading...' : this.props.promotionsData.map(({title}, index) => {
-      
-                const slug = title.rendered.toLowerCase().split(" ").join("-");
-                
-                return(
-                  <div key={index}>
-                    <input type="checkbox" id={slug} name="promotions" value={title.rendered} />
-                    <label for={slug}>{title.rendered}</label>
-                  </div>
-                )
-              })}
-             </form>
-           </React.Fragment>
+           <div className="promotions">
+            <div className="promotions__form">
+              <legend>Promotions</legend>
+              <form id="promotions" ref={form => this.form = form} onChange={this.handleCheckboxChange}>
+                {this.props.isLoading ? 'loading...' : this.props.promotionsData.map(({title}, index) => {
+        
+                  const slug = title.rendered.toLowerCase().split(" ").join("-");
+                  
+                  return(
+                    <div key={index}>
+                      <input type="checkbox" id={slug} name="promotions" value={title.rendered} />
+                      <label for={slug}>{title.rendered}</label>
+                    </div>
+                  )
+                })}
+              </form>
+             </div>
+           </div>
         );
     }
 }

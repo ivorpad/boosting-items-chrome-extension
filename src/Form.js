@@ -25,72 +25,24 @@ export default class Form extends Component {
     bigApproveButton.addEventListener('click', this.handleApproveClick);
   }
 
-  handleSubmit = (e) => {
-    e.preventDefault();
+  // TODO: Placeholder for later use to fetch data from Sheets
+  // handleGet = (e) => {
+  //   e.preventDefault();
 
-    const {
-    	itemUrl,
-    	itemName,
-    	reviewerName,
-    	formData
-    } = this.props
+  //   /*eslint-disable no-undef*/
+  //   chrome.storage.sync.get(["access_token"], function (result) {
 
-    const dataToInsert = {
-    	"range": range,
-    	"majorDimension": "ROWS",
-    	"values": [
-    		[
-    			moment(Date.now()).format("MM-DD-YYYY"),
-    			itemUrl,
-    			itemName,
-    			reviewerName,
-    			formData.boosting,
-          this.validateFormDataArray(formData.notable_for) ? formData.notable_for.join(", ") : '-',
-          this.validateFormDataArray(formData.promotions) ? formData.promotions.join(", ") : '-'
-    		],
-    	]
-    }
+  //   	if (!result.access_token) {
+  //   		return;
+  //     }
 
-
-    /*eslint-disable no-undef*/
-    chrome.storage.sync.get(["access_token"], function(result) {
-        if (!result.access_token) {
-          return;
-        } 
-        console.log(result)
-        SheetApi.defaults.headers.post['Authorization'] = `Bearer ${result.access_token}`;
-        SheetApi.post(`/${this.props.sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`, dataToInsert)
-          .then(resp => {
-            console.log(resp)
-          })
-          .catch(e => {
-            console.log(e.response)
-          });
-      // }
-    }.bind(this));
-    /*eslint-enable no-undef*/
-
-  }
-
-  handleGet = (e) => {
-    e.preventDefault();
-
-    /*eslint-disable no-undef*/
-    chrome.storage.sync.get(["access_token"], function (result) {
-
-    	if (!result.access_token) {
-    		return;
-      }
-
-      SheetApi.defaults.headers.get['Authorization'] = `Bearer ${result.access_token}`
-      SheetApi.get(`${this.props.sheetId}/values/${domain}!A1:D5?key=AIzaSyB96OBaegaOIfxM_xuXRf2ppUlEh9HKmbc`)
-        .then(r => console.log(r))
-        .catch(e => console.log(e.response))
-    }.bind(this));
-    /*eslint-enable no-undef*/
-
-
-  }
+  //     SheetApi.defaults.headers.get['Authorization'] = `Bearer ${result.access_token}`
+  //     SheetApi.get(`${this.props.sheetId}/values/${domain}!A1:D5?key=AIzaSyB96OBaegaOIfxM_xuXRf2ppUlEh9HKmbc`)
+  //       .then(r => console.log(r))
+  //       .catch(e => console.log(e.response))
+  //   }.bind(this));
+  //   /*eslint-enable no-undef*/
+  // }
 
   cloneAndChangeButtonAttr = () => {
     const bigApproveButton = document.getElementById('approve').children['proofing_action'];
@@ -157,22 +109,12 @@ export default class Form extends Component {
 
   render() {
     return (
-      <div>
-         <form onSubmit={this.handleSubmit}>
-           <input id="send_data" type="submit" value="Submit sample Data"/>
-         </form>
-          <br/>
-         <form onSubmit={this.handleGet}>
-            <input type="submit" value="Get sample data"/>
-         </form>
-
-          <br/>
-
+      <React.Fragment>
           {this.props.isLoggedIn ? 
             <button onClick={this.props.handleLogout}>Logout</button> :
             <button onClick={this.props.handleLogin}>Login with Google</button>
           }
-      </div>
+      </React.Fragment>
     )
   }
 }

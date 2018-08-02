@@ -1,9 +1,9 @@
-.boosting_multiselect {
+.highlights {
   display: flex;
   justify-content: space-between;
 }
 
-.boosting_multiselect .notable_for {
+.highlights .highlights__select {
     border: 1px solid #bbbbbb;
     border-radius: 5px;
     width: 250px;

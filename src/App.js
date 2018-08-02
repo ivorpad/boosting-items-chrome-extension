@@ -171,9 +171,7 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <Boosting   handleFormData={this.handleFormData}/>
-
-        {console.log(this.state)}
+        <Boosting handleFormData={this.handleFormData}/>
 
         <NotableFor 
           isLoading={this.state.isLoading} 
@@ -199,6 +197,7 @@ class App extends Component {
           handleLogout={this.handleLogout}
           isLoggedIn={this.state.isLoggedIn}
         />
+
       </div>
     );
   }
