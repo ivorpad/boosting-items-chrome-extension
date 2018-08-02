@@ -1,11 +1,15 @@
 {
   "manifest_version": 2,
-  "name": "Envato Markets Staff Boosting",
-  "version": "0.1",
-  "description": "Envato Markets Staff Boosting",
+  "name": "Envato Market Item Boosting",
+  "version": "0.1.0",
+  "description": "Envato Market Item Boosting",
+  "icons": {
+    "16": "/img/16.png",
+    "48": "/img/48.png",
+    "128": "/img/128.png"
+  },
   "browser_action": {
-  	"default_icon": "favicon.ico",
-  	"default_title": "Envato Markets Staff Boosting"
+    "default_icon": "/img/48.png"
   },
   "permissions": [
     "https://themeforest.net/admin/awesome_proofing/*",
@@ -34,7 +38,7 @@
         "*://*/*admin/awesome_proofing*"
       ],
       "css": ["/static/css/main.css"],
-      "js": ["/static/js/main.js", "test.js"]
+      "js": ["/static/js/main.js"]
     }
   ],
   "background": {
