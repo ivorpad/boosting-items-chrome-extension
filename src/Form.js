@@ -4,14 +4,9 @@ import moment from 'moment';
 import { extractDomainName } from './helpers/helpers';
 
 const domain = extractDomainName(window.location.host)
+const range = `${domain}!A2`;
 
 export default class Form extends Component {
-
-  constructor() {
-    super();
-    this.range = `${domain}!A2`;
-    this.market = domain;
-  }
 
   static defaultProps = {
   	formData: {
@@ -28,15 +23,11 @@ export default class Form extends Component {
   componentDidMount() {
     const bigApproveButton = document.getElementById('approve').children['proofing_action'];
     bigApproveButton.addEventListener('click', this.handleApproveClick);
-    //this.cleanTokenIfExpired()
   }
 
   handleSubmit = (e) => {
     e.preventDefault();
 
-    const sheet = extractDomainName(window.location.host)
-    const range = `${sheet}!A2`;
-    
     const {
     	itemUrl,
     	itemName,
@@ -92,7 +83,7 @@ export default class Form extends Component {
       }
 
       SheetApi.defaults.headers.get['Authorization'] = `Bearer ${result.access_token}`
-      SheetApi.get(`${this.props.sheetId}/values/${this.market}!A1:D5?key=AIzaSyB96OBaegaOIfxM_xuXRf2ppUlEh9HKmbc`)
+      SheetApi.get(`${this.props.sheetId}/values/${domain}!A1:D5?key=AIzaSyB96OBaegaOIfxM_xuXRf2ppUlEh9HKmbc`)
         .then(r => console.log(r))
         .catch(e => console.log(e.response))
     }.bind(this));
@@ -131,7 +122,7 @@ export default class Form extends Component {
     } = this.props
 
     const dataToInsert = {
-      "range": this.range,
+      "range": range,
       "majorDimension": "ROWS",
       "values": [
         [
@@ -152,7 +143,7 @@ export default class Form extends Component {
     		return;
     	}
     	SheetApi.defaults.headers.post['Authorization'] = `Bearer ${result.access_token}`;
-    	SheetApi.post(`/${this.props.sheetId}/values/${this.range}:append?valueInputOption=USER_ENTERED`, dataToInsert)
+    	SheetApi.post(`/${this.props.sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`, dataToInsert)
     		.then(resp => {
     			console.log(resp)
     		})
@@ -179,7 +170,7 @@ export default class Form extends Component {
 
           {this.props.isLoggedIn ? 
             <button onClick={this.props.handleLogout}>Logout</button> :
-            <button onClick={this.props.handleLogin}>Login</button>
+            <button onClick={this.props.handleLogin}>Login with Google</button>
           }
       </div>
     )

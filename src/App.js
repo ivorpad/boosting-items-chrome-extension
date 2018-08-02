@@ -142,6 +142,9 @@ class App extends Component {
     });
   }
 
+
+  // TODO: Improve this method name to also check if the expires_in time is less than 10 minutes
+  // so we can re-issue a new token
   checkIfLoggedIn = () => {
   	/*eslint-disable no-undef*/
   	chrome.storage.sync.get(['access_token'], function (result) {

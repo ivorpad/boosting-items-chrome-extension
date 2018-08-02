@@ -173,12 +173,9 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 							interval = setInterval(function () {
 
 								TokenFactory.getNewToken(false).then(token => {
-									console.log('will get a new token')
+									console.log('getting a new token')
 									chrome.storage.sync.set({ access_token: token });
 									console.log(token);
-									sendResponse({
-										startTokenRefresh: true
-									});
 								});
 							}, Number(resp.expires_in) * 1000 - 900000);
 						});
