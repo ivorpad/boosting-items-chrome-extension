@@ -8,6 +8,7 @@ import axios from 'axios';
 import SheetApi from './helpers/API';
 import moment from 'moment';
 import { extractDomainName, removeItemBundleCount } from './helpers/helpers';
+import loading from './loading.svg';
 
 const domain = extractDomainName(window.location.host)
 const range = `${domain}!A2`;
@@ -250,43 +251,49 @@ class App extends Component {
       <div className="App">
         
         {this.state.isLoading ? 
-            <div> 
-              <p>
-                Loading...
-              </p> 
-            </div> :
+          <img src={
+            /*eslint-disable no-undef*/
+            chrome.extension.getURL(loading)
+            /*eslint-enable no-undef*/
+          } alt="Loading" /> :
           
             <React.Fragment>
-              
+             
               <hr className="app__separator" />
               <h4 className="app__title">Staff Boosting</h4>
+       
+               {this.state.isLoggedIn ? 
+                <React.Fragment>
+                
+                  <Button 
+                    value={this.state.buttonText} 
+                    isLoggedIn={this.state.isLoggedIn} 
+                    handleLogout={this.handleLogout}
+                  /> 
+                
+                  <Boosting handleFormData={this.handleFormData}/>
 
-              <Boosting handleFormData={this.handleFormData}/>
+                  <Highlights
+                    isLoading={this.state.isLoading} 
+                    highlightsData={this.state.highlights} 
+                    handleFormData={this.handleFormData}
+                  />
 
-              <Highlights
-                isLoading={this.state.isLoading} 
-                highlightsData={this.state.highlights} 
-                handleFormData={this.handleFormData}
-              />
-
-              <Promotions 
-                isLoading={this.state.isLoading} 
-                promotionsData={this.state.promotions} 
-                handleFormData={this.handleFormData} 
-              />
-
-              {this.state.isLoggedIn ? 
-                <Button 
-                  value={this.state.buttonText} 
-                  isLoggedIn={this.state.isLoggedIn} 
-                  handleLogout={this.handleLogout} 
-                /> :
+                  <Promotions 
+                    isLoading={this.state.isLoading} 
+                    promotionsData={this.state.promotions} 
+                    handleFormData={this.handleFormData} 
+                  />
+                </React.Fragment>
+                
+                :
                 <Button 
                   value={this.state.buttonText} 
                   isLoggedIn={this.state.isLoggedIn} 
                   handleLogin={this.handleLogin} 
                 />
               }
+
             </React.Fragment>
         }
 

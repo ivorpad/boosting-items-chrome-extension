@@ -17,7 +17,7 @@ class Highlights extends Component {
     render() {
 
         return (
-         <div className="highlights" style={{ paddingTop: 20 }}><label htmlFor="notable_for">Highlights:</label>
+          <div className="highlights" style={{ paddingTop: 20, fontWeight: 'bold' }}><label htmlFor="notable_for">Highlights:</label>
             <select name="notable_for" id="notable_for" class="highlights__select" multiple="multiple" onChange={this.handleOptionChange}>
               {this.props.highlightsData.map(({ title }, index) => {
                 return(

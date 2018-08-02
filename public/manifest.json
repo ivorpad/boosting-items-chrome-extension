@@ -26,7 +26,8 @@
     "*://*.google.com/*"
   ],
   "web_accessible_resources": [
-    "/oauth2/*"
+    "/oauth2/*",
+    "/static/media/*"
   ],
   "content_scripts": [
     {

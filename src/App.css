@@ -1,3 +1,31 @@
+.App {
+  display: flex;
+  flex-direction: column;
+}
+
+button.login,
+button.logout {
+  align-self: center;
+  margin-bottom: 20px;
+  padding: 3px 20px;
+}
+
+button.login {
+  background: #0084B4;
+}
+
+button.login:hover {
+  background: #51a0bd;
+}
+
+button.logout {
+  background: #df2c2c;
+}
+
+button.logout:hover {
+  background: #db4c4c;
+}
+
 .highlights {
   display: flex;
   justify-content: space-between;
@@ -23,6 +51,10 @@
   margin-left: 10px;
 }
 
+.promotions {
+  margin-top: 20px;
+}
+
 #promotions label {
 	margin-left: 5px;
 }
@@ -35,4 +67,10 @@ hr.app__separator {
 h4.app__title {
   text-align: center;
   font-size: 20px;
+  padding-bottom: 10px;
+}
+
+.promotions__legend {
+  font-weight: bold;
+  margin-bottom: 10px;
 }

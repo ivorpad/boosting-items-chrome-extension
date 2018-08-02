@@ -27,7 +27,7 @@ class Promotions extends Component {
         return (
            <div className="promotions">
             <div className="promotions__form">
-              <legend>Promotions</legend>
+              <legend className="promotions__legend">Promotions</legend>
               <form id="promotions" ref={form => this.form = form} onChange={this.handleCheckboxChange}>
                 {this.props.promotionsData.map(({title}, index) => {
         

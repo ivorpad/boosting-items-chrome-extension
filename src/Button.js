@@ -5,8 +5,8 @@ export default class Button extends Component {
     return (
      <React.Fragment>
         {this.props.isLoggedIn ? 
-          <button onClick={this.props.handleLogout}>Logout</button> :
-          <button onClick={this.props.handleLogin}>Login with Google</button>
+          <button className="logout" onClick={this.props.handleLogout}>Logout</button> :
+          <button className="login" onClick={this.props.handleLogin}>Login with Google</button>
         }
       </React.Fragment>
     )
