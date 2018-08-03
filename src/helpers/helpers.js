@@ -12,3 +12,9 @@ export const removeItemBundleCount = () => {
 		return v.innerText === 'Item Bundle Count';
 	})[0].parentNode.remove();
 }
+
+export const getDataFrom = (array, marketplace) => {
+    return array.filter(function(value) {
+      return value.marketplace.includes(marketplace[0].id);
+    });
+}
