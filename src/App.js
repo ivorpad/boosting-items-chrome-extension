@@ -84,6 +84,9 @@ class App extends Component {
     const bigApproveButton = document.getElementById('approve').children['proofing_action'];
     bigApproveButton.addEventListener('click', this.handleApproveClick);
 
+    const exitButton = document.querySelector(".exit");
+    exitButton.addEventListener('click', this.handleLogout);
+
     if(!this.state.isLoggedIn) {
       this.setState({
         buttonText: 'Logout'
@@ -186,7 +189,7 @@ class App extends Component {
   cloneAndChangeButtonAttr = () => {
     const bigApproveButton = document.getElementById('approve').children['proofing_action'];
     const approveAction = document.getElementById('approve');
-    let newButton = bigApproveButton.cloneNode(true);
+    const newButton = bigApproveButton.cloneNode(true);
 
     bigApproveButton.style.display = 'none';
 
@@ -285,7 +288,6 @@ class App extends Component {
                     handleFormData={this.handleFormData} 
                   />
                 </React.Fragment>
-                
                 :
                 <Button 
                   value={this.state.buttonText} 
@@ -296,7 +298,6 @@ class App extends Component {
 
             </React.Fragment>
         }
-
       </div>
     );
   }
