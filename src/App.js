@@ -16,7 +16,6 @@ import loading from "./loading.svg";
 
 const domain = extractDomainName(window.location.host);
 const range = `${domain}!A2`;
-const baseUrl = "https://tfsnippets.ivorpad.com/wp-json/wp/v2";
 
 removeItemBundleCount();
 
@@ -58,40 +57,47 @@ class App extends Component {
       itemUrl
     });
 
-    axios
-      .all([
-        axios.get(`${baseUrl}/post_type_promotion`),
-        axios.get(`${baseUrl}/post_type_highlight`),
-        axios.get(`${baseUrl}/marketplace`)
-      ])
-      .then(
-        axios.spread(
-          (promotionsResponse, highlightsResponse, marketplaceResponse) => {
-            if (
-              promotionsResponse.status === 200 &&
-              highlightsResponse.status === 200 &&
-              marketplaceResponse.status === 200
-            ) {
-              let { data: promotions } = promotionsResponse;
-              let { data: highlights } = highlightsResponse;
+    /*eslint-disable no-undef*/
+    chrome.storage.sync.get(["baseUrlValue"], function (value) {
+      axios
+        .all([
+          axios.get(`https://${value.baseUrlValue}/wp-json/wp/v2/post_type_promotion`),
+          axios.get(`https://${value.baseUrlValue}/wp-json/wp/v2/post_type_highlight`),
+          axios.get(`https://${value.baseUrlValue}/wp-json/wp/v2/marketplace`)
+        ])
+        .then(axios.spread(
+            (
+              promotionsResponse,
+              highlightsResponse,
+              marketplaceResponse
+            ) => {
+              if (
+                promotionsResponse.status === 200 &&
+                highlightsResponse.status === 200 &&
+                marketplaceResponse.status === 200
+              ) {
+                let { data: promotions } = promotionsResponse;
+                let { data: highlights } = highlightsResponse;
 
-              const marketplace = marketplaceResponse.data.filter(market => {
-                return market.name === domain;
-              });
+                const marketplace = marketplaceResponse.data.filter(
+                  market => {
+                    return market.name === domain;
+                  }
+                );
 
-              highlights = getDataFrom(highlights, marketplace);
-              promotions = getDataFrom(promotions, marketplace);
+                highlights = getDataFrom(highlights, marketplace);
+                promotions = getDataFrom(promotions, marketplace);
 
-              this.setState({
-                promotions,
-                highlights,
-                isLoading: false
-              });
+                this.setState({
+                  promotions,
+                  highlights,
+                  isLoading: false
+                });
+              }
             }
-          }
-        )
-      )
-      .catch(e => console.log(e));
+          ))
+        .catch(e => console.log(e));
+    }.bind(this));
 
     /* eslint-disable no-undef */
     chrome.storage.sync.get(

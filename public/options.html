@@ -14,7 +14,12 @@
         <h3 class="subtitle">Options</h3>
         <form id="sheet_id__form">
           <label for="sheet_id" class="sheet_id__label">Google Sheet ID</label>
-          <input id="sheet_id" type="text" class="sheet_id__input" value="" placeholder="Add sheet id">
+          <small class="description">Paste here a Google Sheet ID. <a href="#" target="_blank">See example</a>.</small><!-- /.description -->
+          <input id="sheet_id" type="text" class="sheet_id__input" value="" placeholder="Google Sheet ID">
+          <br>
+          <label for="base_url" class="base_url__label">WordPress URL</label>
+          <small class="description">A WordPress site with REST API enabled and the Envato Boosting WP Plugin installed</small><!-- /.description -->
+          <input id="base_url" type="text" class="base_url__input" value="" placeholder="site.example.com">
         </form>
         
         <div id="status"></div>
