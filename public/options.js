@@ -24,8 +24,8 @@ function save_options() {
 // stored in chrome.storage.
 function restore_options() {
 	chrome.storage.sync.get({
-	sheetIdValue: 'default value',
-	baseUrlValue: 'site.example.com'
+	sheetIdValue: '',
+	baseUrlValue: ''
 	}, function (items) {
     console.log(items)
 		document.getElementById('sheet_id').value = items.sheetIdValue;

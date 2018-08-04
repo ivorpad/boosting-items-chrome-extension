@@ -4,6 +4,7 @@ import Boosting from "./Boosting";
 import Highlights from "./Highlights";
 import Promotions from "./Promotions";
 import Button from "./Button";
+import Notice from "./Notice";
 import axios from "axios";
 import SheetApi from "./helpers/API";
 import moment from "moment";
@@ -39,7 +40,8 @@ class App extends Component {
       highlights: [],
       promotions: []
     },
-    buttonText: "Login with Google"
+    buttonText: "Login with Google",
+    notices: [],
   };
 
   componentDidMount() {
@@ -48,7 +50,7 @@ class App extends Component {
       intercomSetup.getAttribute("data-intercom-settings-payload")
     );
     const itemName = document.querySelector(".existing-value").innerText;
-    const itemUrl = document.querySelector(".submission-details > a").href;
+    const itemUrl = document.querySelector(".submission-details > a").href;   
 
     this.setState({
       isLoading: true,
@@ -59,13 +61,14 @@ class App extends Component {
 
     /*eslint-disable no-undef*/
     chrome.storage.sync.get(["baseUrlValue"], function (value) {
-      axios
-        .all([
-          axios.get(`https://${value.baseUrlValue}/wp-json/wp/v2/post_type_promotion`),
-          axios.get(`https://${value.baseUrlValue}/wp-json/wp/v2/post_type_highlight`),
-          axios.get(`https://${value.baseUrlValue}/wp-json/wp/v2/marketplace`)
-        ])
-        .then(axios.spread(
+
+        axios
+          .all([
+            axios.get(`https://${value.baseUrlValue}/wp-json/wp/v2/post_type_promotion`),
+            axios.get(`https://${value.baseUrlValue}/wp-json/wp/v2/post_type_highlight`),
+            axios.get(`https://${value.baseUrlValue}/wp-json/wp/v2/marketplace`)
+          ])
+          .then(axios.spread(
             (
               promotionsResponse,
               highlightsResponse,
@@ -96,7 +99,16 @@ class App extends Component {
               }
             }
           ))
-        .catch(e => console.log(e));
+          .catch(e => {
+            console.log(e)
+            const error = `Please make sure the WordPress Site URL option is correct. Go to the Extension Options Panel.`;
+            this.setState( prevState => {
+              return {
+                notices: [ ...prevState.notices, error ]
+              }
+            })
+          });
+      
     }.bind(this));
 
     /* eslint-disable no-undef */
@@ -110,6 +122,7 @@ class App extends Component {
     );
     /* eslint-enable no-undef */
   }
+
 
   componentWillMount = () => {
     this.checkIfLoggedIn();
@@ -308,8 +321,25 @@ class App extends Component {
   };
 
   render() {
+
+    const notices = this.state.notices.length ? 
+      (
+        this.state.notices.map( (notice) => {
+          return(
+            <Notice>
+              <p>{notice}</p>
+            </Notice>
+          )
+        })
+      )
+    : null
+
     return (
       <div className="App">
+        {
+          // Notices Portal
+          notices
+        }
         {this.state.isLoading ? (
           <img
             src={

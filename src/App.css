@@ -74,3 +74,22 @@ h4.app__title {
   font-weight: bold;
   margin-bottom: 10px;
 }
+
+.extension__notice {
+    padding: 10px;
+    border-radius: 3px;
+    font-size: 14px;
+    background: #c5c5c5;
+    border: 1px solid darkgray;
+}
+
+.extension__notice.error {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+.extension__notice h4 {
+  padding: 0;
+  margin: 0;
+}
