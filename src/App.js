@@ -41,7 +41,7 @@ class App extends Component {
       promotions: []
     },
     buttonText: "Login with Google",
-    notices: [],
+    notices: []
   };
 
   componentDidMount() {
@@ -50,7 +50,7 @@ class App extends Component {
       intercomSetup.getAttribute("data-intercom-settings-payload")
     );
     const itemName = document.querySelector(".existing-value").innerText;
-    const itemUrl = document.querySelector(".submission-details > a").href;   
+    const itemUrl = document.querySelector(".submission-details > a").href;
 
     this.setState({
       isLoading: true,
@@ -60,56 +60,58 @@ class App extends Component {
     });
 
     /*eslint-disable no-undef*/
-    chrome.storage.sync.get(["baseUrlValue"], function (value) {
-
+    chrome.storage.sync.get(
+      ["baseUrlValue"],
+      function(value) {
         axios
           .all([
-            axios.get(`https://${value.baseUrlValue}/wp-json/wp/v2/post_type_promotion`),
-            axios.get(`https://${value.baseUrlValue}/wp-json/wp/v2/post_type_highlight`),
+            axios.get(
+              `https://${value.baseUrlValue}/wp-json/wp/v2/post_type_promotion`
+            ),
+            axios.get(
+              `https://${value.baseUrlValue}/wp-json/wp/v2/post_type_highlight`
+            ),
             axios.get(`https://${value.baseUrlValue}/wp-json/wp/v2/marketplace`)
           ])
-          .then(axios.spread(
-            (
-              promotionsResponse,
-              highlightsResponse,
-              marketplaceResponse
-            ) => {
-              if (
-                promotionsResponse.status === 200 &&
-                highlightsResponse.status === 200 &&
-                marketplaceResponse.status === 200
-              ) {
-                let { data: promotions } = promotionsResponse;
-                let { data: highlights } = highlightsResponse;
+          .then(
+            axios.spread(
+              (promotionsResponse, highlightsResponse, marketplaceResponse) => {
+                if (
+                  promotionsResponse.status === 200 &&
+                  highlightsResponse.status === 200 &&
+                  marketplaceResponse.status === 200
+                ) {
+                  let { data: promotions } = promotionsResponse;
+                  let { data: highlights } = highlightsResponse;
 
-                const marketplace = marketplaceResponse.data.filter(
-                  market => {
-                    return market.name === domain;
-                  }
-                );
+                  const marketplace = marketplaceResponse.data.filter(
+                    market => {
+                      return market.name === domain;
+                    }
+                  );
 
-                highlights = getDataFrom(highlights, marketplace);
-                promotions = getDataFrom(promotions, marketplace);
+                  highlights = getDataFrom(highlights, marketplace);
+                  promotions = getDataFrom(promotions, marketplace);
 
-                this.setState({
-                  promotions,
-                  highlights,
-                  isLoading: false
-                });
+                  this.setState({
+                    promotions,
+                    highlights,
+                    isLoading: false
+                  });
+                }
               }
-            }
-          ))
+            )
+          )
           .catch(e => {
-            console.log(e)
-            const error = `Please make sure the WordPress Site URL option is correct. Go to the Extension Options Panel.`;
-            this.setState( prevState => {
+            const message = `Please make sure the WordPress Site URL option is correct. Go to the Extension Options Panel.`;
+            this.setState(prevState => {
               return {
-                notices: [ ...prevState.notices, error ]
-              }
-            })
+                notices: [...prevState.notices, { class: "error", message }]
+              };
+            });
           });
-      
-    }.bind(this));
+      }.bind(this)
+    );
 
     /* eslint-disable no-undef */
     chrome.storage.sync.get(
@@ -123,7 +125,6 @@ class App extends Component {
     /* eslint-enable no-undef */
   }
 
-
   componentWillMount = () => {
     this.checkIfLoggedIn();
     const bigApproveButton = document.getElementById("approve").children[
@@ -136,7 +137,7 @@ class App extends Component {
 
     if (!this.state.isLoggedIn) {
       this.setState({
-        buttonText: "Logout"
+          buttonText: "Logout",
       });
     }
   };
@@ -150,12 +151,10 @@ class App extends Component {
         type: "login"
       },
       function(response) {
-        console.log(response);
-
         this.setState({
-          isLoggedIn: response.isLoggedIn
+          isLoggedIn: response.isLoggedIn,
+          notices: this.state.notices.filter(notice => notice.type !== 'logout')
         });
-
         if (response.access_token) {
           this.handleRefresh();
         }
@@ -219,7 +218,6 @@ class App extends Component {
     chrome.storage.sync.get(
       ["access_token"],
       function(result) {
-        if (result.access_token) {
           fetch(
             `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${
               result.access_token
@@ -236,11 +234,13 @@ class App extends Component {
               }
             })
             .catch(err => {
-              this.setState({
-                isLoggedIn: false
+              this.setState(prevState => {
+                return {
+                  isLoggedIn: false,
+                  notices: [...prevState.notices, { type: 'logout', class: 'warning', message: err.message } ]
+                }
               });
             });
-        }
       }.bind(this)
     );
     /*eslint-enable no-undef*/
@@ -321,25 +321,21 @@ class App extends Component {
   };
 
   render() {
-
-    const notices = this.state.notices.length ? 
-      (
-        this.state.notices.map( (notice) => {
-          return(
-            <Notice>
-              <p>{notice}</p>
+    const notices = this.state.notices.length
+      ? this.state.notices.map(notice => {
+          return (
+            <Notice class={notice.class}>
+              <p>
+                <b>Envato Market Item Boosting:</b> {notice.message}
+              </p>
             </Notice>
-          )
+          );
         })
-      )
-    : null
+      : null;
 
     return (
       <div className="App">
-        {
-          // Notices Portal
-          notices
-        }
+        {notices}
         {this.state.isLoading ? (
           <img
             src={

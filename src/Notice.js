@@ -6,10 +6,10 @@ const awesome_proofing = document.querySelector(".awesome-proofing");
 
 export default class Notice extends Component {
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.el = document.createElement('div');
-    this.el.className = 'extension__notice'
+    this.el.classList = `extension__notice ${props.class}`;
   }
 
   componentWillMount = () => {

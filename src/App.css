@@ -76,20 +76,43 @@ h4.app__title {
 }
 
 .extension__notice {
-    padding: 10px;
+    padding: 20px;
     border-radius: 3px;
-    font-size: 14px;
     background: #c5c5c5;
     border: 1px solid darkgray;
+}
+
+.extension__notice p {
+  margin: 0;
+  padding: 0;
+}
+
+.extension__notice p b {
+  font-weight: bold
 }
 
 .extension__notice.error {
     background-color: #f8d7da;
     border-color: #f5c6cb;
-    color: #721c24;
+}
+
+.extension__notice.error p,
+.extension__notice.error h4 {
+  color: #721c24;
+}
+
+.extension__notice.warning {
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+}
+
+.extension__notice.warning p,
+.extension__notice.warning h4 {
+  color: #856404;
 }
 
 .extension__notice h4 {
+  font-size: 16px;
   padding: 0;
-  margin: 0;
+  margin-bottom: 10px;
 }
