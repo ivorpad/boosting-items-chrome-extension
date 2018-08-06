@@ -33,6 +33,7 @@ class App extends Component {
     inputValue: "",
     isLoading: false,
     isLoggedIn: false,
+    isHidden: true,
     startTokenRefresh: JSON.parse(localStorage.getItem("start_token_refresh")),
     marketplace: "",
     formData: {
@@ -129,7 +130,10 @@ class App extends Component {
     const bigApproveButton = document.getElementById("approve").children[
       "proofing_action"
     ];
-    bigApproveButton.addEventListener("click", this.handleApproveClick);
+    bigApproveButton.addEventListener("click", this.handleBigApproveButton);
+
+    const approveButton = document.querySelector(".reviewer-proofing-actions").firstElementChild;
+    approveButton.addEventListener("click", this.handleApproveButton);
 
     const exitButton = document.querySelector(".header-right-container").firstElementChild;
     exitButton.addEventListener("click", this.handleLogout);
@@ -266,7 +270,7 @@ class App extends Component {
   validateFormDataArray = array =>
     Array.isArray(array) && array.length > 0 && typeof array !== "undefined";
 
-  handleApproveClick = e => {
+  handleBigApproveButton = e => {
     this.cloneAndChangeButtonAttr();
 
     const { itemUrl, itemName, reviewerName, formData } = this.state;
@@ -319,6 +323,12 @@ class App extends Component {
     /*eslint-enable no-undef*/
   };
 
+  handleApproveButton = () => {
+    this.setState({
+      isHidden: !this.state.isHidden
+    })
+  }
+
   render() {
     const notices = this.state.notices.length
       ? this.state.notices.map(notice => {
@@ -333,54 +343,57 @@ class App extends Component {
       : null;
 
     return (
-      <div className="App">
-        {notices}
-        {this.state.isLoading ? (
-          <img
-            src={
-              /*eslint-disable no-undef*/
-              chrome.extension.getURL(loading)
-              /*eslint-enable no-undef*/
-            }
-            alt="Loading"
-          />
-        ) : (
-          <React.Fragment>
-            <hr className="app__separator" />
-            <h4 className="app__title">Staff Boosting</h4>
-
-            {this.state.isLoggedIn ? (
+      !this.state.isHidden ? 
+        <div className="App">
+          {notices}
+          {this.state.isLoading ? (
+            <img
+              src={
+                /*eslint-disable no-undef*/
+                chrome.extension.getURL(loading)
+                /*eslint-enable no-undef*/
+              }
+              alt="Loading"
+            />
+          ) : (
               <React.Fragment>
-                <Button
-                  value={this.state.buttonText}
-                  isLoggedIn={this.state.isLoggedIn}
-                  handleLogout={this.handleLogout}
-                />
+                <hr className="app__separator" />
+                <h4 className="app__title">Staff Boosting</h4>
 
-                <Boosting handleFormData={this.handleFormData} />
+                {this.state.isLoggedIn ? (
+                  <React.Fragment>
+                    <Button
+                      value={this.state.buttonText}
+                      isLoggedIn={this.state.isLoggedIn}
+                      handleLogout={this.handleLogout}
+                    />
 
-                <Highlights
-                  isLoading={this.state.isLoading}
-                  highlightsData={this.state.highlights}
-                  handleFormData={this.handleFormData}
-                />
+                    <Boosting handleFormData={this.handleFormData} />
 
-                <Promotions
-                  isLoading={this.state.isLoading}
-                  promotionsData={this.state.promotions}
-                  handleFormData={this.handleFormData}
-                />
+                    <Highlights
+                      isLoading={this.state.isLoading}
+                      highlightsData={this.state.highlights}
+                      handleFormData={this.handleFormData}
+                    />
+
+                    <Promotions
+                      isLoading={this.state.isLoading}
+                      promotionsData={this.state.promotions}
+                      handleFormData={this.handleFormData}
+                    />
+                  </React.Fragment>
+                ) : (
+                    <Button
+                      value={this.state.buttonText}
+                      isLoggedIn={this.state.isLoggedIn}
+                      handleLogin={this.handleLogin}
+                    />
+                  )}
               </React.Fragment>
-            ) : (
-              <Button
-                value={this.state.buttonText}
-                isLoggedIn={this.state.isLoggedIn}
-                handleLogin={this.handleLogin}
-              />
-            )}
-          </React.Fragment>
-        )}
-      </div>
+            )
+          }
+        </div> :
+      null
     );
   }
 }
