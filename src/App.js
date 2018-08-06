@@ -43,7 +43,6 @@ class App extends Component {
     buttonText: "Login with Google",
     notices: []
   };
-
   componentDidMount() {
     const intercomSetup = document.getElementById("intercom-setup");
     const { name } = JSON.parse(
@@ -132,7 +131,7 @@ class App extends Component {
     ];
     bigApproveButton.addEventListener("click", this.handleApproveClick);
 
-    const exitButton = document.querySelector(".exit");
+    const exitButton = document.querySelector(".header-right-container").firstElementChild;
     exitButton.addEventListener("click", this.handleLogout);
 
     if (!this.state.isLoggedIn) {

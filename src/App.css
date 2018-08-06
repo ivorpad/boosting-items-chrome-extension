@@ -80,6 +80,7 @@ h4.app__title {
     border-radius: 3px;
     background: #c5c5c5;
     border: 1px solid darkgray;
+    margin-bottom: 15px;
 }
 
 .extension__notice p {
@@ -115,4 +116,8 @@ h4.app__title {
   font-size: 16px;
   padding: 0;
   margin-bottom: 10px;
+}
+
+.notice {
+  margin-top: 0 !important;
 }
