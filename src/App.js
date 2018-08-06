@@ -25,8 +25,10 @@ removeItemBundleCount();
 class App extends Component {
   state = {
     reviewerName: "",
+    authorName: "",
     itemUrl: "",
     itemName: "",
+    itemId: "",
     sheetId: "",
     highlights: [],
     promotions: [],
@@ -51,12 +53,16 @@ class App extends Component {
     );
     const itemName = document.querySelector(".existing-value").innerText;
     const itemUrl = document.querySelector(".submission-details > a").href;
+    const authorName = document.querySelectorAll('a[title="author profile page"]')[0].innerText;
+    const itemId = document.querySelector('.submission-details').firstElementChild.href.split('/').slice(-1)[0]
 
     this.setState({
       isLoading: true,
       reviewerName: name,
       itemName,
-      itemUrl
+      itemUrl,
+      authorName,
+      itemId
     });
 
     /*eslint-disable no-undef*/
@@ -103,7 +109,7 @@ class App extends Component {
             )
           )
           .catch(e => {
-            const message = `Please make sure the WordPress Site URL option is correct. Go to the Extension Options Panel.`;
+            const message = `Please set the WordPress Site URL option. Go to the Extension Options Panel.`;
             this.setState(prevState => {
               return {
                 notices: [...prevState.notices, { class: "error", message }]
@@ -117,9 +123,18 @@ class App extends Component {
     chrome.storage.sync.get(
       ["sheetIdValue"],
       function(value) {
-        this.setState({
-          sheetId: value.sheetIdValue
-        });
+        if(!value.sheetIdValue) {
+          const message = `Please set the Google Sheet ID option. Go to the Extension Options Panel.`;
+          this.setState(prevState => {
+            return {
+              notices: [...prevState.notices, { class: "error", message }]
+            }
+          })
+        } else {
+          this.setState({
+            sheetId: value.sheetIdValue
+          });
+        }
       }.bind(this)
     );
     /* eslint-enable no-undef */
@@ -277,8 +292,14 @@ class App extends Component {
 
   handleBigApproveButton = e => {
     this.cloneAndChangeButtonAttr();
-
-    const { itemUrl, itemName, reviewerName, formData } = this.state;
+    const { 
+      itemUrl, 
+      itemName, 
+      reviewerName, 
+      formData, 
+      authorName,
+      itemId
+    } = this.state;
 
     const dataToInsert = {
       range: range,
@@ -286,8 +307,10 @@ class App extends Component {
       values: [
         [
           moment(Date.now()).format("MM-DD-YYYY"),
-          itemUrl,
+          authorName,
           itemName,
+          itemUrl,
+          itemId,
           reviewerName,
           formData.boosting,
           this.validateFormDataArray(formData.highlights)
@@ -335,8 +358,20 @@ class App extends Component {
   };
 
   render() {
-    const notices = this.state.notices.length
-      ? this.state.notices.map(notice => {
+
+    const {
+      notices,
+      isLoading,
+      isLoggedIn,
+      highlights,
+      promotions,
+      buttonText,
+      isHidden
+    } = this.state;
+
+    // TODO: Move to a component
+    const noticesMoveToComponent = notices.length
+      ? notices.map(notice => {
           return (
             <Notice class={notice.class}>
               <p>
@@ -347,10 +382,10 @@ class App extends Component {
         })
       : null;
 
-    return !this.state.isHidden ? (
+    return (
       <div className="App">
-        {notices}
-        {this.state.isLoading ? (
+        {noticesMoveToComponent}
+        { isLoading && isLoggedIn ? (
           <img
             src={
               /*eslint-disable no-undef*/
@@ -359,44 +394,44 @@ class App extends Component {
             }
             alt="Loading"
           />
-        ) : (
+        ) : !isHidden ? (
           <React.Fragment>
             <hr className="app__separator" />
             <h4 className="app__title">Item Boosting</h4>
 
-            {this.state.isLoggedIn ? (
+            {isLoggedIn ? (
               <React.Fragment>
                 <Button
-                  value={this.state.buttonText}
-                  isLoggedIn={this.state.isLoggedIn}
+                  value={buttonText}
+                  isLoggedIn={isLoggedIn}
                   handleLogout={this.handleLogout}
                 />
 
                 <Boosting handleFormData={this.handleFormData} />
 
                 <Highlights
-                  isLoading={this.state.isLoading}
-                  highlightsData={this.state.highlights}
+                  isLoading={isLoading}
+                  highlightsData={highlights}
                   handleFormData={this.handleFormData}
                 />
 
                 <Promotions
-                  isLoading={this.state.isLoading}
-                  promotionsData={this.state.promotions}
+                  isLoading={isLoading}
+                  promotionsData={promotions}
                   handleFormData={this.handleFormData}
                 />
               </React.Fragment>
             ) : (
               <Button
-                value={this.state.buttonText}
-                isLoggedIn={this.state.isLoggedIn}
+                value={buttonText}
+                isLoggedIn={isLoggedIn}
                 handleLogin={this.handleLogin}
               />
             )}
           </React.Fragment>
-        )}
+        ) : null}
       </div>
-    ) : null;
+    );
   }
 }
 
