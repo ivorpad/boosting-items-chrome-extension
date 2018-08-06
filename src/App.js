@@ -132,15 +132,17 @@ class App extends Component {
     ];
     bigApproveButton.addEventListener("click", this.handleBigApproveButton);
 
-    const approveButton = document.querySelector(".reviewer-proofing-actions").firstElementChild;
+    const approveButton = document.querySelector(".reviewer-proofing-actions")
+      .firstElementChild;
     approveButton.addEventListener("click", this.handleApproveButton);
 
-    const exitButton = document.querySelector(".header-right-container").firstElementChild;
+    const exitButton = document.querySelector(".header-right-container")
+      .firstElementChild;
     exitButton.addEventListener("click", this.handleLogout);
 
     if (!this.state.isLoggedIn) {
       this.setState({
-          buttonText: "Logout",
+        buttonText: "Logout"
       });
     }
   };
@@ -156,7 +158,7 @@ class App extends Component {
       function(response) {
         this.setState({
           isLoggedIn: response.isLoggedIn,
-          notices: this.state.notices.filter(notice => notice.type !== 'logout')
+          notices: this.state.notices.filter(notice => notice.type !== "logout")
         });
         if (response.access_token) {
           this.handleRefresh();
@@ -221,29 +223,32 @@ class App extends Component {
     chrome.storage.sync.get(
       ["access_token"],
       function(result) {
-          fetch(
-            `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${
-              result.access_token
-            }`
-          )
-            .then(resp => resp.json())
-            .then(val => {
-              if (val.error_description) {
-                throw new Error("Not logged in, please login to continue.");
-              } else {
-                this.setState({
-                  isLoggedIn: true
-                });
-              }
-            })
-            .catch(err => {
-              this.setState(prevState => {
-                return {
-                  isLoggedIn: false,
-                  notices: [...prevState.notices, { type: 'logout', class: 'warning', message: err.message } ]
-                }
+        fetch(
+          `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${
+            result.access_token
+          }`
+        )
+          .then(resp => resp.json())
+          .then(val => {
+            if (val.error_description) {
+              throw new Error("Not logged in, please login to continue.");
+            } else {
+              this.setState({
+                isLoggedIn: true
               });
+            }
+          })
+          .catch(err => {
+            this.setState(prevState => {
+              return {
+                isLoggedIn: false,
+                notices: [
+                  ...prevState.notices,
+                  { type: "logout", class: "warning", message: err.message }
+                ]
+              };
             });
+          });
       }.bind(this)
     );
     /*eslint-enable no-undef*/
@@ -326,8 +331,8 @@ class App extends Component {
   handleApproveButton = () => {
     this.setState({
       isHidden: !this.state.isHidden
-    })
-  }
+    });
+  };
 
   render() {
     const notices = this.state.notices.length
@@ -342,59 +347,56 @@ class App extends Component {
         })
       : null;
 
-    return (
-      !this.state.isHidden ? 
-        <div className="App">
-          {notices}
-          {this.state.isLoading ? (
-            <img
-              src={
-                /*eslint-disable no-undef*/
-                chrome.extension.getURL(loading)
-                /*eslint-enable no-undef*/
-              }
-              alt="Loading"
-            />
-          ) : (
+    return !this.state.isHidden ? (
+      <div className="App">
+        {notices}
+        {this.state.isLoading ? (
+          <img
+            src={
+              /*eslint-disable no-undef*/
+              chrome.extension.getURL(loading)
+              /*eslint-enable no-undef*/
+            }
+            alt="Loading"
+          />
+        ) : (
+          <React.Fragment>
+            <hr className="app__separator" />
+            <h4 className="app__title">Item Boosting</h4>
+
+            {this.state.isLoggedIn ? (
               <React.Fragment>
-                <hr className="app__separator" />
-                <h4 className="app__title">Staff Boosting</h4>
+                <Button
+                  value={this.state.buttonText}
+                  isLoggedIn={this.state.isLoggedIn}
+                  handleLogout={this.handleLogout}
+                />
 
-                {this.state.isLoggedIn ? (
-                  <React.Fragment>
-                    <Button
-                      value={this.state.buttonText}
-                      isLoggedIn={this.state.isLoggedIn}
-                      handleLogout={this.handleLogout}
-                    />
+                <Boosting handleFormData={this.handleFormData} />
 
-                    <Boosting handleFormData={this.handleFormData} />
+                <Highlights
+                  isLoading={this.state.isLoading}
+                  highlightsData={this.state.highlights}
+                  handleFormData={this.handleFormData}
+                />
 
-                    <Highlights
-                      isLoading={this.state.isLoading}
-                      highlightsData={this.state.highlights}
-                      handleFormData={this.handleFormData}
-                    />
-
-                    <Promotions
-                      isLoading={this.state.isLoading}
-                      promotionsData={this.state.promotions}
-                      handleFormData={this.handleFormData}
-                    />
-                  </React.Fragment>
-                ) : (
-                    <Button
-                      value={this.state.buttonText}
-                      isLoggedIn={this.state.isLoggedIn}
-                      handleLogin={this.handleLogin}
-                    />
-                  )}
+                <Promotions
+                  isLoading={this.state.isLoading}
+                  promotionsData={this.state.promotions}
+                  handleFormData={this.handleFormData}
+                />
               </React.Fragment>
-            )
-          }
-        </div> :
-      null
-    );
+            ) : (
+              <Button
+                value={this.state.buttonText}
+                isLoggedIn={this.state.isLoggedIn}
+                handleLogin={this.handleLogin}
+              />
+            )}
+          </React.Fragment>
+        )}
+      </div>
+    ) : null;
   }
 }
 
