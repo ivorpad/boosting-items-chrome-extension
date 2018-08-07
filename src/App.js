@@ -153,7 +153,7 @@ class App extends Component {
 
     const exitButton = document.querySelector(".header-right-container")
       .firstElementChild;
-    exitButton.addEventListener("click", this.handleLogout);
+    exitButton.addEventListener("click", (e) => this.handleLogout(e, false));
 
     if (!this.state.isLoggedIn) {
       this.setState({
@@ -203,8 +203,10 @@ class App extends Component {
     /*eslint-enable no-undef*/
   };
 
-  handleLogout = e => {
-    e.preventDefault();
+  handleLogout = (e, prevent) => {
+    if(prevent) {
+      e.preventDefault();
+    }
     /*eslint-disable no-undef*/
     chrome.runtime.sendMessage(
       {
@@ -404,7 +406,7 @@ class App extends Component {
                 <Button
                   value={buttonText}
                   isLoggedIn={isLoggedIn}
-                  handleLogout={this.handleLogout}
+                  handleLogout={(e) => this.handleLogout(e, true)}
                 />
 
                 <Boosting handleFormData={this.handleFormData} />
