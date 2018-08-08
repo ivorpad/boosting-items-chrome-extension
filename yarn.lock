@@ -82,30 +82,6 @@
     lodash "^4.17.5"
     to-fast-properties "^2.0.0"
 
-"@lourd/equal-by-keys@^0.1.2":
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/@lourd/equal-by-keys/-/equal-by-keys-0.1.2.tgz#c3ca22ae4df93b7c18a25a8febb549a3d6cb9cf3"
-
-"@lourd/load-script@^0.1.0":
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/@lourd/load-script/-/load-script-0.1.3.tgz#abf1de059ed3b21c4cdff0c36a986033700b9afe"
-
-"@lourd/react-google-api@^0.1.0":
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/@lourd/react-google-api/-/react-google-api-0.1.4.tgz#66bf51ea9fb74cbf97ffd2101c98223387a4fa02"
-  dependencies:
-    "@lourd/load-script" "^0.1.0"
-    prop-types "^15.6.0"
-    react-broadcast "^0.7.0-rc.2"
-
-"@lourd/react-google-sheet@^0.4.0":
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/@lourd/react-google-sheet/-/react-google-sheet-0.4.0.tgz#b3c08e51821ef0cbc2a308f5e7ae0f00b1593eee"
-  dependencies:
-    "@lourd/equal-by-keys" "^0.1.2"
-    "@lourd/react-google-api" "^0.1.0"
-    prop-types "^15.6.0"
-
 "@types/react@*":
   version "16.4.6"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-16.4.6.tgz#5024957c6bcef4f02823accf5974faba2e54fada"
@@ -5822,13 +5798,6 @@ rc@^1.0.1, rc@^1.1.6, rc@^1.2.7:
     ini "~1.3.0"
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
-
-react-broadcast@^0.7.0-rc.2:
-  version "0.7.1"
-  resolved "https://registry.yarnpkg.com/react-broadcast/-/react-broadcast-0.7.1.tgz#732c1f4d3c9dbb9dbf0b92540c7c2490fb746dfb"
-  dependencies:
-    prop-types "^15.6.0"
-    warning "^3.0.0"
 
 react-dev-utils@^5.0.1:
   version "5.0.1"
