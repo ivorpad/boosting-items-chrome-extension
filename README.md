@@ -15,11 +15,27 @@
 
 ## Configuration:
 
-### Right click in the icon:
+### Manager:
+
+**Spreadsheet:**
+
+1. Make a copy of the spreadsheet template: [Envato Boosting Template](https://docs.google.com/spreadsheets/d/1DEkyj5e7VjWmAJyfkIGcz5s55KObusFBeobelIbBMGA)
+2. Share the link with the Reviewers
+
+**WordPress URL:**
+
+1. Install [Envato Item Boosting WP](https://github.com/ivorpad/envato-item-boosting-wp-plugin) in your WordPress backend
+2. Activate the plugin
+3. Flush the permalinks. `Settings / Permalinks / Save Settings`
+4. Share the link with the Reviewers
+
+### Reviewers:
+
+#### Right click in the icon:
 
 ![](https://user-images.githubusercontent.com/52452/43923374-981f9aec-9bef-11e8-8ba2-02b28b3deb8e.png)
 
-### Enter your settings:
+#### Enter your settings:
 
 ![](https://user-images.githubusercontent.com/52452/43923001-7323f072-9bee-11e8-972c-a6dc689acf12.png)
 
@@ -27,16 +43,13 @@
 
 `https://docs.google.com/spreadsheets/d/[google_sheet_id]/edit#gid=0`
 
-#### WordPress URL (if you're a reviewer the URL will be provided by your manager):
+#### WordPress URL:
 
-1. Install [Envato Item Boosting WP](https://github.com/ivorpad/envato-item-boosting-wp-plugin) in your WordPress backend
-2. Activate the plugin
-3. Flush the permalinks. `Settings / Permalinks / Save Settings`
-4. Paste the URL in the extension settings (without https:// or www)
+Paste the URL given by your manager in the WordPress URL field (without https:// or www)
 
 ## Usage:
 
-### Login with your @envato.com account:
+### Reviewer: Login with your @envato.com account:
 
 ![](https://user-images.githubusercontent.com/52452/43924319-5107be84-9bf2-11e8-89b2-e53f3c0c5269.png)
 
