@@ -49,10 +49,10 @@ Paste the URL given by your manager in the WordPress URL field (without https://
 
 ## Usage:
 
-### Reviewer: Login with your @envato.com account:
+**Login with your @envato.com account:**
 
 ![](https://user-images.githubusercontent.com/52452/43924319-5107be84-9bf2-11e8-89b2-e53f3c0c5269.png)
 
-### Before approving the item make sure you rate it:
+**Before approving the item make sure you rate it:**
 
 ![](https://user-images.githubusercontent.com/52452/43924354-6e1b6f0c-9bf2-11e8-9e0d-bc9a903f97d7.png)

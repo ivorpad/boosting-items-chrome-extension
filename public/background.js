@@ -52,10 +52,6 @@ function Token() {
 	let paramsSearch;
 	let launchWebAuthFlowParams;
 
-	// const refreshToken = async (token, callback) => {
-	//     return getTokenInfo = await tokenInfo(token);
-	// }
-
 	/**
 	 * Gets a new interactive access token to access Google APIs
 	 *
