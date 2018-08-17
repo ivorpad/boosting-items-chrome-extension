@@ -30,9 +30,8 @@ class App extends Component {
     itemName: "",
     itemId: "",
     sheetId: "",
-    highlights: [],
-    promotions: [],
-    inputValue: "",
+    highlightsData: [],
+    promotionsData: [],
     isLoading: false,
     isLoggedIn: false,
     isHidden: true,
@@ -43,9 +42,9 @@ class App extends Component {
       highlights: [],
       promotions: []
     },
-    buttonText: "Login with Google",
     notices: []
   };
+
   componentDidMount() {
     const intercomSetup = document.getElementById("intercom-setup");
     const { name } = JSON.parse(
@@ -53,8 +52,13 @@ class App extends Component {
     );
     const itemName = document.querySelector(".existing-value").innerText;
     const itemUrl = document.querySelector(".submission-details > a").href;
-    const authorName = document.querySelectorAll('a[title="author profile page"]')[0].innerText;
-    const itemId = document.querySelector('.submission-details').firstElementChild.href.split('/').slice(-1)[0]
+    const authorName = document.querySelectorAll(
+      'a[title="author profile page"]'
+    )[0].innerText;
+    const itemId = document
+      .querySelector(".submission-details")
+      .firstElementChild.href.split("/")
+      .slice(-1)[0];
 
     this.setState({
       isLoading: true,
@@ -100,8 +104,8 @@ class App extends Component {
                   promotions = getDataFrom(promotions, marketplace);
 
                   this.setState({
-                    promotions,
-                    highlights,
+                    promotionsData: promotions,
+                    highlightsData: highlights,
                     isLoading: false
                   });
                 }
@@ -123,13 +127,13 @@ class App extends Component {
     chrome.storage.sync.get(
       ["sheetIdValue"],
       function(value) {
-        if(!value.sheetIdValue) {
+        if (!value.sheetIdValue) {
           const message = `Please set the Google Sheet ID option. Go to the Extension Options Panel.`;
           this.setState(prevState => {
             return {
               notices: [...prevState.notices, { class: "error", message }]
-            }
-          })
+            };
+          });
         } else {
           this.setState({
             sheetId: value.sheetIdValue
@@ -138,12 +142,6 @@ class App extends Component {
       }.bind(this)
     );
     /* eslint-enable no-undef */
-
-    // workaround to fix undefined .settings in jQuery validation  
-    const script = document.createElement('script');
-    script.textContent = "$('#promotions').validate()";
-    (document.head || document.documentElement).appendChild(script);
-    script.parentNode.removeChild(script);  
   }
 
   componentWillMount = () => {
@@ -159,7 +157,7 @@ class App extends Component {
 
     const exitButton = document.querySelector(".header-right-container")
       .firstElementChild;
-    exitButton.addEventListener("click", (e) => this.handleLogout(e, false));
+    exitButton.addEventListener("click", e => this.handleLogout(e, false));
 
     if (!this.state.isLoggedIn) {
       this.setState({
@@ -210,7 +208,7 @@ class App extends Component {
   };
 
   handleLogout = (e, prevent) => {
-    if(prevent) {
+    if (prevent) {
       e.preventDefault();
     }
     /*eslint-disable no-undef*/
@@ -300,11 +298,11 @@ class App extends Component {
 
   handleBigApproveButton = e => {
     this.cloneAndChangeButtonAttr();
-    const { 
-      itemUrl, 
-      itemName, 
-      reviewerName, 
-      formData, 
+    const {
+      itemUrl,
+      itemName,
+      reviewerName,
+      formData,
       authorName,
       itemId
     } = this.state;
@@ -371,9 +369,8 @@ class App extends Component {
       notices,
       isLoading,
       isLoggedIn,
-      highlights,
-      promotions,
-      buttonText,
+      highlightsData,
+      promotionsData,
       isHidden
     } = this.state;
 
@@ -390,59 +387,41 @@ class App extends Component {
         })
       : null;
 
-    return (
-      <div className="App">
+    return <div className="App">
         {/* TODO: Move to stateless functional component */}
         {noticesMoveToComponent}
-        { isLoading && isLoggedIn ? (
-          <img
-            src={
-              /*eslint-disable no-undef*/
+        {isLoading && isLoggedIn ? <img src={/*eslint-disable no-undef*/
               chrome.extension.getURL(loading)
               /*eslint-enable no-undef*/
-            }
-            alt="Loading"
-          />
-        ) : !isHidden ? (
-          <React.Fragment>
+            } alt="Loading" /> : !isHidden ? <React.Fragment>
             <hr className="app__separator" />
             <h4 className="app__title">Item Boosting</h4>
 
             <Button render={() => {
-                return(
-                  <button 
-                    className={isLoggedIn ? 'logout' : 'login'}
-                    onClick={isLoggedIn ? (e) => this.handleLogout(e, true) : this.handleLogin}> 
-                    {isLoggedIn ? 'Logout' : 'Login'}
-                  </button>
-                )
+                return <button className={isLoggedIn ? "logout" : "login"} onClick={isLoggedIn ? e => this.handleLogout(e, true) : this.handleLogin}>
+                    {isLoggedIn ? "Logout" : "Login"}
+                  </button>;
               }} />
 
-            {isLoggedIn ? (
-              <React.Fragment>
-                <Boosting 
-                  handleFormData={this.handleFormData} 
-                />
+            {isLoggedIn ? <React.Fragment>
+                <Boosting handleFormData={this.handleFormData} />
 
-                <Highlights
-                  isLoading={isLoading}
-                  highlightsData={highlights}
-                  handleFormData={this.handleFormData}
-                />
+                <Highlights isLoading={isLoading} highlightsData={highlightsData} handleFormData={this.handleFormData} />
 
-                <Promotions
-                  isLoading={isLoading}
-                  promotionsData={promotions}
-                  handleFormData={this.handleFormData}
-                />
-              </React.Fragment>
-            ) : (
-              null
-            )}
-          </React.Fragment>
-        ) : null}
-      </div>
-    );
+                <Promotions handleFormData={this.handleFormData} render={() => {
+                    return promotionsData.map(({ title }, index) => {
+                      const slug = title.rendered.toLowerCase().split(" ").join("-");
+                      return(
+                        <div key={index}>
+                          <input type="checkbox" id={slug} name="promotions" value={title.rendered} />
+                          <label for={slug}>{title.rendered}</label>
+                        </div>
+                      )
+                    });
+                  }} />
+              </React.Fragment> : null}
+          </React.Fragment> : null}
+      </div>;
   }
 }
 
