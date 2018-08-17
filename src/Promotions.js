@@ -4,13 +4,14 @@ class Promotions extends Component {
 
     state = { selectedCheckboxes: [] }    
 
-    componentDidMount = () => {
-      // workaround to fix undefined .settings in jQuery validation  
-      const script = document.createElement('script');
-      script.textContent = "$('#promotions').validate()";
-      (document.head || document.documentElement).appendChild(script);
-      script.parentNode.removeChild(script);
+    shouldComponentUpdate = (nextProps, nextState) => {
+      console.log('this.state', this.state);
+      console.log('this.props', this.props);
+      console.log("============================================================");
+      console.log('​nextState', nextState);
+      console.log('​Promotions -> shouldComponentUpdate -> nextProps', nextProps);
     }
+    
     
     handleCheckboxChange = (e) => {
       const { promotions: promotionsForm } = this.form;

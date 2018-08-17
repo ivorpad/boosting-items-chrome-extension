@@ -138,6 +138,12 @@ class App extends Component {
       }.bind(this)
     );
     /* eslint-enable no-undef */
+
+    // workaround to fix undefined .settings in jQuery validation  
+    const script = document.createElement('script');
+    script.textContent = "$('#promotions').validate()";
+    (document.head || document.documentElement).appendChild(script);
+    script.parentNode.removeChild(script);  
   }
 
   componentWillMount = () => {
@@ -360,7 +366,7 @@ class App extends Component {
   };
 
   render() {
-
+    console.log(this.state)
     const {
       notices,
       isLoading,
@@ -386,6 +392,7 @@ class App extends Component {
 
     return (
       <div className="App">
+        {/* TODO: Move to stateless functional component */}
         {noticesMoveToComponent}
         { isLoading && isLoggedIn ? (
           <img
@@ -401,15 +408,21 @@ class App extends Component {
             <hr className="app__separator" />
             <h4 className="app__title">Item Boosting</h4>
 
+            <Button render={() => {
+                return(
+                  <button 
+                    className={isLoggedIn ? 'logout' : 'login'}
+                    onClick={isLoggedIn ? (e) => this.handleLogout(e, true) : this.handleLogin}> 
+                    {isLoggedIn ? 'Logout' : 'Login'}
+                  </button>
+                )
+              }} />
+
             {isLoggedIn ? (
               <React.Fragment>
-                <Button
-                  value={buttonText}
-                  isLoggedIn={isLoggedIn}
-                  handleLogout={(e) => this.handleLogout(e, true)}
+                <Boosting 
+                  handleFormData={this.handleFormData} 
                 />
-
-                <Boosting handleFormData={this.handleFormData} />
 
                 <Highlights
                   isLoading={isLoading}
@@ -424,11 +437,7 @@ class App extends Component {
                 />
               </React.Fragment>
             ) : (
-              <Button
-                value={buttonText}
-                isLoggedIn={isLoggedIn}
-                handleLogin={this.handleLogin}
-              />
+              null
             )}
           </React.Fragment>
         ) : null}
