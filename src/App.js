@@ -31,7 +31,6 @@ removeItemBundleCount();
 
 class App extends Component {
   state = {
-    sheetId: "",
     highlightsData: [],
     promotionsData: [],
     isLoading: false,
@@ -71,7 +70,6 @@ class App extends Component {
   };
 
   componentDidMount() {
-
     const {
       name,
       itemName,
@@ -92,7 +90,6 @@ class App extends Component {
       }
     };
 
-  
     this.props.setMarketData(marketplacePayload);
 
     this.setState({
@@ -108,7 +105,10 @@ class App extends Component {
     this.bigApproveButton = document.getElementById("approve").children[
       "proofing_action"
     ];
-    this.bigApproveButton.addEventListener( "click", this.handleBigApproveButton );
+    this.bigApproveButton.addEventListener(
+      "click",
+      this.handleBigApproveButton
+    );
 
     this.approveButton = document.querySelector(
       ".reviewer-proofing-actions"
@@ -120,6 +120,12 @@ class App extends Component {
     ).firstElementChild;
     this.exitButton.addEventListener("click", e => this.handleLogout(e, false));
 
+    this.rejectButton = document.querySelector('a[href="#reject"]');
+    this.rejectButton.addEventListener("click", this.handleRejectAndHoldButtons);
+
+    this.holdButton = document.querySelector('a[href="#hold"]');
+    this.holdButton.addEventListener("click", this.handleRejectAndHoldButtons);
+
     if (!this.state.isLoggedIn) {
       this.setState({
         buttonText: "Logout"
@@ -128,90 +134,94 @@ class App extends Component {
   };
 
   componentWillUnmount = () => {
-    this.bigApproveButton.removeEventListener( "click", this.handleBigApproveButton );
+    this.bigApproveButton.removeEventListener(
+      "click",
+      this.handleBigApproveButton
+    );
     this.approveButton.removeEventListener("click", this.handleApproveButton);
     this.exitButton.removeEventListener("click", this.handleLogout);
+    this.rejectButton.removeEventListener("click", this.handleRejectAndHoldButtons);
+    this.holdButton.removeEventListener("click", this.handleRejectAndHoldButtons);
   };
+
+
+  handleRejectAndHoldButtons = () => {
+    if (!this.state.isHidden) {
+      this.setState({
+        isHidden: true
+      })
+    }
+  }
+
 
   checkSheetUrlOption = () => {
     /* eslint-disable no-undef */
-    chrome.storage.sync.get(
-      ["sheetIdValue"],
-      (value) => {
-        if (!value.sheetIdValue) {
-          const message = `Please set the Google Sheet ID option. Go to the Extension Options Panel.`;
-          this.setState(prevState => {
-            return {
-              notices: [...prevState.notices, { class: "error", message }]
-            };
-          });
-        } else {
-          // TODO: Wont work cause it's async
-          this.props.setSpreadsheetId(value.sheetIdValue);
-          // this.setState({
-          //   sheetId: value.sheetIdValue
-          // });
-        }
+    chrome.storage.sync.get(["sheetIdValue"], value => {
+      if (!value.sheetIdValue) {
+        const message = `Please set the Google Sheet ID option. Go to the Extension Options Panel.`;
+        this.setState(prevState => {
+          return {
+            notices: [...prevState.notices, { class: "error", message }]
+          };
+        });
+      } else {
+        // TODO: Wont work cause it's async
+        this.props.setSpreadsheetId(value.sheetIdValue);
       }
-    );
+    });
     /* eslint-enable no-undef */
   };
 
   fetchDataFromApi = () => {
     /*eslint-disable no-undef*/
-    chrome.storage.sync.get(
-      ["baseUrlValue"],
-      (value) => {
-        axios
-          .all([
-            axios.get(
-              `https://${value.baseUrlValue}/wp-json/wp/v2/post_type_promotion`
-            ),
-            axios.get(
-              `https://${value.baseUrlValue}/wp-json/wp/v2/post_type_highlight`
-            ),
-            axios.get(`https://${value.baseUrlValue}/wp-json/wp/v2/marketplace`)
-          ])
-          .then(
-            axios.spread(
-              (promotionsResponse, highlightsResponse, marketplaceResponse) => {
-                if (
-                  promotionsResponse.status === 200 &&
-                  highlightsResponse.status === 200 &&
-                  marketplaceResponse.status === 200
-                ) {
-                  let { data: promotions } = promotionsResponse;
-                  let { data: highlights } = highlightsResponse;
+    chrome.storage.sync.get(["baseUrlValue"], value => {
+      axios
+        .all([
+          axios.get(
+            `https://${value.baseUrlValue}/wp-json/wp/v2/post_type_promotion`
+          ),
+          axios.get(
+            `https://${value.baseUrlValue}/wp-json/wp/v2/post_type_highlight`
+          ),
+          axios.get(`https://${value.baseUrlValue}/wp-json/wp/v2/marketplace`)
+        ])
+        .then(
+          axios.spread(
+            (promotionsResponse, highlightsResponse, marketplaceResponse) => {
+              if (
+                promotionsResponse.status === 200 &&
+                highlightsResponse.status === 200 &&
+                marketplaceResponse.status === 200
+              ) {
+                let { data: promotions } = promotionsResponse;
+                let { data: highlights } = highlightsResponse;
 
-                  const marketplace = marketplaceResponse.data.filter(
-                    market => {
-                      return market.name === domain;
-                    }
-                  );
+                const marketplace = marketplaceResponse.data.filter(market => {
+                  return market.name === domain;
+                });
 
-                  highlights = getDataFrom(highlights, marketplace);
-                  promotions = getDataFrom(promotions, marketplace);
+                highlights = getDataFrom(highlights, marketplace);
+                promotions = getDataFrom(promotions, marketplace);
 
-                  this.setState({
-                    promotionsData: promotions,
-                    highlightsData: highlights,
-                    isLoading: false
-                  });
-                }
+                this.setState({
+                  promotionsData: promotions,
+                  highlightsData: highlights,
+                  isLoading: false
+                });
               }
-            )
+            }
           )
-          .catch( e => {
-            const message = `Please set the WordPress Site URL option. Go to the Extension Options Panel.`;
-            // TODO: dispatch action
-            this.setState(prevState => {
-              return {
-                notices: [...prevState.notices, { class: "error", message }]
-              };
-            });
+        )
+        .catch(e => {
+          const message = `Please set the WordPress Site URL option. Go to the Extension Options Panel.`;
+          // TODO: dispatch action
+          this.setState(prevState => {
+            return {
+              notices: [...prevState.notices, { class: "error", message }]
+            };
           });
-      }
-    );
+        });
+    });
   };
 
   handleLogin = e => {
@@ -341,7 +351,6 @@ class App extends Component {
     Array.isArray(array) && array.length > 0 && typeof array !== "undefined";
 
   handleBigApproveButton = () => {
-    
     this.cloneAndChangeButtonAttr();
 
     const { formData } = this.state;
@@ -377,15 +386,17 @@ class App extends Component {
     chrome.storage.sync.get(
       ["access_token"],
 
-      (result) => {
+      result => {
         if (!result.access_token) {
           return;
         }
         SheetApi.defaults.headers.post["Authorization"] = `Bearer ${
           result.access_token
-          }`;
+        }`;
         SheetApi.post(
-          `/${this.props.sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`,
+          `/${
+            this.props.sheetId
+          }/values/${range}:append?valueInputOption=USER_ENTERED`,
           payload
         )
           .then(response => {
@@ -395,7 +406,7 @@ class App extends Component {
           .catch(e => {
             console.log(e.response);
           });
-      },
+      }
     );
     /*eslint-enable no-undef*/
   };
@@ -407,7 +418,7 @@ class App extends Component {
   };
 
   render() {
-    console.log(this.props)
+    console.log(this.props);
     const {
       notices,
       isLoading,
@@ -422,7 +433,9 @@ class App extends Component {
       ? notices.map(notice => {
           return (
             <Notice class={notice.class}>
-              <p><b>Envato Market Item Boosting:</b> {notice.message}</p>
+              <p>
+                <b>Envato Market Item Boosting:</b> {notice.message}
+              </p>
             </Notice>
           );
         })
@@ -434,78 +447,78 @@ class App extends Component {
         {noticesMoveToComponent}
 
         <Loading
-          render={ () => {
-            return(
-              isLoading && isLoggedIn && !isHidden ?
-                <img
-                  src={
-                    /*eslint-disable no-undef*/
-                    chrome.extension.getURL(loading)
-                    /*eslint-enable no-undef*/
-                  }
-                  alt="Loading"
-                />
-                :
-                null
-            )
+          render={() => {
+            return isLoading && isLoggedIn && !isHidden ? (
+              <img
+                src={
+                  /*eslint-disable no-undef*/
+                  chrome.extension.getURL(loading)
+                  /*eslint-enable no-undef*/
+                }
+                alt="Loading"
+              />
+            ) : null;
           }}
         />
 
-        {!isHidden ? 
-        <React.Fragment>
+        {!isHidden ? (
+          <React.Fragment>
+            <hr className="app__separator" />
+            <h4 className="app__title">Item Boosting</h4>
 
-          <hr className="app__separator" />
-          <h4 className="app__title">Item Boosting</h4>
+            <Button
+              render={() => {
+                return (
+                  <button
+                    className={isLoggedIn ? "logout" : "login"}
+                    onClick={
+                      isLoggedIn
+                        ? e => this.handleLogout(e, true)
+                        : this.handleLogin
+                    }
+                  >
+                    {isLoggedIn ? "Logout" : "Login"}
+                  </button>
+                );
+              }}
+            />
 
-          <Button
-            render={() => {
-              return (
-                <button
-                  className={isLoggedIn ? "logout" : "login"}
-                  onClick={isLoggedIn ? e => this.handleLogout(e, true) : this.handleLogin}
-                >
-                  {isLoggedIn ? "Logout" : "Login"}
-                </button>
-              );
-            }}
-          />
+            {isLoggedIn ? (
+              <React.Fragment>
+                <Boosting handleFormData={this.handleFormData} />
 
-          {isLoggedIn ? (
-            <React.Fragment>
-              <Boosting handleFormData={this.handleFormData} />
+                <Highlights
+                  isLoading={isLoading}
+                  highlightsData={highlightsData}
+                  handleFormData={this.handleFormData}
+                />
 
-              <Highlights
-                isLoading={isLoading}
-                highlightsData={highlightsData}
-                handleFormData={this.handleFormData}
-              />
-
-              <Promotions
-                handleFormData={this.handleFormData}
-                render={() => {
-                  return promotionsData.map(({ title }, index) => {
-                    const slug = title.rendered
-                      .toLowerCase()
-                      .split(" ")
-                      .join("-");
-                    return (
-                      <div key={index}>
-                        <input
-                          type="checkbox"
-                          id={slug}
-                          name="promotions"
-                          value={title.rendered}
-                        />
-                        <label for={slug}>{title.rendered}</label>
-                      </div>
-                    );
-                  });
-                }}
-              />
-            </React.Fragment>
-          ) : null}
-        </React.Fragment>  : null }
-        
+                <Promotions
+                  handleFormData={this.handleFormData}
+                  render={() => {
+                    return promotionsData.map(({ title }, index) => {
+                      const slug = title.rendered
+                        .toLowerCase()
+                        .split(" ")
+                        .join("-");
+                      return (
+                        <div key={index}>
+                          <input
+                            type="checkbox"
+                            id={slug}
+                            name="promotions"
+                            value={title.rendered}
+                          />
+                          <label for={slug}>{title.rendered}</label>
+                        </div>
+                      );
+                    });
+                  }}
+                />
+              </React.Fragment>
+            ) : null}
+          </React.Fragment>
+        ) : null}
       </div>
     );
   }
