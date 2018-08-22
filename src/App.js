@@ -4,6 +4,7 @@ import Boosting from "./Boosting";
 import Highlights from "./Highlights";
 import Promotions from "./Promotions";
 import Button from "./Button";
+import Loading from "./Loading";
 import Notice from "./Notice";
 import axios from "axios";
 import SheetApi from "./helpers/API";
@@ -11,7 +12,8 @@ import moment from "moment";
 import { bindActionCreators } from "redux";
 import { connect } from 'react-redux';
 
-import { actions } from './reducers/marketplace';
+import { actions as marketplaceActions } from './reducers/marketplace';
+import { actions as spreadsheetActions } from './reducers/spreadsheet';
  
 import {
   extractDomainName,
@@ -69,6 +71,7 @@ class App extends Component {
   };
 
   componentDidMount() {
+
     const {
       name,
       itemName,
@@ -89,6 +92,7 @@ class App extends Component {
       }
     };
 
+  
     this.props.setMarketData(marketplacePayload);
 
     this.setState({
@@ -142,9 +146,11 @@ class App extends Component {
             };
           });
         } else {
-          this.setState({
-            sheetId: value.sheetIdValue
-          });
+          // TODO: Wont work cause it's async
+          this.props.setSpreadsheetId(value.sheetIdValue);
+          // this.setState({
+          //   sheetId: value.sheetIdValue
+          // });
         }
       }
     );
@@ -379,7 +385,7 @@ class App extends Component {
           result.access_token
           }`;
         SheetApi.post(
-          `/${this.state.sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`,
+          `/${this.props.sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`,
           payload
         )
           .then(response => {
@@ -401,7 +407,7 @@ class App extends Component {
   };
 
   render() {
-    console.log(this.state);
+    console.log(this.props)
     const {
       notices,
       isLoading,
@@ -426,69 +432,80 @@ class App extends Component {
       <div className="App">
         {/* TODO: Move to stateless functional component */}
         {noticesMoveToComponent}
-        {isLoading && isLoggedIn && !isHidden ? (
-          <img
-            src={
-              /*eslint-disable no-undef*/
-              chrome.extension.getURL(loading)
-              /*eslint-enable no-undef*/
-            }
-            alt="Loading"
+
+        <Loading
+          render={ () => {
+            return(
+              isLoading && isLoggedIn && !isHidden ?
+                <img
+                  src={
+                    /*eslint-disable no-undef*/
+                    chrome.extension.getURL(loading)
+                    /*eslint-enable no-undef*/
+                  }
+                  alt="Loading"
+                />
+                :
+                null
+            )
+          }}
+        />
+
+        {!isHidden ? 
+        <React.Fragment>
+
+          <hr className="app__separator" />
+          <h4 className="app__title">Item Boosting</h4>
+
+          <Button
+            render={() => {
+              return (
+                <button
+                  className={isLoggedIn ? "logout" : "login"}
+                  onClick={isLoggedIn ? e => this.handleLogout(e, true) : this.handleLogin}
+                >
+                  {isLoggedIn ? "Logout" : "Login"}
+                </button>
+              );
+            }}
           />
-        ) : !isHidden ? (
-          <React.Fragment>
-            <hr className="app__separator" />
-            <h4 className="app__title">Item Boosting</h4>
 
-            <Button
-              render={() => {
-                return (
-                  <button
-                    className={isLoggedIn ? "logout" : "login"}
-                    onClick={ isLoggedIn ? e => this.handleLogout(e, true) : this.handleLogin }
-                  >
-                    {isLoggedIn ? "Logout" : "Login"}
-                  </button>
-                );
-              }}
-            />
+          {isLoggedIn ? (
+            <React.Fragment>
+              <Boosting handleFormData={this.handleFormData} />
 
-            {isLoggedIn ? (
-              <React.Fragment>
-                <Boosting handleFormData={this.handleFormData} />
+              <Highlights
+                isLoading={isLoading}
+                highlightsData={highlightsData}
+                handleFormData={this.handleFormData}
+              />
 
-                <Highlights
-                  isLoading={isLoading}
-                  highlightsData={highlightsData}
-                  handleFormData={this.handleFormData}
-                />
-
-                <Promotions
-                  handleFormData={this.handleFormData}
-                  render={() => {
-                    return promotionsData.map(({ title }, index) => {
-                      const slug = title.rendered
-                        .toLowerCase()
-                        .split(" ")
-                        .join("-");
-                      return (
-                        <div key={index}>
-                          <input
-                            type="checkbox"
-                            id={slug}
-                            name="promotions"
-                            value={title.rendered}
-                          />
-                          <label for={slug}>{title.rendered}</label>
-                        </div>
-                      );
-                    });
-                  }}
-                />
-              </React.Fragment>
-            ) : null}
-          </React.Fragment>
-        ) : null}
+              <Promotions
+                handleFormData={this.handleFormData}
+                render={() => {
+                  return promotionsData.map(({ title }, index) => {
+                    const slug = title.rendered
+                      .toLowerCase()
+                      .split(" ")
+                      .join("-");
+                    return (
+                      <div key={index}>
+                        <input
+                          type="checkbox"
+                          id={slug}
+                          name="promotions"
+                          value={title.rendered}
+                        />
+                        <label for={slug}>{title.rendered}</label>
+                      </div>
+                    );
+                  });
+                }}
+              />
+            </React.Fragment>
+          ) : null}
+        </React.Fragment>  : null }
+        
       </div>
     );
   }
@@ -496,13 +513,16 @@ class App extends Component {
 
 // =============== \REDUX =============== //
 
-const mapStateToProps = state => ({
-  person: state.people,
-  item: state.item
-});
+const mapStateToProps = state => {
+  return ({
+    person: state.marketplace.people,
+    item: state.marketplace.item,
+    sheetId: state.spreadsheet.sheetId
+  })
+}
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators(actions, dispatch); 
+  return bindActionCreators({ ...marketplaceActions, ...spreadsheetActions }, dispatch); 
 }
 
 const AppContainer = connect(

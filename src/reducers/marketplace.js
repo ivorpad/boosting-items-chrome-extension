@@ -15,7 +15,7 @@ const defaultState = {
 }
 
 export default (state = defaultState, action) => {
-  console.log(action, state)
+  console.log(action.payload);
 
   const {
     SET_MARKET_DATA
