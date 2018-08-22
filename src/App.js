@@ -36,7 +36,6 @@ class App extends Component {
     isLoggedIn: false,
     isHidden: true,
     startTokenRefresh: JSON.parse(localStorage.getItem("start_token_refresh")),
-    marketplace: "",
     formData: {
       boosting: "Good",
       highlights: [],
@@ -98,7 +97,6 @@ class App extends Component {
 
     this.fetchDataFromApi();
     this.checkSheetUrlOption();
-
   }
 
   componentWillMount = () => {
@@ -106,14 +104,16 @@ class App extends Component {
     this.bigApproveButton = document.getElementById("approve").children[
       "proofing_action"
     ];
-    this.bigApproveButton.addEventListener("click", this.handleBigApproveButton);
+    this.bigApproveButton.addEventListener( "click", this.handleBigApproveButton );
 
-    this.approveButton = document.querySelector(".reviewer-proofing-actions")
-      .firstElementChild;
+    this.approveButton = document.querySelector(
+      ".reviewer-proofing-actions"
+    ).firstElementChild;
     this.approveButton.addEventListener("click", this.handleApproveButton);
 
-    this.exitButton = document.querySelector(".header-right-container")
-      .firstElementChild;
+    this.exitButton = document.querySelector(
+      ".header-right-container"
+    ).firstElementChild;
     this.exitButton.addEventListener("click", e => this.handleLogout(e, false));
 
     if (!this.state.isLoggedIn) {
@@ -124,16 +124,16 @@ class App extends Component {
   };
 
   componentWillUnmount = () => {
-    this.bigApproveButton.removeEventListener("click", this.handleBigApproveButton);
+    this.bigApproveButton.removeEventListener( "click", this.handleBigApproveButton );
     this.approveButton.removeEventListener("click", this.handleApproveButton);
     this.exitButton.removeEventListener("click", this.handleLogout);
-  }
-  
+  };
+
   checkSheetUrlOption = () => {
     /* eslint-disable no-undef */
     chrome.storage.sync.get(
       ["sheetIdValue"],
-      function (value) {
+      (value) => {
         if (!value.sheetIdValue) {
           const message = `Please set the Google Sheet ID option. Go to the Extension Options Panel.`;
           this.setState(prevState => {
@@ -146,16 +146,16 @@ class App extends Component {
             sheetId: value.sheetIdValue
           });
         }
-      }.bind(this)
+      }
     );
     /* eslint-enable no-undef */
-  }
+  };
 
   fetchDataFromApi = () => {
     /*eslint-disable no-undef*/
     chrome.storage.sync.get(
       ["baseUrlValue"],
-      function (value) {
+      (value) => {
         axios
           .all([
             axios.get(
@@ -195,7 +195,7 @@ class App extends Component {
               }
             )
           )
-          .catch(e => {
+          .catch( e => {
             const message = `Please set the WordPress Site URL option. Go to the Extension Options Panel.`;
             // TODO: dispatch action
             this.setState(prevState => {
@@ -204,9 +204,9 @@ class App extends Component {
               };
             });
           });
-      }.bind(this)
+      }
     );
-  }
+  };
 
   handleLogin = e => {
     e.preventDefault();
@@ -334,11 +334,12 @@ class App extends Component {
   validateFormDataArray = array =>
     Array.isArray(array) && array.length > 0 && typeof array !== "undefined";
 
-  handleBigApproveButton = e => {
+  handleBigApproveButton = () => {
+    
     this.cloneAndChangeButtonAttr();
 
     const { formData } = this.state;
-    const { person, item } = this.props
+    const { person, item } = this.props;
 
     const payload = {
       range: range,
@@ -363,14 +364,14 @@ class App extends Component {
     };
 
     this.postDataToSpreadsheet(payload);
-
   };
 
-  postDataToSpreadsheet = (payload) => {
+  postDataToSpreadsheet = payload => {
     /*eslint-disable no-undef*/
     chrome.storage.sync.get(
       ["access_token"],
-      function (result) {
+
+      (result) => {
         if (!result.access_token) {
           return;
         }
@@ -378,22 +379,20 @@ class App extends Component {
           result.access_token
           }`;
         SheetApi.post(
-          `/${
-          this.state.sheetId
-          }/values/${range}:append?valueInputOption=USER_ENTERED`,
+          `/${this.state.sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`,
           payload
         )
-          .then(resp => {
-            console.log(resp);
+          .then(response => {
+            // TODO: Remove
+            console.log(response);
           })
           .catch(e => {
             console.log(e.response);
           });
-        // }
-      }.bind(this)
+      },
     );
     /*eslint-enable no-undef*/
-  }
+  };
 
   handleApproveButton = () => {
     this.setState({
@@ -402,7 +401,7 @@ class App extends Component {
   };
 
   render() {
-    console.log(this.props);
+    console.log(this.state);
     const {
       notices,
       isLoading,
@@ -417,7 +416,9 @@ class App extends Component {
       ? notices.map(notice => {
           return (
             <Notice class={notice.class}>
-              <p> <b>Envato Market Item Boosting:</b> {notice.message} </p>
+              <p>
+                <b>Envato Market Item Boosting:</b> {notice.message}
+              </p>
             </Notice>
           );
         })
@@ -446,11 +447,7 @@ class App extends Component {
                 return (
                   <button
                     className={isLoggedIn ? "logout" : "login"}
-                    onClick={
-                      isLoggedIn
-                        ? e => this.handleLogout(e, true)
-                        : this.handleLogin
-                    }
+                    onClick={ isLoggedIn ? e => this.handleLogout(e, true) : this.handleLogin }
                   >
                     {isLoggedIn ? "Logout" : "Login"}
                   </button>
