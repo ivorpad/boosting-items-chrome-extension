@@ -8,10 +8,10 @@ import Notice from "./Notice";
 import axios from "axios";
 import SheetApi from "./helpers/API";
 import moment from "moment";
-import { createStore, applyMiddleware, bindActionCreators } from "redux";
-import { connect, Provider } from 'react-redux';
-import thunk from "redux-thunk";  
-import marketplace, { actions } from './reducers/marketplace';
+import { bindActionCreators } from "redux";
+import { connect } from 'react-redux';
+
+import { actions } from './reducers/marketplace';
  
 import {
   extractDomainName,
@@ -95,7 +95,6 @@ class App extends Component {
     this.setState({
       isLoading: true
     });
-
 
     this.fetchDataFromApi();
     this.checkSheetUrlOption();
@@ -214,9 +213,7 @@ class App extends Component {
 
     /*eslint-disable no-undef*/
     chrome.runtime.sendMessage(
-      {
-        type: "login"
-      },
+      { type: "login" },
       function(response) {
         this.setState({
           isLoggedIn: response.isLoggedIn,
@@ -234,9 +231,7 @@ class App extends Component {
   handleRefresh = () => {
     /*eslint-disable no-undef*/
     chrome.runtime.sendMessage(
-      {
-        type: "refresh"
-      },
+      { type: "refresh" },
       function(response) {
         console.log(response);
         localStorage.setItem("start_token_refresh", response.startTokenRefresh);
@@ -422,9 +417,7 @@ class App extends Component {
       ? notices.map(notice => {
           return (
             <Notice class={notice.class}>
-              <p>
-                <b>Envato Market Item Boosting:</b> {notice.message}
-              </p>
+              <p> <b>Envato Market Item Boosting:</b> {notice.message} </p>
             </Notice>
           );
         })
@@ -508,9 +501,6 @@ class App extends Component {
 
 // =============== \REDUX =============== //
 
-const createStoreWithMiddleware = applyMiddleware(thunk)(createStore);
-const store = createStoreWithMiddleware(marketplace);
-
 const mapStateToProps = state => ({
   person: state.people,
   item: state.item
@@ -526,14 +516,6 @@ const AppContainer = connect(
 )(App);
 
 
-const AppWrapper = () => {
-  return(
-    <Provider store={store}>
-      <AppContainer />
-    </Provider>
-  )
-}
-
 // =============== /REDUX =============== //
 
-export default AppWrapper;
+export default AppContainer;
