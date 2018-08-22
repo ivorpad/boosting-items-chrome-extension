@@ -416,9 +416,7 @@ class App extends Component {
       ? notices.map(notice => {
           return (
             <Notice class={notice.class}>
-              <p>
-                <b>Envato Market Item Boosting:</b> {notice.message}
-              </p>
+              <p><b>Envato Market Item Boosting:</b> {notice.message}</p>
             </Notice>
           );
         })
@@ -428,7 +426,7 @@ class App extends Component {
       <div className="App">
         {/* TODO: Move to stateless functional component */}
         {noticesMoveToComponent}
-        {isLoading && isLoggedIn ? (
+        {isLoading && isLoggedIn && !isHidden ? (
           <img
             src={
               /*eslint-disable no-undef*/
