@@ -8,6 +8,11 @@ import Notice from "./Notice";
 import axios from "axios";
 import SheetApi from "./helpers/API";
 import moment from "moment";
+import { createStore, applyMiddleware, bindActionCreators } from "redux";
+import { connect, Provider } from 'react-redux';
+import thunk from "redux-thunk";  
+import marketplace, { actions } from './reducers/marketplace';
+ 
 import {
   extractDomainName,
   removeItemBundleCount,
@@ -24,11 +29,6 @@ removeItemBundleCount();
 
 class App extends Component {
   state = {
-    reviewerName: "",
-    authorName: "",
-    itemUrl: "",
-    itemName: "",
-    itemId: "",
     sheetId: "",
     highlightsData: [],
     promotionsData: [],
@@ -45,7 +45,7 @@ class App extends Component {
     notices: []
   };
 
-  componentDidMount() {
+  prepareMarketData = () => {
     const intercomSetup = document.getElementById("intercom-setup");
     const { name } = JSON.parse(
       intercomSetup.getAttribute("data-intercom-settings-payload")
@@ -56,23 +56,107 @@ class App extends Component {
       'a[title="author profile page"]'
     )[0].innerText;
     const itemId = document
-      .querySelector(".submission-details")
-      .firstElementChild.href.split("/")
+      .querySelector(".submission-details > a")
+      .href.split("/")
       .slice(-1)[0];
 
-    this.setState({
-      isLoading: true,
-      reviewerName: name,
+    return {
+      name,
       itemName,
       itemUrl,
       authorName,
       itemId
+    };
+  };
+
+  componentDidMount() {
+    const {
+      name,
+      itemName,
+      itemUrl,
+      authorName,
+      itemId
+    } = this.prepareMarketData();
+
+    const marketplacePayload = {
+      people: {
+        reviewer: name,
+        author: authorName
+      },
+      item: {
+        url: itemUrl,
+        title: itemName,
+        id: itemId
+      }
+    };
+
+    this.props.setMarketData(marketplacePayload);
+
+    this.setState({
+      isLoading: true
     });
 
+
+    this.fetchDataFromApi();
+    this.checkSheetUrlOption();
+
+  }
+
+  componentWillMount = () => {
+    this.checkIfLoggedIn();
+    this.bigApproveButton = document.getElementById("approve").children[
+      "proofing_action"
+    ];
+    this.bigApproveButton.addEventListener("click", this.handleBigApproveButton);
+
+    this.approveButton = document.querySelector(".reviewer-proofing-actions")
+      .firstElementChild;
+    this.approveButton.addEventListener("click", this.handleApproveButton);
+
+    this.exitButton = document.querySelector(".header-right-container")
+      .firstElementChild;
+    this.exitButton.addEventListener("click", e => this.handleLogout(e, false));
+
+    if (!this.state.isLoggedIn) {
+      this.setState({
+        buttonText: "Logout"
+      });
+    }
+  };
+
+  componentWillUnmount = () => {
+    this.bigApproveButton.removeEventListener("click", this.handleBigApproveButton);
+    this.approveButton.removeEventListener("click", this.handleApproveButton);
+    this.exitButton.removeEventListener("click", this.handleLogout);
+  }
+  
+  checkSheetUrlOption = () => {
+    /* eslint-disable no-undef */
+    chrome.storage.sync.get(
+      ["sheetIdValue"],
+      function (value) {
+        if (!value.sheetIdValue) {
+          const message = `Please set the Google Sheet ID option. Go to the Extension Options Panel.`;
+          this.setState(prevState => {
+            return {
+              notices: [...prevState.notices, { class: "error", message }]
+            };
+          });
+        } else {
+          this.setState({
+            sheetId: value.sheetIdValue
+          });
+        }
+      }.bind(this)
+    );
+    /* eslint-enable no-undef */
+  }
+
+  fetchDataFromApi = () => {
     /*eslint-disable no-undef*/
     chrome.storage.sync.get(
       ["baseUrlValue"],
-      function(value) {
+      function (value) {
         axios
           .all([
             axios.get(
@@ -114,6 +198,7 @@ class App extends Component {
           )
           .catch(e => {
             const message = `Please set the WordPress Site URL option. Go to the Extension Options Panel.`;
+            // TODO: dispatch action
             this.setState(prevState => {
               return {
                 notices: [...prevState.notices, { class: "error", message }]
@@ -122,49 +207,7 @@ class App extends Component {
           });
       }.bind(this)
     );
-
-    /* eslint-disable no-undef */
-    chrome.storage.sync.get(
-      ["sheetIdValue"],
-      function(value) {
-        if (!value.sheetIdValue) {
-          const message = `Please set the Google Sheet ID option. Go to the Extension Options Panel.`;
-          this.setState(prevState => {
-            return {
-              notices: [...prevState.notices, { class: "error", message }]
-            };
-          });
-        } else {
-          this.setState({
-            sheetId: value.sheetIdValue
-          });
-        }
-      }.bind(this)
-    );
-    /* eslint-enable no-undef */
   }
-
-  componentWillMount = () => {
-    this.checkIfLoggedIn();
-    const bigApproveButton = document.getElementById("approve").children[
-      "proofing_action"
-    ];
-    bigApproveButton.addEventListener("click", this.handleBigApproveButton);
-
-    const approveButton = document.querySelector(".reviewer-proofing-actions")
-      .firstElementChild;
-    approveButton.addEventListener("click", this.handleApproveButton);
-
-    const exitButton = document.querySelector(".header-right-container")
-      .firstElementChild;
-    exitButton.addEventListener("click", e => this.handleLogout(e, false));
-
-    if (!this.state.isLoggedIn) {
-      this.setState({
-        buttonText: "Logout"
-      });
-    }
-  };
 
   handleLogin = e => {
     e.preventDefault();
@@ -298,26 +341,21 @@ class App extends Component {
 
   handleBigApproveButton = e => {
     this.cloneAndChangeButtonAttr();
-    const {
-      itemUrl,
-      itemName,
-      reviewerName,
-      formData,
-      authorName,
-      itemId
-    } = this.state;
 
-    const dataToInsert = {
+    const { formData } = this.state;
+    const { person, item } = this.props
+
+    const payload = {
       range: range,
       majorDimension: "ROWS",
       values: [
         [
           moment(Date.now()).format("MM-DD-YYYY"),
-          authorName,
-          itemName,
-          itemUrl,
-          itemId,
-          reviewerName,
+          person.author,
+          item.title,
+          item.url,
+          item.id,
+          person.reviewer,
           formData.boosting,
           this.validateFormDataArray(formData.highlights)
             ? formData.highlights.join(", ")
@@ -329,21 +367,26 @@ class App extends Component {
       ]
     };
 
+    this.postDataToSpreadsheet(payload);
+
+  };
+
+  postDataToSpreadsheet = (payload) => {
     /*eslint-disable no-undef*/
     chrome.storage.sync.get(
       ["access_token"],
-      function(result) {
+      function (result) {
         if (!result.access_token) {
           return;
         }
         SheetApi.defaults.headers.post["Authorization"] = `Bearer ${
           result.access_token
-        }`;
+          }`;
         SheetApi.post(
           `/${
-            this.state.sheetId
+          this.state.sheetId
           }/values/${range}:append?valueInputOption=USER_ENTERED`,
-          dataToInsert
+          payload
         )
           .then(resp => {
             console.log(resp);
@@ -355,7 +398,7 @@ class App extends Component {
       }.bind(this)
     );
     /*eslint-enable no-undef*/
-  };
+  }
 
   handleApproveButton = () => {
     this.setState({
@@ -364,6 +407,7 @@ class App extends Component {
   };
 
   render() {
+    console.log(this.props);
     const {
       notices,
       isLoading,
@@ -386,42 +430,110 @@ class App extends Component {
         })
       : null;
 
-    return <div className="App">
+    return (
+      <div className="App">
         {/* TODO: Move to stateless functional component */}
         {noticesMoveToComponent}
-        {isLoading && isLoggedIn ? <img src={/*eslint-disable no-undef*/
+        {isLoading && isLoggedIn ? (
+          <img
+            src={
+              /*eslint-disable no-undef*/
               chrome.extension.getURL(loading)
               /*eslint-enable no-undef*/
-            } alt="Loading" /> : !isHidden ? <React.Fragment>
+            }
+            alt="Loading"
+          />
+        ) : !isHidden ? (
+          <React.Fragment>
             <hr className="app__separator" />
             <h4 className="app__title">Item Boosting</h4>
 
-            <Button render={() => {
-                return <button className={isLoggedIn ? "logout" : "login"} onClick={isLoggedIn ? e => this.handleLogout(e, true) : this.handleLogin}>
+            <Button
+              render={() => {
+                return (
+                  <button
+                    className={isLoggedIn ? "logout" : "login"}
+                    onClick={
+                      isLoggedIn
+                        ? e => this.handleLogout(e, true)
+                        : this.handleLogin
+                    }
+                  >
                     {isLoggedIn ? "Logout" : "Login"}
-                  </button>;
-              }} />
+                  </button>
+                );
+              }}
+            />
 
-            {isLoggedIn ? <React.Fragment>
+            {isLoggedIn ? (
+              <React.Fragment>
                 <Boosting handleFormData={this.handleFormData} />
 
-                <Highlights isLoading={isLoading} highlightsData={highlightsData} handleFormData={this.handleFormData} />
+                <Highlights
+                  isLoading={isLoading}
+                  highlightsData={highlightsData}
+                  handleFormData={this.handleFormData}
+                />
 
-                <Promotions handleFormData={this.handleFormData} render={() => {
+                <Promotions
+                  handleFormData={this.handleFormData}
+                  render={() => {
                     return promotionsData.map(({ title }, index) => {
-                      const slug = title.rendered.toLowerCase().split(" ").join("-");
-                      return(
+                      const slug = title.rendered
+                        .toLowerCase()
+                        .split(" ")
+                        .join("-");
+                      return (
                         <div key={index}>
-                          <input type="checkbox" id={slug} name="promotions" value={title.rendered} />
+                          <input
+                            type="checkbox"
+                            id={slug}
+                            name="promotions"
+                            value={title.rendered}
+                          />
                           <label for={slug}>{title.rendered}</label>
                         </div>
-                      )
+                      );
                     });
-                  }} />
-              </React.Fragment> : null}
-          </React.Fragment> : null}
-      </div>;
+                  }}
+                />
+              </React.Fragment>
+            ) : null}
+          </React.Fragment>
+        ) : null}
+      </div>
+    );
   }
 }
 
-export default App;
+// =============== \REDUX =============== //
+
+const createStoreWithMiddleware = applyMiddleware(thunk)(createStore);
+const store = createStoreWithMiddleware(marketplace);
+
+const mapStateToProps = state => ({
+  person: state.people,
+  item: state.item
+});
+
+const mapDispatchToProps = (dispatch) => {
+  return bindActionCreators(actions, dispatch); 
+}
+
+const AppContainer = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(App);
+
+
+const AppWrapper = () => {
+  return(
+    <Provider store={store}>
+      <AppContainer />
+    </Provider>
+  )
+}
+
+// =============== /REDUX =============== //
+
+export default AppWrapper;
