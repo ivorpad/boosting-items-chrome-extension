@@ -27,8 +27,6 @@ const range = `${domain}!A2`;
 
 removeItemBundleCount();
 
-/*eslint-enable no-undef*/
-
 class App extends Component {
   state = {
     highlightsData: [],
@@ -114,7 +112,7 @@ class App extends Component {
       ".reviewer-proofing-actions"
     ).firstElementChild;
     this.approveButton.addEventListener("click", this.handleApproveButton);
-
+    
     this.exitButton = document.querySelector(
       ".header-right-container"
     ).firstElementChild;
@@ -165,7 +163,6 @@ class App extends Component {
           };
         });
       } else {
-        // TODO: Wont work cause it's async
         this.props.setSpreadsheetId(value.sheetIdValue);
       }
     });
@@ -173,7 +170,7 @@ class App extends Component {
   };
 
   fetchDataFromApi = () => {
-    /*eslint-disable no-undef*/
+    // eslint-disable-next-line no-undef
     chrome.storage.sync.get(["baseUrlValue"], value => {
       axios
         .all([
@@ -227,7 +224,7 @@ class App extends Component {
   handleLogin = e => {
     e.preventDefault();
 
-    /*eslint-disable no-undef*/
+    // eslint-disable-next-line no-undef
     chrome.runtime.sendMessage(
       { type: "login" },
       function(response) {
@@ -239,13 +236,11 @@ class App extends Component {
           this.handleRefresh();
         }
       }.bind(this)
-    );
-
-    /*eslint-enable no-undef*/
+    );    
   };
 
   handleRefresh = () => {
-    /*eslint-disable no-undef*/
+    // eslint-disable-next-line no-undef
     chrome.runtime.sendMessage(
       { type: "refresh" },
       function(response) {
@@ -257,15 +252,14 @@ class App extends Component {
           )
         });
       }.bind(this)
-    );
-    /*eslint-enable no-undef*/
+    );  
   };
 
   handleLogout = (e, prevent) => {
     if (prevent) {
       e.preventDefault();
     }
-    /*eslint-disable no-undef*/
+    // eslint-disable-next-line no-undef
     chrome.runtime.sendMessage(
       {
         type: "logout"
@@ -277,7 +271,6 @@ class App extends Component {
         });
       }.bind(this)
     );
-    /*eslint-enable no-undef*/
   };
 
   handleFormData = (values, key) => {
@@ -294,7 +287,7 @@ class App extends Component {
   // TODO: Improve this method name to also check if the expires_in time is less than 10 minutes
   // so we can re-issue a new token
   checkIfLoggedIn = () => {
-    /*eslint-disable no-undef*/
+    // eslint-disable-next-line no-undef
     chrome.storage.sync.get(
       ["access_token"],
       function(result) {
@@ -326,7 +319,6 @@ class App extends Component {
           });
       }.bind(this)
     );
-    /*eslint-enable no-undef*/
   };
 
   cloneAndChangeButtonAttr = () => {
@@ -382,7 +374,7 @@ class App extends Component {
   };
 
   postDataToSpreadsheet = payload => {
-    /*eslint-disable no-undef*/
+    // eslint-disable-next-line no-undef
     chrome.storage.sync.get(
       ["access_token"],
 
@@ -408,7 +400,6 @@ class App extends Component {
           });
       }
     );
-    /*eslint-enable no-undef*/
   };
 
   handleApproveButton = () => {
@@ -451,9 +442,8 @@ class App extends Component {
             return isLoading && isLoggedIn && !isHidden ? (
               <img
                 src={
-                  /*eslint-disable no-undef*/
+                  // eslint-disable-next-line no-undef
                   chrome.extension.getURL(loading)
-                  /*eslint-enable no-undef*/
                 }
                 alt="Loading"
               />
@@ -542,7 +532,6 @@ const AppContainer = connect(
   mapStateToProps,
   mapDispatchToProps
 )(App);
-
 
 // =============== /REDUX =============== //
 
