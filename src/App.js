@@ -9,9 +9,10 @@ import Notice from "./Notice";
 import axios from "axios";
 import SheetApi from "./helpers/API";
 import moment from "moment";
+
+// REDUX
 import { bindActionCreators } from "redux";
 import { connect } from 'react-redux';
-
 import { actions as marketplaceActions } from './reducers/marketplace';
 import { actions as spreadsheetActions } from './reducers/spreadsheet';
  

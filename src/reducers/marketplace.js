@@ -15,7 +15,6 @@ const defaultState = {
 }
 
 export default (state = defaultState, action) => {
-  console.log(action.payload);
 
   const {
     SET_MARKET_DATA
@@ -23,6 +22,7 @@ export default (state = defaultState, action) => {
 
   switch (action.type) {
     case SET_MARKET_DATA:
+      console.log(action);
       return { 
         ...state, 
         people: action.payload.people,

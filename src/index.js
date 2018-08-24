@@ -3,17 +3,23 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import { Provider } from "react-redux";
 import App from './App';
-import { createStore, applyMiddleware } from "redux";
-import thunk from "redux-thunk"; 
+import { createStore, applyMiddleware, compose } from "redux";
+import createSagaMiddleware from "redux-saga";
 import rootReducer from './reducers/index';
 
-// TODO: Use combineReducers
 const reviewerProofingActions = document.querySelector(".reviewer-proofing-actions");
 const newDiv = document.createElement("div");
 newDiv.id = "root";
 reviewerProofingActions.append(newDiv);
-const createStoreWithMiddleware = applyMiddleware(thunk)(createStore);
-const store = createStoreWithMiddleware(rootReducer);
+
+const sagaMiddleware = createSagaMiddleware();
+const middlewares = applyMiddleware(sagaMiddleware);
+
+const store = createStore(
+  rootReducer,
+  compose(middlewares)
+);
+
 ReactDOM.render(
   <Provider store={store}>
     <App />
