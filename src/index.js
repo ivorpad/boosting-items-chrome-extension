@@ -6,7 +6,6 @@ import App from './App';
 import { createStore, applyMiddleware } from "redux";
 import thunk from "redux-thunk"; 
 import rootReducer from './reducers/index';
-import marketplace from "./reducers/marketplace";
 
 // TODO: Use combineReducers
 const reviewerProofingActions = document.querySelector(".reviewer-proofing-actions");

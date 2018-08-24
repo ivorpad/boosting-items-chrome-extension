@@ -4,6 +4,11 @@ const types = {
   FETCH_ERROR: "HIGHLIGHTS/FETCH_ERROR"
 };
 
+// eslint-disable-next-line no-undef
+// chrome.storage.sync.get(["baseUrlValue"], (r) => {
+//   console.log(r)
+// });
+
 export default (state = [], action) => {
   switch (action.type) {
     case "typeName":
@@ -13,3 +18,7 @@ export default (state = [], action) => {
       return state;
   }
 };
+
+const actions = {
+
+}
