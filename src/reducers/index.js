@@ -6,7 +6,8 @@ import highlights from "./highlights";
 import promotions from "./promotions";
 
 const rootReducer = combineReducers({
-  marketplace,
+  // TODO: Change name of reducer
+  currentItem: marketplace,
   spreadsheet,
   highlights,
   marketplaces,

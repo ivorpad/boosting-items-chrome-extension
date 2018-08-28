@@ -13,8 +13,7 @@ const {
 export default (state = [], action) => {
   switch (action.type) {
     case FETCH_MARKETPLACES_SUCCESS:
-      console.log(action);
-      return { ...state };
+      return action.payload.data;
     default:
       return state;
   }

@@ -421,6 +421,7 @@ class App extends Component {
   };
 
   render() {
+    console.log(this.props.store.getState())
     const {
       notices,
       isLoading,
@@ -529,8 +530,8 @@ class App extends Component {
 
 const mapStateToProps = state => {
   return ({
-    person: state.marketplace.people,
-    item: state.marketplace.item,
+    person: state.currentItem.people,
+    item: state.currentItem.item,
     sheetId: state.spreadsheet.sheetId
   })
 }

@@ -10,16 +10,11 @@ const {
   FETCH_HIGHLIGHTS_ERROR
 } = types;
 
-export default (state = [], action) => {
+export default (state = {}, action) => {
   switch (action.type) {
     case FETCH_HIGHLIGHTS_SUCCESS:
-      console.log(action);
-      return { ...state };
+      return action.payload.data
     default:
       return state;
   }
 };
-
-// export const actions = {
-
-// }
