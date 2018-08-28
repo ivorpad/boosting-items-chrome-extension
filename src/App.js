@@ -10,11 +10,16 @@ import axios from "axios";
 import SheetApi from "./helpers/API";
 import moment from "moment";
 
+
+import { types as HighlightTypes } from "./reducers/highlights"
+
+
 // REDUX
 import { bindActionCreators } from "redux";
 import { connect } from 'react-redux';
 import { actions as marketplaceActions } from './reducers/marketplace';
 import { actions as spreadsheetActions } from './reducers/spreadsheet';
+import { actions as restApiDataSagaActions } from "./sagas/restApiDataSaga";
  
 import {
   extractDomainName,
@@ -22,6 +27,8 @@ import {
   getDataFrom
 } from "./helpers/helpers";
 import loading from "./loading.svg";
+
+const { FETCH_HIGHLIGHTS } = HighlightTypes;
 
 const domain = extractDomainName(window.location.host);
 const range = `${domain}!A2`;
@@ -76,6 +83,10 @@ class App extends Component {
       authorName,
       itemId
     } = this.prepareMarketData();
+
+    this.props.fetchApiDataPromotions();
+    this.props.fetchApiDataHighlights();
+    this.props.fetchApiDataMarketplaces();
 
     const marketplacePayload = {
       people: {
@@ -410,7 +421,6 @@ class App extends Component {
   };
 
   render() {
-    console.log(this.props);
     const {
       notices,
       isLoading,
@@ -526,7 +536,7 @@ const mapStateToProps = state => {
 }
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ ...marketplaceActions, ...spreadsheetActions }, dispatch); 
+  return bindActionCreators({ ...marketplaceActions, ...spreadsheetActions, ...restApiDataSagaActions }, dispatch); 
 }
 
 const AppContainer = connect(

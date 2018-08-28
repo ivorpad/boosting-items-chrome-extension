@@ -6,6 +6,7 @@ import App from './App';
 import { createStore, applyMiddleware, compose } from "redux";
 import createSagaMiddleware from "redux-saga";
 import rootReducer from './reducers/index';
+import rootSaga from './sagas/rootSaga';
 
 const reviewerProofingActions = document.querySelector(".reviewer-proofing-actions");
 const newDiv = document.createElement("div");
@@ -19,6 +20,8 @@ const store = createStore(
   rootReducer,
   compose(middlewares)
 );
+
+sagaMiddleware.run(rootSaga);
 
 ReactDOM.render(
   <Provider store={store}>

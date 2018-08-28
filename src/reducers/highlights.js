@@ -1,24 +1,25 @@
-const types = {
+export const types = {
   FETCH_HIGHLIGHTS: "HIGHLIGHTS/FETCH_HIGHLIGHTS",
-  FETCH_SUCCESS: "HIGHLIGHTS/FETCH_SUCCESS",
-  FETCH_ERROR: "HIGHLIGHTS/FETCH_ERROR"
+  FETCH_HIGHLIGHTS_SUCCESS: "HIGHLIGHTS/FETCH_HIGHLIGHTS_SUCCESS",
+  FETCH_HIGHLIGHTS_ERROR: "HIGHLIGHTS/FETCH_HIGHLIGHTS_ERROR"
 };
 
-// eslint-disable-next-line no-undef
-// chrome.storage.sync.get(["baseUrlValue"], (r) => {
-//   console.log(r)
-// });
+const {
+  FETCH_HIGHLIGHTS,
+  FETCH_HIGHLIGHTS_SUCCESS,
+  FETCH_HIGHLIGHTS_ERROR
+} = types;
 
 export default (state = [], action) => {
   switch (action.type) {
-    case "typeName":
+    case FETCH_HIGHLIGHTS_SUCCESS:
+      console.log(action);
       return { ...state };
-
     default:
       return state;
   }
 };
 
-const actions = {
+// export const actions = {
 
-}
+// }

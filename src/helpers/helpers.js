@@ -18,3 +18,12 @@ export const getDataFrom = (array, marketplace) => {
       return value.marketplace.includes(marketplace[0].id);
     });
 }
+
+export const getFromStorageSync = (key) => {
+	return new Promise(function (resolve) {
+		//eslint-disable-next-line no-undef
+		chrome.storage.sync.get(key, function (items) {
+			resolve(items)
+		})
+	})
+}
