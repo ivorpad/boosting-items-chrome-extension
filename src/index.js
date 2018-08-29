@@ -16,7 +16,7 @@ reviewerProofingActions.append(newDiv);
 const sagaMiddleware = createSagaMiddleware();
 const middlewares = applyMiddleware(sagaMiddleware);
 
-const store = createStore(
+export const store = createStore(
   rootReducer,
   compose(middlewares)
 );
@@ -25,7 +25,7 @@ sagaMiddleware.run(rootSaga);
 
 ReactDOM.render(
   <Provider store={store}>
-    <App store={store}/>
+    <App />
   </Provider>
   , 
 document.getElementById('root'));

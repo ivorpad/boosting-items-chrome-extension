@@ -10,10 +10,18 @@ const {
   FETCH_PROMOTIONS_ERROR
 } = types;
 
-export default (state = {}, action) => {
+export default (state = [], action) => {
   switch (action.type) {
+    case FETCH_PROMOTIONS:
+      return { ...state, isFetching: true };
     case FETCH_PROMOTIONS_SUCCESS:
-      return action.payload.data;
+      return {
+        ...state,
+        data: action.payload.data,
+        isFetching: action.isFetching
+      }
+    case "ON_FETCH_ERROR":
+      return { ...state, error: action.payload };
     default:
       return state;
   }

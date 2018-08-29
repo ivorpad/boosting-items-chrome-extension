@@ -3,47 +3,30 @@ import { types as HighlightTypes } from '../reducers/highlights'
 import { types as PromotionTypes } from '../reducers/promotions'
 import { types as MarketplacesTypes } from "../reducers/marketplaces";
 import { takeLatest, call, fork, put, all } from 'redux-saga/effects';
-import { getFromStorageSync } from '../helpers/helpers'
+import { getFromStorageSync, extractDomainName } from "../helpers/helpers";
 
-const { FETCH_HIGHLIGHTS, FETCH_HIGHLIGHTS_SUCCESS } = HighlightTypes;
-const { FETCH_PROMOTIONS, FETCH_PROMOTIONS_SUCCESS } = PromotionTypes;
-const { FETCH_MARKETPLACES, FETCH_MARKETPLACES_SUCCESS } = MarketplacesTypes;
+const { FETCH_HIGHLIGHTS, FETCH_HIGHLIGHTS_SUCCESS, FETCH_HIGHLIGHTS_ERROR } = HighlightTypes;
+const { FETCH_PROMOTIONS, FETCH_PROMOTIONS_SUCCESS, FETCH_PROMOTIONS_ERROR } = PromotionTypes;
+const { FETCH_MARKETPLACES, FETCH_MARKETPLACES_SUCCESS, FETCH_MARKETPLACES_ERROR } = MarketplacesTypes;
 
-const fetchApiDataRequestPromotions = async () => {
+const fetchApiDataRequest = async (endpoint) => {
   let url = await getFromStorageSync("baseUrlValue");
-  return axios.get(`https://${url.baseUrlValue}/wp-json/wp/v2/post_type_promotion`);
+  return axios
+    .get(`https://${url.baseUrlValue}/wp-json/wp/v2/${endpoint}?filter[marketplace]=${extractDomainName(window.location.host)}`)
+    .then(response => response)
+    .catch(error => error);
 }
-
-const fetchApiDataRequestHighlights = async () => {
-  let url = await getFromStorageSync("baseUrlValue");
-  return axios.get(`https://${url.baseUrlValue}/wp-json/wp/v2/post_type_highlight`);
-}
-
-const fetchApiDataRequestMarketplaces = async () => {
-  let url = await getFromStorageSync("baseUrlValue");
-  return axios.get(`https://${url.baseUrlValue}/wp-json/wp/v2/marketplace`);
-}
-
 
 function* fetchApiDataSaga(action) {
-  try {
-    //let payload = yield call(fetchApiDataRequest, action.endpoint);
-    //const { data } = payload;
-    //yield put(actions.fetchApiDataSuccess(payload, action.endpoint));
-
-    yield all([
-      fork(requestAndPut, fetchApiDataRequestPromotions, actions.fetchApiDataPromotionsSuccess),
-      fork(requestAndPut, fetchApiDataRequestHighlights, actions.fetchApiDataHighlightsSuccess),
-      fork(requestAndPut, fetchApiDataRequestMarketplaces, actions.fetchApiDataMarketplacesSuccess),
-    ]);
-
-  } catch (error) {
-    console.log(error)
-  }
+  yield [
+    fork(requestAndPut, [fetchApiDataRequest, "post_type_promotion"], actions.fetchApiDataPromotionsSuccess),
+    fork(requestAndPut, [fetchApiDataRequest, "post_type_highlight"], actions.fetchApiDataHighlightsSuccess),
+  ];
 }
 
+// TODO: Add error handling
 function* requestAndPut(request, actionCreator) {
-  const result = yield call(request);
+  const result = yield call(...request);
   yield put(actionCreator(result));
 }
 
@@ -51,32 +34,27 @@ export function* fetchApiDataSagaWatcher() {
   yield [
     takeLatest(FETCH_PROMOTIONS, fetchApiDataSaga),
     takeLatest(FETCH_HIGHLIGHTS, fetchApiDataSaga),
-    takeLatest(FETCH_MARKETPLACES, fetchApiDataSaga)
   ]
 }
 
 export const actions = {
-  fetchApiDataPromotions: endpoint => {
-    return { type: FETCH_PROMOTIONS, endpoint }
+  fetchApiDataPromotions: isFetching => {
+    return { type: FETCH_PROMOTIONS, isFetching }
   },
 
-  fetchApiDataHighlights: endpoint => {
-    return { type: FETCH_HIGHLIGHTS, endpoint }
-  },
-
-  fetchApiDataMarketplaces: endpoint => {
-    return { type: FETCH_MARKETPLACES, endpoint }
+  fetchApiDataHighlights: isFetching => {
+    return { type: FETCH_HIGHLIGHTS, isFetching }
   },
 
   fetchApiDataPromotionsSuccess: (payload) => {
-    return { type: FETCH_PROMOTIONS_SUCCESS, payload: payload };
+    return { type: FETCH_PROMOTIONS_SUCCESS, payload, isFetching: false};
   },
 
   fetchApiDataHighlightsSuccess: (payload) => {
-    return { type: FETCH_HIGHLIGHTS_SUCCESS, payload: payload };
+    return { type: FETCH_HIGHLIGHTS_SUCCESS, payload, isFetching: false };
   },
 
-  fetchApiDataMarketplacesSuccess: (payload) => {
-    return { type: FETCH_MARKETPLACES_SUCCESS, payload: payload };
+  fetchApiDataPromotionsError: (error) => {
+    return { type: "ON_FETCH_ERROR", error };
   }
-};
+}

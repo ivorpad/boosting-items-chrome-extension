@@ -9,6 +9,7 @@ import Notice from "./Notice";
 import axios from "axios";
 import SheetApi from "./helpers/API";
 import moment from "moment";
+import {store} from './index'
 
 
 import { types as HighlightTypes } from "./reducers/highlights"
@@ -421,7 +422,7 @@ class App extends Component {
   };
 
   render() {
-    console.log(this.props.store.getState())
+    console.log(store.getState())
     const {
       notices,
       isLoading,
