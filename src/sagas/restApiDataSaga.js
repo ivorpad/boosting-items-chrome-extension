@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { types as HighlightTypes } from '../reducers/highlights'
 import { types as PromotionTypes } from '../reducers/promotions'
-import { takeLatest, call, fork, put, all } from 'redux-saga/effects';
+import { takeLatest, call, fork, put } from 'redux-saga/effects';
 import { getFromStorageSync, extractDomainName } from "../helpers/helpers";
 
 const { FETCH_HIGHLIGHTS, FETCH_HIGHLIGHTS_SUCCESS, FETCH_HIGHLIGHTS_ERROR } = HighlightTypes;
