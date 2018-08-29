@@ -82,8 +82,7 @@ class App extends Component {
       itemId
     } = this.prepareMarketData();
 
-    this.props.fetchApiDataPromotions();
-    this.props.fetchApiDataHighlights();
+    //this.props.fetchApiDataHighlights();
 
     const marketplacePayload = {
       people: {
@@ -485,7 +484,9 @@ class App extends Component {
                   handleFormData={this.handleFormData}
                 />
 
-                <Promotions
+                <Promotions />
+
+                {/* <Promotions
                   handleFormData={this.handleFormData}
                   render={() => {
                     return promotionsData.map(({ title }, index) => {
@@ -506,7 +507,7 @@ class App extends Component {
                       );
                     });
                   }}
-                />
+                /> */}
               </React.Fragment>
             ) : null}
           </React.Fragment>
@@ -527,7 +528,7 @@ const mapStateToProps = state => {
 }
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ ...marketplaceActions, ...spreadsheetActions, ...restApiDataSagaActions }, dispatch); 
+  return bindActionCreators({ ...marketplaceActions, ...spreadsheetActions }, dispatch); 
 }
 
 const AppContainer = connect(

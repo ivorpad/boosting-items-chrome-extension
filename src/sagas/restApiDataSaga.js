@@ -45,11 +45,11 @@ export const actions = {
   },
 
   fetchApiDataPromotionsSuccess: (payload) => {
-    return { type: FETCH_PROMOTIONS_SUCCESS, payload, isFetching: false};
+    return { type: FETCH_PROMOTIONS_SUCCESS, payload};
   },
 
   fetchApiDataHighlightsSuccess: (payload) => {
-    return { type: FETCH_HIGHLIGHTS_SUCCESS, payload, isFetching: false };
+    return { type: FETCH_HIGHLIGHTS_SUCCESS, payload};
   },
 
   fetchApiDataPromotionsError: (error) => {

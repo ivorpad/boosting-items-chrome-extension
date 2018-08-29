@@ -1,52 +1,68 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
+import { connect } from "react-redux";
+import { actions as restApiDataSagaActions } from "./sagas/restApiDataSaga";
+import { actions as PromotionActions } from "./reducers/promotions";
 
 class Promotions extends Component {
 
-    state = { selectedCheckboxes: [] }    
+  componentDidMount = () => {
+    //workaround to fix undefined.settings in jQuery validation
+    const script = document.createElement("script");
+    script.textContent = "$('#promotions').validate()";
+    (document.head || document.documentElement).appendChild(script);
+    script.parentNode.removeChild(script);
 
-    shouldComponentUpdate = (nextProps, nextState) => {
-      if (this.state.selectedCheckboxes !== nextState.selectedCheckboxes) {
-        return true;
-      }
-      return false;
-    }
+    this.props.fetchApiDataPromotions();
+  };
 
-    componentDidMount = () => {
-      // workaround to fix undefined .settings in jQuery validation
-      const script = document.createElement("script");
-      script.textContent = "$('#promotions').validate()";
-      (document.head || document.documentElement).appendChild(script);
-      script.parentNode.removeChild(script);
-    }
-    
-    handleCheckboxChange = (e) => {
-      const { promotions: promotionsForm } = this.form;
-      const promotionsArr = [...promotionsForm];
-      const checked = promotionsArr
-                        .filter(input => input.checked === true)
-                        .map(input => input.value);
+  render() {
+    return (
+      <div className="promotions">
+        <div className="promotions__form">
+          <legend className="promotions__legend">Promotions</legend>
+          <form
+            id="promotions"
+            onChange={e => this.props.addPromotions(e.target)}
+          >
+            {this.props.promotions.isFetching ? (
+              <p>loading...</p>
+            ) : (
+              this.props.promotions.data &&
+              this.props.promotions.data.map(({ title }, index) => {
+                const slug = title.rendered
+                  .toLowerCase()
+                  .split(" ")
+                  .join("-");
 
-      this.setState({selectedCheckboxes: checked});                  
-    }   
-    
-    componentDidUpdate = (prevProps, prevState) => {
-      if (this.state.selectedCheckboxes !== prevState.selectedCheckboxes ) {
-        this.props.handleFormData(this.state.selectedCheckboxes, "promotions");
-      }
-    }
-    
-    render() {
-        return (
-           <div className="promotions">
-            <div className="promotions__form">
-              <legend className="promotions__legend">Promotions</legend>
-              <form ref={form => this.form = form} id="promotions" onChange={this.handleCheckboxChange}>
-                {this.props.render()}
-              </form>
-             </div>
-           </div>
-        );
-    }
+                return (
+                  <div key={index}>
+                    <input
+                      type="checkbox"
+                      id={slug}
+                      name="promotions"
+                      value={title.rendered}
+                    />
+                    <label for={slug}>{title.rendered}</label>
+                  </div>
+                );
+              })
+            )}
+          </form>
+        </div>
+      </div>
+    );
+  }
 }
 
-export default Promotions;
+const mapStateToProps = state => ({
+  promotions: state.promotions
+});
+
+const { fetchApiDataPromotions } = restApiDataSagaActions;
+
+const PromotionsContainer = connect(
+  mapStateToProps,
+  { fetchApiDataPromotions, ...PromotionActions }
+)(Promotions);
+
+export default PromotionsContainer;
