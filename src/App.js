@@ -5,15 +5,12 @@ import Highlights from "./Highlights";
 import Promotions from "./Promotions";
 import Button from "./Button";
 import Loading from "./Loading";
-import Notice from "./Notice";
+import Notices from "./Notices";
 import axios from "axios";
 import SheetApi from "./helpers/API";
 import moment from "moment";
 import {store} from './index'
-
-
 import { types as HighlightTypes } from "./reducers/highlights"
-
 
 // REDUX
 import { bindActionCreators } from "redux";
@@ -87,7 +84,6 @@ class App extends Component {
 
     this.props.fetchApiDataPromotions();
     this.props.fetchApiDataHighlights();
-    this.props.fetchApiDataMarketplaces();
 
     const marketplacePayload = {
       people: {
@@ -125,14 +121,17 @@ class App extends Component {
       ".reviewer-proofing-actions"
     ).firstElementChild;
     this.approveButton.addEventListener("click", this.handleApproveButton);
-    
+
     this.exitButton = document.querySelector(
       ".header-right-container"
     ).firstElementChild;
     this.exitButton.addEventListener("click", e => this.handleLogout(e, false));
 
     this.rejectButton = document.querySelector('a[href="#reject"]');
-    this.rejectButton.addEventListener("click", this.handleRejectAndHoldButtons);
+    this.rejectButton.addEventListener(
+      "click",
+      this.handleRejectAndHoldButtons
+    );
 
     this.holdButton = document.querySelector('a[href="#hold"]');
     this.holdButton.addEventListener("click", this.handleRejectAndHoldButtons);
@@ -151,19 +150,23 @@ class App extends Component {
     );
     this.approveButton.removeEventListener("click", this.handleApproveButton);
     this.exitButton.removeEventListener("click", this.handleLogout);
-    this.rejectButton.removeEventListener("click", this.handleRejectAndHoldButtons);
-    this.holdButton.removeEventListener("click", this.handleRejectAndHoldButtons);
+    this.rejectButton.removeEventListener(
+      "click",
+      this.handleRejectAndHoldButtons
+    );
+    this.holdButton.removeEventListener(
+      "click",
+      this.handleRejectAndHoldButtons
+    );
   };
-
 
   handleRejectAndHoldButtons = () => {
     if (!this.state.isHidden) {
       this.setState({
         isHidden: true
-      })
+      });
     }
-  }
-
+  };
 
   checkSheetUrlOption = () => {
     /* eslint-disable no-undef */
@@ -249,7 +252,7 @@ class App extends Component {
           this.handleRefresh();
         }
       }.bind(this)
-    );    
+    );
   };
 
   handleRefresh = () => {
@@ -265,7 +268,7 @@ class App extends Component {
           )
         });
       }.bind(this)
-    );  
+    );
   };
 
   handleLogout = (e, prevent) => {
@@ -422,7 +425,8 @@ class App extends Component {
   };
 
   render() {
-    console.log(store.getState())
+    
+    console.log(store.getState());
     const {
       notices,
       isLoading,
@@ -432,24 +436,9 @@ class App extends Component {
       isHidden
     } = this.state;
 
-    // TODO: Move to a component
-    const noticesMoveToComponent = notices.length
-      ? notices.map(notice => {
-          return (
-            <Notice class={notice.class}>
-              <p>
-                <b>Envato Market Item Boosting:</b> {notice.message}
-              </p>
-            </Notice>
-          );
-        })
-      : null;
-
     return (
       <div className="App">
-        {/* TODO: Move to stateless functional component */}
-        {noticesMoveToComponent}
-
+        <Notices notices={notices} />
         <Loading
           render={() => {
             return isLoading && isLoggedIn && !isHidden ? (
