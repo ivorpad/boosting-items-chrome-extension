@@ -1,13 +1,11 @@
 import axios from 'axios';
 import { types as HighlightTypes } from '../reducers/highlights'
 import { types as PromotionTypes } from '../reducers/promotions'
-import { types as MarketplacesTypes } from "../reducers/marketplaces";
 import { takeLatest, call, fork, put, all } from 'redux-saga/effects';
 import { getFromStorageSync, extractDomainName } from "../helpers/helpers";
 
 const { FETCH_HIGHLIGHTS, FETCH_HIGHLIGHTS_SUCCESS, FETCH_HIGHLIGHTS_ERROR } = HighlightTypes;
 const { FETCH_PROMOTIONS, FETCH_PROMOTIONS_SUCCESS, FETCH_PROMOTIONS_ERROR } = PromotionTypes;
-const { FETCH_MARKETPLACES, FETCH_MARKETPLACES_SUCCESS, FETCH_MARKETPLACES_ERROR } = MarketplacesTypes;
 
 const fetchApiDataRequest = async (endpoint) => {
   let url = await getFromStorageSync("baseUrlValue");
