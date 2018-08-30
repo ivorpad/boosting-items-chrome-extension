@@ -6,13 +6,9 @@ import Promotions from "./Promotions";
 import Button from "./Button";
 import Loading from "./Loading";
 import Notices from "./Notices";
-import axios from "axios";
 import SheetApi from "./helpers/API";
 import moment from "moment";
 import { actions as restApiDataSagaActions } from "./sagas/restApiDataSaga";
-
-
-// REDUX
 import { bindActionCreators } from "redux";
 import { connect } from 'react-redux';
 import { actions as marketplaceActions } from './reducers/marketplace';
@@ -20,8 +16,7 @@ import { actions as spreadsheetActions } from './reducers/spreadsheet';
  
 import {
   extractDomainName,
-  removeItemBundleCount,
-  getDataFrom
+  removeItemBundleCount
 } from "./helpers/helpers";
 import loading from "./loading.svg";
 
@@ -32,85 +27,27 @@ removeItemBundleCount();
 
 class App extends Component {
   state = {
-    highlightsData: [],
-    promotionsData: [],
     isLoading: false,
     isLoggedIn: false,
     isHidden: true,
     startTokenRefresh: JSON.parse(localStorage.getItem("start_token_refresh")),
     formData: {
       boosting: "Good",
-      highlights: [],
-      promotions: []
     },
     notices: []
   };
 
-  prepareMarketData = () => {
-    const intercomSetup = document.getElementById("intercom-setup");
-    const { name } = JSON.parse(
-      intercomSetup.getAttribute("data-intercom-settings-payload")
-    );
-    const itemName = document.querySelector(".existing-value").innerText;
-    const itemUrl = document.querySelector(".submission-details > a").href;
-    const authorName = document.querySelectorAll(
-      'a[title="author profile page"]'
-    )[0].innerText;
-    const itemId = document
-      .querySelector(".submission-details > a")
-      .href.split("/")
-      .slice(-1)[0];
-
-    return {
-      name,
-      itemName,
-      itemUrl,
-      authorName,
-      itemId
-    };
-  };
-
   componentDidMount() {
-    const {
-      name,
-      itemName,
-      itemUrl,
-      authorName,
-      itemId
-    } = this.prepareMarketData();
-
-    const marketplacePayload = {
-      people: {
-        reviewer: name,
-        author: authorName
-      },
-      item: {
-        url: itemUrl,
-        title: itemName,
-        id: itemId
-      }
-    };
-
+    const marketDataPayload = this.prepareMarketData();
+    this.props.setMarketData(marketDataPayload);
     this.props.fetchApiData();
-    this.props.setMarketData(marketplacePayload);
-
-    this.setState({
-      isLoading: true
-    });
-
-    this.fetchDataFromApi();
     this.checkSheetUrlOption();
   }
 
   componentWillMount = () => {
     this.checkIfLoggedIn();
-    this.bigApproveButton = document.getElementById("approve").children[
-      "proofing_action"
-    ];
-    this.bigApproveButton.addEventListener(
-      "click",
-      this.handleBigApproveButton
-    );
+    this.bigApproveButton = document.getElementById("approve").children["proofing_action"];
+    this.bigApproveButton.addEventListener("click",this.handleBigApproveButton);
 
     this.approveButton = document.querySelector(
       ".reviewer-proofing-actions"
@@ -139,20 +76,35 @@ class App extends Component {
   };
 
   componentWillUnmount = () => {
-    this.bigApproveButton.removeEventListener(
-      "click",
-      this.handleBigApproveButton
-    );
+    this.bigApproveButton.removeEventListener("click",this.handleBigApproveButton);
     this.approveButton.removeEventListener("click", this.handleApproveButton);
     this.exitButton.removeEventListener("click", this.handleLogout);
-    this.rejectButton.removeEventListener(
-      "click",
-      this.handleRejectAndHoldButtons
+    this.rejectButton.removeEventListener("click",this.handleRejectAndHoldButtons);
+    this.holdButton.removeEventListener("click", this.handleRejectAndHoldButtons);
+  };
+
+  prepareMarketData = () => {
+    const intercomSetup = document.getElementById("intercom-setup");
+    const { name } = JSON.parse(
+      intercomSetup.getAttribute("data-intercom-settings-payload")
     );
-    this.holdButton.removeEventListener(
-      "click",
-      this.handleRejectAndHoldButtons
-    );
+    const itemName = document.querySelector(".existing-value").innerText;
+    const itemUrl = document.querySelector(".submission-details > a").href;
+    const authorName = document.querySelectorAll(
+      'a[title="author profile page"]'
+    )[0].innerText;
+    const itemId = document
+      .querySelector(".submission-details > a")
+      .href.split("/")
+      .slice(-1)[0];
+
+    return {
+      name,
+      itemName,
+      itemUrl,
+      authorName,
+      itemId
+    };
   };
 
   handleRejectAndHoldButtons = () => {
@@ -164,7 +116,7 @@ class App extends Component {
   };
 
   checkSheetUrlOption = () => {
-    /* eslint-disable no-undef */
+    //eslint-disable-next-line no-undef
     chrome.storage.sync.get(["sheetIdValue"], value => {
       if (!value.sheetIdValue) {
         const message = `Please set the Google Sheet ID option. Go to the Extension Options Panel.`;
@@ -177,60 +129,23 @@ class App extends Component {
         this.props.setSpreadsheetId(value.sheetIdValue);
       }
     });
-    /* eslint-enable no-undef */
   };
 
-  fetchDataFromApi = () => {
-    // eslint-disable-next-line no-undef
-    chrome.storage.sync.get(["baseUrlValue"], value => {
-      axios
-        .all([
-          axios.get(
-            `https://${value.baseUrlValue}/wp-json/wp/v2/post_type_promotion`
-          ),
-          axios.get(
-            `https://${value.baseUrlValue}/wp-json/wp/v2/post_type_highlight`
-          ),
-          axios.get(`https://${value.baseUrlValue}/wp-json/wp/v2/marketplace`)
-        ])
-        .then(
-          axios.spread(
-            (promotionsResponse, highlightsResponse, marketplaceResponse) => {
-              if (
-                promotionsResponse.status === 200 &&
-                highlightsResponse.status === 200 &&
-                marketplaceResponse.status === 200
-              ) {
-                let { data: promotions } = promotionsResponse;
-                let { data: highlights } = highlightsResponse;
-
-                const marketplace = marketplaceResponse.data.filter(market => {
-                  return market.name === domain;
-                });
-
-                highlights = getDataFrom(highlights, marketplace);
-                promotions = getDataFrom(promotions, marketplace);
-
-                this.setState({
-                  promotionsData: promotions,
-                  highlightsData: highlights,
-                  isLoading: false
-                });
-              }
-            }
-          )
-        )
-        .catch(e => {
-          const message = `Please set the WordPress Site URL option. Go to the Extension Options Panel.`;
-          // TODO: dispatch action
-          this.setState(prevState => {
-            return {
-              notices: [...prevState.notices, { class: "error", message }]
-            };
-          });
-        });
-    });
-  };
+  //// fetchDataFromApi = () => {
+  //   // eslint-disable-next-line no-undef
+  ////       chrome.storage.sync.get()
+  ////       .then()
+  ////       .catch(e => {
+  ////         const message = `Please set the WordPress Site URL option. Go to the Extension Options Panel.`;
+  //         // TODO: dispatch action
+  ////         this.setState(prevState => {
+  ////           return {
+  ////             notices: [...prevState.notices, { class: "error", message }]
+  ////           };
+  ////         });
+  ////       });
+  ////   });
+  //// };
 
   handleLogin = e => {
     e.preventDefault();
@@ -272,9 +187,7 @@ class App extends Component {
     }
     // eslint-disable-next-line no-undef
     chrome.runtime.sendMessage(
-      {
-        type: "logout"
-      },
+      {type: "logout"},
       function(response) {
         console.log(response);
         this.setState({
@@ -333,31 +246,26 @@ class App extends Component {
   };
 
   cloneAndChangeButtonAttr = () => {
-    const bigApproveButton = document.getElementById("approve").children[
-      "proofing_action"
-    ];
+    const bigApproveButton = document.getElementById("approve").children["proofing_action"];
     const approveAction = document.getElementById("approve");
     const newButton = bigApproveButton.cloneNode(true);
 
     bigApproveButton.style.display = "none";
-
     newButton.name = "";
     newButton.value = "";
     newButton.innerText = "Approving item...";
     newButton.style.display = "block";
     newButton.setAttribute("disabled", true);
-
     approveAction.append(newButton);
   };
 
-  validateFormDataArray = array =>
-    Array.isArray(array) && array.length > 0 && typeof array !== "undefined";
+  validateFormDataArray = array => Array.isArray(array) && array.length > 0 && typeof array !== "undefined";
 
   handleBigApproveButton = () => {
     this.cloneAndChangeButtonAttr();
 
     const { formData } = this.state;
-    const { person, item } = this.props;
+    const { person, item } = this.props.currentItem;
 
     const payload = {
       range: range,
@@ -371,11 +279,11 @@ class App extends Component {
           item.id,
           person.reviewer,
           formData.boosting,
-          this.validateFormDataArray(formData.highlights)
-            ? formData.highlights.join(", ")
+          this.validateFormDataArray(this.props.highlights.selected)
+            ? this.props.highlights.selected.join(", ")
             : "-",
-          this.validateFormDataArray(formData.promotions)
-            ? formData.promotions.join(", ")
+          this.validateFormDataArray(this.props.promotions.selected)
+            ? this.props.promotions.selected.join(", ")
             : "-"
         ]
       ]
@@ -388,20 +296,12 @@ class App extends Component {
     // eslint-disable-next-line no-undef
     chrome.storage.sync.get(
       ["access_token"],
-
       result => {
         if (!result.access_token) {
           return;
         }
-        SheetApi.defaults.headers.post["Authorization"] = `Bearer ${
-          result.access_token
-        }`;
-        SheetApi.post(
-          `/${
-            this.props.sheetId
-          }/values/${range}:append?valueInputOption=USER_ENTERED`,
-          payload
-        )
+        SheetApi.defaults.headers.post["Authorization"] = `Bearer ${result.access_token}`;
+        SheetApi.post(`/${this.props.sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`,payload)
           .then(response => {
             // TODO: Remove
             console.log(response);
@@ -420,14 +320,9 @@ class App extends Component {
   };
 
   render() {
-    
-    console.log(this.props);
     const {
       notices,
-      isLoading,
       isLoggedIn,
-      highlightsData,
-      promotionsData,
       isHidden
     } = this.state;
 
@@ -436,7 +331,7 @@ class App extends Component {
         <Notices notices={notices} />
         <Loading
           render={() => {
-            return isLoading && isLoggedIn && !isHidden ? (
+            return (this.props.promotions.isFetching || this.props.highlights.isFetching) && isLoggedIn && !isHidden ? (
               <img
                 src={
                   // eslint-disable-next-line no-undef
@@ -473,39 +368,8 @@ class App extends Component {
             {isLoggedIn ? (
               <React.Fragment>
                 <Boosting handleFormData={this.handleFormData} />
-
-                {/* <Highlights
-                  isLoading={isLoading}
-                  highlightsData={highlightsData}
-                  handleFormData={this.handleFormData}
-                /> */}
-
                 <Highlights />
-
                 <Promotions />
-
-                {/* <Promotions
-                  handleFormData={this.handleFormData}
-                  render={() => {
-                    return promotionsData.map(({ title }, index) => {
-                      const slug = title.rendered
-                        .toLowerCase()
-                        .split(" ")
-                        .join("-");
-                      return (
-                        <div key={index}>
-                          <input
-                            type="checkbox"
-                            id={slug}
-                            name="promotions"
-                            value={title.rendered}
-                          />
-                          <label for={slug}>{title.rendered}</label>
-                        </div>
-                      );
-                    });
-                  }}
-                /> */}
               </React.Fragment>
             ) : null}
           </React.Fragment>
@@ -519,8 +383,7 @@ class App extends Component {
 
 const mapStateToProps = state => {
   return ({
-    person: state.currentItem.people,
-    item: state.currentItem.item,
+    currentItem: state.currentItem,
     sheetId: state.spreadsheet.sheetId,
     highlights: state.highlights,
     promotions: state.promotions

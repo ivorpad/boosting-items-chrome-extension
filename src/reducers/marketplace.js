@@ -3,7 +3,7 @@ export const types = {
 }
 
 const defaultState = {
-  people: {
+  person: {
     reviewer: '',
     author: ''
   },
@@ -24,8 +24,15 @@ export default (state = defaultState, action) => {
     case SET_MARKET_DATA:
       return { 
         ...state, 
-        people: action.payload.people,
-        item: action.payload.item
+        person: {
+          reviewer: action.payload.name,
+          author: action.payload.authorName
+        },
+        item: {
+          url: action.payload.itemUrl,
+          title: action.payload.itemName,
+          id: action.payload.itemId
+        }
       };
     default:
       return state;

@@ -15,6 +15,7 @@ const {
 const initiaState = {
   data: [],
   isFetching: true,
+  selected: []
 };
 
 
@@ -29,12 +30,10 @@ export default (state = initiaState, action) => {
         isFetching: false
       };
     case SET_HIGHLIGHTS_PAYLOAD:
-      
       let selected = [...action.payload.selectedOptions].map( option => option.innerText )
-
       return {
         ...state,
-        selected
+        selected: selected
       }
     default:
       return state;
