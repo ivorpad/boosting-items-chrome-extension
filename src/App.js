@@ -9,15 +9,14 @@ import Notices from "./Notices";
 import axios from "axios";
 import SheetApi from "./helpers/API";
 import moment from "moment";
-import {store} from './index'
-import { types as HighlightTypes } from "./reducers/highlights"
+import { actions as restApiDataSagaActions } from "./sagas/restApiDataSaga";
+
 
 // REDUX
 import { bindActionCreators } from "redux";
 import { connect } from 'react-redux';
 import { actions as marketplaceActions } from './reducers/marketplace';
 import { actions as spreadsheetActions } from './reducers/spreadsheet';
-import { actions as restApiDataSagaActions } from "./sagas/restApiDataSaga";
  
 import {
   extractDomainName,
@@ -25,8 +24,6 @@ import {
   getDataFrom
 } from "./helpers/helpers";
 import loading from "./loading.svg";
-
-const { FETCH_HIGHLIGHTS } = HighlightTypes;
 
 const domain = extractDomainName(window.location.host);
 const range = `${domain}!A2`;
@@ -82,8 +79,6 @@ class App extends Component {
       itemId
     } = this.prepareMarketData();
 
-    //this.props.fetchApiDataHighlights();
-
     const marketplacePayload = {
       people: {
         reviewer: name,
@@ -96,6 +91,7 @@ class App extends Component {
       }
     };
 
+    this.props.fetchApiData();
     this.props.setMarketData(marketplacePayload);
 
     this.setState({
@@ -425,7 +421,7 @@ class App extends Component {
 
   render() {
     
-    console.log(store.getState());
+    console.log(this.props);
     const {
       notices,
       isLoading,
@@ -478,11 +474,13 @@ class App extends Component {
               <React.Fragment>
                 <Boosting handleFormData={this.handleFormData} />
 
-                <Highlights
+                {/* <Highlights
                   isLoading={isLoading}
                   highlightsData={highlightsData}
                   handleFormData={this.handleFormData}
-                />
+                /> */}
+
+                <Highlights />
 
                 <Promotions />
 
@@ -523,12 +521,16 @@ const mapStateToProps = state => {
   return ({
     person: state.currentItem.people,
     item: state.currentItem.item,
-    sheetId: state.spreadsheet.sheetId
+    sheetId: state.spreadsheet.sheetId,
+    highlights: state.highlights,
+    promotions: state.promotions
   })
 }
 
+const { fetchApiData } = restApiDataSagaActions;
+
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ ...marketplaceActions, ...spreadsheetActions }, dispatch); 
+  return bindActionCreators({ ...marketplaceActions, ...spreadsheetActions, fetchApiData }, dispatch); 
 }
 
 const AppContainer = connect(

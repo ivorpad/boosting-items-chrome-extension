@@ -4,8 +4,18 @@ import { types as PromotionTypes } from '../reducers/promotions'
 import { takeLatest, call, fork, put } from 'redux-saga/effects';
 import { getFromStorageSync, extractDomainName } from "../helpers/helpers";
 
-const { FETCH_HIGHLIGHTS, FETCH_HIGHLIGHTS_SUCCESS, FETCH_HIGHLIGHTS_ERROR } = HighlightTypes;
-const { FETCH_PROMOTIONS, FETCH_PROMOTIONS_SUCCESS, FETCH_PROMOTIONS_ERROR } = PromotionTypes;
+const { FETCH_HIGHLIGHTS_SUCCESS, FETCH_HIGHLIGHTS_ERROR } = HighlightTypes;
+const { FETCH_PROMOTIONS_SUCCESS, FETCH_PROMOTIONS_ERROR } = PromotionTypes;
+
+const types = {
+  FETCH_API_DATA: "SAGAS/FETCH_API_DATA",
+  ON_FETCH_ERROR: "SAGAS/ON_FETCH_ERROR"
+};
+
+const {
+  FETCH_API_DATA,
+  ON_FETCH_ERROR
+} = types
 
 const fetchApiDataRequest = async (endpoint) => {
   let url = await getFromStorageSync("baseUrlValue");
@@ -28,20 +38,15 @@ function* requestAndPut(request, actionCreator) {
   yield put(actionCreator(result));
 }
 
-export function* fetchApiDataSagaWatcher() {
+export function *fetchApiDataSagaWatcher() {
   yield [
-    takeLatest(FETCH_PROMOTIONS, fetchApiDataSaga),
-    takeLatest(FETCH_HIGHLIGHTS, fetchApiDataSaga),
+    takeLatest(FETCH_API_DATA, fetchApiDataSaga),
   ]
 }
 
 export const actions = {
-  fetchApiDataPromotions: isFetching => {
-    return { type: FETCH_PROMOTIONS, isFetching }
-  },
-
-  fetchApiDataHighlights: isFetching => {
-    return { type: FETCH_HIGHLIGHTS, isFetching }
+  fetchApiData: () => {
+    return { type: FETCH_API_DATA }
   },
 
   fetchApiDataPromotionsSuccess: (payload) => {
@@ -53,6 +58,6 @@ export const actions = {
   },
 
   fetchApiDataPromotionsError: (error) => {
-    return { type: "ON_FETCH_ERROR", error };
+    return { type: ON_FETCH_ERROR, error };
   }
 }

@@ -14,7 +14,7 @@ const {
 
 const initiaState = {
   data: [],
-  isFetching: false,
+  isFetching: true,
   selected: []
 }
 

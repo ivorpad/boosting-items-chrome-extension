@@ -11,8 +11,6 @@ class Promotions extends Component {
     script.textContent = "$('#promotions').validate()";
     (document.head || document.documentElement).appendChild(script);
     script.parentNode.removeChild(script);
-
-    this.props.fetchApiDataPromotions();
   };
 
   render() {
@@ -58,11 +56,9 @@ const mapStateToProps = state => ({
   promotions: state.promotions
 });
 
-const { fetchApiDataPromotions } = restApiDataSagaActions;
-
 const PromotionsContainer = connect(
   mapStateToProps,
-  { fetchApiDataPromotions, ...PromotionActions }
+  { ...PromotionActions }
 )(Promotions);
 
 export default PromotionsContainer;
