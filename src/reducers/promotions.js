@@ -16,7 +16,7 @@ const initiaState = {
   data: [],
   isFetching: true,
   selected: []
-}
+};
 
 export default (state = initiaState, action) => {
   switch (action.type) {
@@ -29,7 +29,6 @@ export default (state = initiaState, action) => {
         isFetching: false
       };
     case SET_PROMOTIONS_PAYLOAD:
-
       {
         var selected;
         let index;
@@ -40,10 +39,10 @@ export default (state = initiaState, action) => {
           selected = [
             ...state.selected.slice(0, index),
             ...state.selected.slice(index + 1, state.selected.length)
-          ]
+          ];
         }
       }
-    
+
       return {
         ...state,
         selected
@@ -54,5 +53,5 @@ export default (state = initiaState, action) => {
 };
 
 export const actions = {
-  addPromotions: (payload) => ({ type: SET_PROMOTIONS_PAYLOAD, payload })
-}
+  addPromotions: payload => ({ type: SET_PROMOTIONS_PAYLOAD, payload })
+};

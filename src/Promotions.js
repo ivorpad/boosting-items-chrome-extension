@@ -1,10 +1,8 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { actions as restApiDataSagaActions } from "./sagas/restApiDataSaga";
 import { actions as PromotionActions } from "./reducers/promotions";
 
 class Promotions extends Component {
-
   componentDidMount = () => {
     //workaround to fix undefined.settings in jQuery validation
     const script = document.createElement("script");
