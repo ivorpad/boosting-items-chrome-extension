@@ -1,0 +1,2 @@
+export const FETCH_API_DATA = "SAGAS/FETCH_API_DATA";
+export const ON_FETCH_ERROR = "SAGAS/ON_FETCH_ERROR";

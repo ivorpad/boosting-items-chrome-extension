@@ -1,16 +1,11 @@
-export const types = {
-  FETCH_PROMOTIONS: "PROMOTIONS/FETCH_PROMOTIONS",
-  FETCH_PROMOTIONS_SUCCESS: "PROMOTIONS/FETCH_PROMOTIONS_SUCCESS",
-  FETCH_PROMOTIONS_ERROR: "PROMOTIONS/FETCH_PROMOTIONS_ERROR",
-  SET_PROMOTIONS_PAYLOAD: "PROMOTIONS/SET_PROMOTIONS_PAYLOAD"
-};
-
-const {
+import {
   FETCH_PROMOTIONS,
   FETCH_PROMOTIONS_SUCCESS,
   FETCH_PROMOTIONS_ERROR,
   SET_PROMOTIONS_PAYLOAD
-} = types;
+} from '../constants/restApi';
+
+import { ON_FETCH_ERROR } from '../constants/saga'
 
 const initiaState = {
   data: [],
@@ -42,11 +37,15 @@ export default (state = initiaState, action) => {
           ];
         }
       }
-
       return {
         ...state,
         selected
       };
+    case ON_FETCH_ERROR:
+      console.log(action)
+      return {
+        ...state
+      }  
     default:
       return state;
   }

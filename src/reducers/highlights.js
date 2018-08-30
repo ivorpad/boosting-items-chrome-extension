@@ -1,16 +1,11 @@
-export const types = {
-  FETCH_HIGHLIGHTS: "HIGHLIGHTS/FETCH_HIGHLIGHTS",
-  FETCH_HIGHLIGHTS_SUCCESS: "HIGHLIGHTS/FETCH_HIGHLIGHTS_SUCCESS",
-  FETCH_HIGHLIGHTS_ERROR: "HIGHLIGHTS/FETCH_HIGHLIGHTS_ERROR",
-  SET_HIGHLIGHTS_PAYLOAD: "HIGHLIGHTS/SET_HIGHLIGHTS_PAYLOAD"
-};
-
-const {
+import {
   FETCH_HIGHLIGHTS,
   FETCH_HIGHLIGHTS_SUCCESS,
   FETCH_HIGHLIGHTS_ERROR,
   SET_HIGHLIGHTS_PAYLOAD
-} = types;
+} from "../constants/restApi";
+
+import { ON_FETCH_ERROR } from "../constants/saga";
 
 const initiaState = {
   data: [],
@@ -35,6 +30,11 @@ export default (state = initiaState, action) => {
         ...state,
         selected: selected
       }
+    case ON_FETCH_ERROR:
+      console.log(action)
+      return {
+        ...state
+      }  
     default:
       return state;
   }

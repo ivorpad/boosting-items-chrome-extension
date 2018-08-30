@@ -1,41 +1,38 @@
 import axios from 'axios';
-import { types as HighlightTypes } from '../reducers/highlights'
-import { types as PromotionTypes } from '../reducers/promotions'
 import { takeLatest, call, fork, put } from 'redux-saga/effects';
 import { getFromStorageSync, extractDomainName } from "../helpers/helpers";
 
-const { FETCH_HIGHLIGHTS_SUCCESS, FETCH_HIGHLIGHTS_ERROR } = HighlightTypes;
-const { FETCH_PROMOTIONS_SUCCESS, FETCH_PROMOTIONS_ERROR } = PromotionTypes;
+import {
+  FETCH_PROMOTIONS_SUCCESS,
+  FETCH_HIGHLIGHTS_SUCCESS
+} from "../constants/restApi";
 
-const types = {
-  FETCH_API_DATA: "SAGAS/FETCH_API_DATA",
-  ON_FETCH_ERROR: "SAGAS/ON_FETCH_ERROR"
-};
-
-const {
-  FETCH_API_DATA,
-  ON_FETCH_ERROR
-} = types
+import { ON_FETCH_ERROR, FETCH_API_DATA } from "../constants/saga";
 
 const fetchApiDataRequest = async (endpoint) => {
   let url = await getFromStorageSync("baseUrlValue");
   return axios
     .get(`https://${url.baseUrlValue}/wp-json/wp/v2/${endpoint}?filter[marketplace]=${extractDomainName(window.location.host)}`)
     .then(response => response)
-    .catch(error => error);
+    .catch(error => {
+      throw new Error(error);
+    });
 }
 
-function* fetchApiDataSaga(action) {
+function *fetchApiDataSaga(action) {
   yield [
     fork(requestAndPut, [fetchApiDataRequest, "post_type_promotion"], actions.fetchApiDataPromotionsSuccess),
     fork(requestAndPut, [fetchApiDataRequest, "post_type_highlight"], actions.fetchApiDataHighlightsSuccess),
   ];
 }
 
-// TODO: Add error handling
-function* requestAndPut(request, actionCreator) {
-  const result = yield call(...request);
-  yield put(actionCreator(result));
+function *requestAndPut(request, actionCreator) {
+  try {
+    const result = yield call(...request);
+    yield put(actionCreator(result));
+  } catch (e) {
+    yield put(actions.failure(e))
+  }
 }
 
 export function *fetchApiDataSagaWatcher() {
@@ -57,7 +54,7 @@ export const actions = {
     return { type: FETCH_HIGHLIGHTS_SUCCESS, payload};
   },
 
-  fetchApiDataPromotionsError: (error) => {
+  failure: (error) => {
     return { type: ON_FETCH_ERROR, error };
-  }
+  },
 }
