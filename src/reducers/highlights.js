@@ -29,9 +29,12 @@ export default (state = initiaState, action) => {
         isFetching: false
       };
     case SET_HIGHLIGHTS_PAYLOAD:
-    console.log(action)
+      
+      let selected = [...action.payload.selectedOptions].map( option => option.innerText )
+
       return {
-        ...state
+        ...state,
+        selected
       }
     default:
       return state;
