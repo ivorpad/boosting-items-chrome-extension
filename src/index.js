@@ -14,11 +14,12 @@ newDiv.id = "root";
 reviewerProofingActions.append(newDiv);
 
 const sagaMiddleware = createSagaMiddleware();
-const middlewares = applyMiddleware(sagaMiddleware);
 
 export const store = createStore(
   rootReducer,
-  compose(middlewares)
+  compose(
+    applyMiddleware(sagaMiddleware)
+  )
 );
 
 sagaMiddleware.run(rootSaga);
@@ -29,4 +30,3 @@ ReactDOM.render(
   </Provider>
   , 
 document.getElementById('root'));
-

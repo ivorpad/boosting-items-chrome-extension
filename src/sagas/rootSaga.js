@@ -1,9 +1,10 @@
-import { all } from "redux-saga/effects";
 import { fetchApiDataSagaWatcher } from "./restApiDataSaga";
+import { requestAuthWatcher } from "./AuthSaga";
 
 export default function* rootSaga() {
   yield [
-    fetchApiDataSagaWatcher()
+    fetchApiDataSagaWatcher(),
+    requestAuthWatcher()
     // add other watchers to the array
   ];
 }

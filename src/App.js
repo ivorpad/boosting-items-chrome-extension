@@ -9,10 +9,12 @@ import Notices from "./Notices";
 import SheetApi from "./helpers/API";
 import moment from "moment";
 import { actions as restApiDataSagaActions } from "./sagas/restApiDataSaga";
+import { actions as authSagaActions } from "./sagas/AuthSaga";
 import { bindActionCreators } from "redux";
 import { connect } from 'react-redux';
 import { actions as marketplaceActions } from './reducers/marketplace';
 import { actions as spreadsheetActions } from './reducers/spreadsheet';
+import {store} from './index'
  
 import {
   extractDomainName,
@@ -34,7 +36,8 @@ class App extends Component {
     formData: {
       boosting: "Good",
     },
-    notices: []
+    notices: [],
+    showButton: false
   };
 
   componentDidMount() {
@@ -319,7 +322,13 @@ class App extends Component {
     });
   };
 
+  handleReduxLogin = (e) => {
+    e.preventDefault()
+    this.props.handleLogin();
+  }
+
   render() {
+    console.log(store.getState());
     const {
       notices,
       isLoggedIn,
@@ -347,6 +356,8 @@ class App extends Component {
           <React.Fragment>
             <hr className="app__separator" />
             <h4 className="app__title">Item Boosting</h4>
+
+            <button onClick={(e) => this.handleReduxLogin(e)}>Login with Redux</button>
 
             <Button
               render={() => {
@@ -391,9 +402,10 @@ const mapStateToProps = state => {
 }
 
 const { fetchApiData } = restApiDataSagaActions;
+const { handleLogin, shootConfirmation } = authSagaActions;
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ ...marketplaceActions, ...spreadsheetActions, fetchApiData }, dispatch); 
+  return bindActionCreators({ ...marketplaceActions, ...spreadsheetActions, fetchApiData, handleLogin, shootConfirmation }, dispatch); 
 }
 
 const AppContainer = connect(

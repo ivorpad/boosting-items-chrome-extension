@@ -1,18 +1,16 @@
 import {
   FETCH_HIGHLIGHTS,
   FETCH_HIGHLIGHTS_SUCCESS,
-  FETCH_HIGHLIGHTS_ERROR,
   SET_HIGHLIGHTS_PAYLOAD
 } from "../constants/restApi";
 
-import { ON_FETCH_ERROR } from "../constants/saga";
+import { ON_FETCH_ERROR } from "../constants/sagas";
 
 const initiaState = {
   data: [],
   isFetching: true,
   selected: []
 };
-
 
 export default (state = initiaState, action) => {
   switch (action.type) {

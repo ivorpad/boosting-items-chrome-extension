@@ -7,7 +7,7 @@ import {
   FETCH_HIGHLIGHTS_SUCCESS
 } from "../constants/restApi";
 
-import { ON_FETCH_ERROR, FETCH_API_DATA } from "../constants/saga";
+import { ON_FETCH_ERROR, FETCH_API_DATA } from "../constants/sagas";
 
 const fetchApiDataRequest = async (endpoint) => {
   let url = await getFromStorageSync("baseUrlValue");

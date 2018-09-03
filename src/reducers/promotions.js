@@ -1,11 +1,10 @@
 import {
   FETCH_PROMOTIONS,
   FETCH_PROMOTIONS_SUCCESS,
-  FETCH_PROMOTIONS_ERROR,
   SET_PROMOTIONS_PAYLOAD
 } from '../constants/restApi';
 
-import { ON_FETCH_ERROR } from '../constants/saga'
+import { ON_FETCH_ERROR } from '../constants/sagas'
 
 const initiaState = {
   data: [],

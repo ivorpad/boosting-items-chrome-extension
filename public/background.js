@@ -8,14 +8,14 @@ var token = function (length) {
 	return rand(length) + rand(length);
 };
 
-const generateRandomKey = length => {
-	const str = "abcdefghijklmnopqrstuvwxyz1234567890";
-	Array.from({
-			length
-		})
-		.map(i => str[Math.floor(Math.random() * str.length)])
-		.join("");
-};
+// const generateRandomKey = length => {
+// 	const str = "abcdefghijklmnopqrstuvwxyz1234567890";
+// 	Array.from({
+// 			length
+// 		})
+// 		.map(i => str[Math.floor(Math.random() * str.length)])
+// 		.join("");
+// };
 
 const convertParamsToString = params => {
 	return Object.keys(params)
