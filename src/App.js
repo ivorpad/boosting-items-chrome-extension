@@ -44,6 +44,7 @@ class App extends Component {
     const marketDataPayload = this.prepareMarketData();
     this.props.setMarketData(marketDataPayload);
     this.props.fetchApiData();
+    this.props.handleLogin();
     this.checkSheetUrlOption();
   }
 
@@ -324,7 +325,13 @@ class App extends Component {
 
   handleReduxLogin = (e) => {
     e.preventDefault()
-    this.props.handleLogin();
+    this.props.handleLoginAction();
+  }
+
+  handleReduxLogout = (e) => {
+    e.preventDefault();
+    console.log('send action')
+    this.props.handleSignOut();
   }
 
   render() {
@@ -358,6 +365,11 @@ class App extends Component {
             <h4 className="app__title">Item Boosting</h4>
 
             <button onClick={(e) => this.handleReduxLogin(e)}>Login with Redux</button>
+            <button onClick={(e) => {
+              e.preventDefault();
+              this.props.handleLoginAction();
+            }}>Confirm</button>
+            <button onClick={(e) => this.handleReduxLogout(e)}>Signout with Redux</button>
 
             <Button
               render={() => {
@@ -402,10 +414,10 @@ const mapStateToProps = state => {
 }
 
 const { fetchApiData } = restApiDataSagaActions;
-const { handleLogin, shootConfirmation } = authSagaActions;
+const { handleLogin, handleSignOut, handleLoginAction } = authSagaActions;
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ ...marketplaceActions, ...spreadsheetActions, fetchApiData, handleLogin, shootConfirmation }, dispatch); 
+  return bindActionCreators({ ...marketplaceActions, ...spreadsheetActions, fetchApiData, handleLogin, handleSignOut, handleLoginAction }, dispatch); 
 }
 
 const AppContainer = connect(
