@@ -335,7 +335,7 @@ class App extends Component {
   }
 
   render() {
-    console.log(store.getState());
+    //console.log(store.getState());
     const {
       notices,
       isLoggedIn,
@@ -365,10 +365,6 @@ class App extends Component {
             <h4 className="app__title">Item Boosting</h4>
 
             <button onClick={(e) => this.handleReduxLogin(e)}>Login with Redux</button>
-            <button onClick={(e) => {
-              e.preventDefault();
-              this.props.handleLoginAction();
-            }}>Confirm</button>
             <button onClick={(e) => this.handleReduxLogout(e)}>Signout with Redux</button>
 
             <Button
