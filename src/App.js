@@ -44,7 +44,7 @@ class App extends Component {
     const marketDataPayload = this.prepareMarketData();
     this.props.setMarketData(marketDataPayload);
     this.props.fetchApiData();
-    this.props.handleLogin();
+    this.props.handleLoginInit()
     this.checkSheetUrlOption();
   }
 
@@ -61,7 +61,10 @@ class App extends Component {
     this.exitButton = document.querySelector(
       ".header-right-container"
     ).firstElementChild;
-    this.exitButton.addEventListener("click", e => this.handleLogout(e, false));
+    this.exitButton.addEventListener("click", e => {
+      this.handleLogout(e, false);
+      this.props.handleLogout();
+    });
 
     this.rejectButton = document.querySelector('a[href="#reject"]');
     this.rejectButton.addEventListener(
@@ -330,12 +333,11 @@ class App extends Component {
 
   handleReduxLogout = (e) => {
     e.preventDefault();
-    console.log('send action')
     this.props.handleSignOut();
   }
 
   render() {
-    //console.log(store.getState());
+    console.log('from render', this.props);
     const {
       notices,
       isLoggedIn,
@@ -405,15 +407,21 @@ const mapStateToProps = state => {
     currentItem: state.currentItem,
     sheetId: state.spreadsheet.sheetId,
     highlights: state.highlights,
-    promotions: state.promotions
+    promotions: state.promotions,
+    session: state.session
   })
 }
 
 const { fetchApiData } = restApiDataSagaActions;
-const { handleLogin, handleSignOut, handleLoginAction } = authSagaActions;
+
 
 const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ ...marketplaceActions, ...spreadsheetActions, fetchApiData, handleLogin, handleSignOut, handleLoginAction }, dispatch); 
+  return bindActionCreators({ 
+    ...marketplaceActions, 
+    ...spreadsheetActions, 
+    fetchApiData, 
+    ...authSagaActions }, 
+    dispatch); 
 }
 
 const AppContainer = connect(
