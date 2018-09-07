@@ -15,7 +15,7 @@ export default (state = initialState, action) => {
     case ON_LOGIN_INIT_SUCCESS:
       return { 
         ...state,
-        access_token: action.payload,
+        access_token: action.token,
         logged: true
        }
     case ON_SIGN_OUT:
@@ -25,9 +25,13 @@ export default (state = initialState, action) => {
         logged: false
       }
     case AUTH_STATUS_CHECK: 
+
+    const {access_token, logged} = JSON.parse(action.payload)
+
     return {
       ...state,
-      logged: Boolean(action.logged)
+      access_token,
+      logged: Boolean(logged)
     }    
     case ON_LOGIN_ACTION:
       console.log(action)
