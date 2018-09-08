@@ -48,7 +48,7 @@
   "options_page": "options.html",
   "content_security_policy": "script-src 'self' https://apis.google.com; object-src 'self'",
   "oauth2": {
-  	"client_id": "302126988402-veu7g7451j5m7jgls99l33ojj6pmgtkv.apps.googleusercontent.com",
+  	"client_id": "1078144084270-l7spsd4d748ihd8tj687bdtvegc9j3kc.apps.googleusercontent.com",
     "scopes": [
       "https://www.googleapis.com/auth/drive.file",
       "https://www.googleapis.com/auth/drive.readonly",

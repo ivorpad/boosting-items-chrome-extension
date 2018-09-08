@@ -1,5 +1,6 @@
 import {
   takeLatest,
+  takeEvery,
   call,
   take,
   fork,
@@ -13,7 +14,8 @@ import { delay } from "redux-saga";
 import {
   ON_LOGIN_INIT,
   ON_LOGIN_INIT_SUCCESS,
-  ON_LOGIN_INIT_FAILURE,
+  ON_LOGIN_FAILURE,
+  ON_LOGIN_SUCCESS,
   ON_LOGIN_ACTION,
   ON_SIGN_OUT,
   AUTH_STATUS_CHECK
@@ -30,14 +32,14 @@ function* verifyToken(token) {
 }
 
 const requestAuthToken = type => {
+  console.log("called");
   return new Promise((resolve, reject) => {
     // eslint-disable-next-line no-undef
     chrome.runtime.sendMessage({ type }, function(response) {
-      if (response) {
+      if (response.access_token) {
         resolve(response.access_token);
       } else {
-        // TODO: Handle error
-        reject(response);
+        reject(response.error);
       }
     });
   });
@@ -58,23 +60,37 @@ const removeStoredToken = () => {
 
 function* authorize(refresh, storedToken) {
   try {
-    if (storedToken) {
-      var token;
-      var { access_token, expires_in } = JSON.parse(storedToken);
+    let token;
+    let expires_in;
+    
+    console.log('TCL: function*authorize -> storedToken', storedToken);
+    
+    if (!storedToken) {
+      token = yield call(requestAuthToken, "login");
+      if (token) {
+        ({ expires_in } = yield call(verifyToken, token));
+        yield call(storeToken, token, expires_in, "true");
+      }
+    } else {
 
-      refresh && expires_in <= 900 ? token = yield call(requestAuthToken, "refresh") : token = access_token
+      let storedToken = yield call(getStoredToken);
+
+      var { access_token } = JSON.parse(storedToken);
+      ({ expires_in } = yield call(verifyToken, access_token));
+
+      if (refresh && Number(expires_in) <= 3590) {
+        token = yield call(requestAuthToken, "refresh");
+        yield call(storeToken, token, expires_in, "true");
+      } else {
+        token = access_token;
+      }
     }
 
-    if (!storedToken) token = yield call(requestAuthToken, "login");
-
-    const tokenInfo = yield call(verifyToken, access_token || token);
-    yield call(storeToken, token, tokenInfo.expires_in, "true");
-    
     yield put(actions.handleLoginSuccess(token));
 
     return {
       access_token: access_token || token,
-      expires_in: tokenInfo.expires_in
+      expires_in: expires_in
     };
   } catch (error) {
     yield call(removeStoredToken);
@@ -86,9 +102,11 @@ function* authorizeLoop(token) {
   try {
     while (true) {
       const refresh = token != null;
+
       token = yield call(authorize, refresh, token);
       if (token == null) return;
-      yield call(delay, (token.expires_in - 900) * 1000);
+      const fortyFiveMinutes = (token.expires_in - 900) * 1000;
+      yield call(delay, 12000);
     }
   } finally {
     if (yield cancelled()) {
@@ -99,37 +117,44 @@ function* authorizeLoop(token) {
 
 function* authenticate() {
   let storedTokenInfo = yield call(getStoredToken);
-  while (true) {
-    if (!storedTokenInfo) {
-      yield take(ON_LOGIN_ACTION);
-    } else {
-      yield put(actions.authStatusCheck(storedTokenInfo));
-    }
 
-    const authLoopTask = yield fork(authorizeLoop, storedTokenInfo);
+  if (storedTokenInfo) {
+    yield put(actions.authStatusCheck(storedTokenInfo));
+  }
 
-    const { signOut } = yield race({
-      signOut: yield take(ON_SIGN_OUT),
-      authLoop: join(authLoopTask)
-    });
+  const authLoopTask = yield fork(authorizeLoop, storedTokenInfo);
 
-    if (signOut) {
-      storedTokenInfo = null;
-      yield call(removeStoredToken);
-      yield cancel(authLoopTask);
-    }
+  const { signOut } = yield race({
+    signOut: yield take(ON_SIGN_OUT),
+    authLoop: join(authLoopTask)
+  });
+
+  if (signOut) {
+    yield call(removeStoredToken);
+    yield cancel(authLoopTask);
+  }
+}
+
+function* loginInit() {
+  let stored = yield call(getStoredToken);
+
+  if (!stored) {
+    yield takeEvery(ON_LOGIN_ACTION, authenticate);
+  } else {
+    yield call(authenticate);
   }
 }
 
 export function* requestAuthWatcher() {
-  yield [takeLatest(ON_LOGIN_INIT, authenticate)];
+  yield [takeLatest(ON_LOGIN_INIT, loginInit)];
 }
 
 export const actions = {
   handleLoginInit: payload => ({ type: ON_LOGIN_INIT, payload }),
   handleLoginAction: () => ({ type: ON_LOGIN_ACTION }),
   handleLoginSuccess: token => ({ type: ON_LOGIN_INIT_SUCCESS, token }),
-  loginFailure: error => ({ type: ON_LOGIN_INIT_FAILURE, error }),
+  loginFailure: error => ({ type: ON_LOGIN_FAILURE, error }),
+  loginSuccess: () => ({ type: ON_LOGIN_SUCCESS }),
   handleSignOut: () => ({ type: ON_SIGN_OUT }),
   authStatusCheck: payload => ({ type: AUTH_STATUS_CHECK, payload })
 };

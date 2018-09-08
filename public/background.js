@@ -87,8 +87,11 @@ function Token() {
 					interactive: true
 				},
 				function (redirectUri) {
+
 					if (chrome.runtime.lastError) {
 						console.log(chrome.runtime.lastError);
+						reject(chrome.runtime.lastError.message);
+						//throw new Error(chrome.runtime.lastError.message)
 						return;
 					}
 
@@ -155,7 +158,13 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 					access_token: token,
 					isLoggedIn: true
 				});
-			});
+			}).catch(error => {
+
+				sendResponse({
+					error
+				})
+				//throw new Error(e)
+			})
 
 			return true;
 			case "refresh": 

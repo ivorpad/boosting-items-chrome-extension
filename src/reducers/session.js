@@ -1,8 +1,7 @@
 import {
-  ON_LOGIN_INIT,
   ON_LOGIN_INIT_SUCCESS,
   ON_LOGIN_ACTION,
-  ON_LOGIN_INIT_FAILURE,
+  ON_LOGIN_FAILURE,
   ON_LOGIN_USER_REJECTION,
   ON_SIGN_OUT,
   AUTH_STATUS_CHECK
@@ -35,7 +34,13 @@ export default (state = initialState, action) => {
     }    
     case ON_LOGIN_ACTION:
       console.log(action)
-    return {...state}       
+    return {...state}
+    case ON_LOGIN_FAILURE:
+      console.log(action)
+      return state;
+    case 'ON_LOGIN_FAILURE':
+      console.log(action)
+      return state;
   default:
     return state
   }
