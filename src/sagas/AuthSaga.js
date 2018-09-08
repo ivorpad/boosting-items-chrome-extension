@@ -106,7 +106,7 @@ function* authorizeLoop(token) {
       token = yield call(authorize, refresh, token);
       if (token == null) return;
       const fortyFiveMinutes = (token.expires_in - 900) * 1000;
-      yield call(delay, 12000);
+      yield call(delay, fortyFiveMinutes);
     }
   } finally {
     if (yield cancelled()) {
