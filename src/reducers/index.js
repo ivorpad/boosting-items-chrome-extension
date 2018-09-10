@@ -4,9 +4,11 @@ import spreadsheet from "./spreadsheet";
 import highlights from "./highlights";
 import promotions from "./promotions";
 import session from "./session";
+import boosting from "./boosting";
 
 const rootReducer = combineReducers({
   currentItem: marketplace,
+  boosting,
   spreadsheet,
   highlights,
   promotions,

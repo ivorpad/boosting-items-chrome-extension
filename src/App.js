@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import "./App.css";
+import { extractDomainName, removeItemBundleCount } from "./helpers/helpers";
+import loading from "./loading.svg";
 import Boosting from "./Boosting";
 import Highlights from "./Highlights";
 import Promotions from "./Promotions";
@@ -15,26 +17,17 @@ import { actions as marketplaceActions } from './reducers/marketplace';
 import { actions as spreadsheetActions } from './reducers/spreadsheet';
 import { actions as spreadsheetSagaActions } from './sagas/SpreadsheetSaga';
  
-import { extractDomainName, removeItemBundleCount } from "./helpers/helpers";
-import loading from "./loading.svg";
-
-
-removeItemBundleCount();
-
 class App extends Component {
   state = {
-    isLoading: false,
-    isLoggedIn: false,
     isHidden: true,
-    startTokenRefresh: JSON.parse(localStorage.getItem("start_token_refresh")),
     formData: {
       boosting: "Good",
     },
     notices: [],
-    showButton: false
   };
 
   componentDidMount() {
+    removeItemBundleCount();
     const marketDataPayload = this.prepareMarketData();
     this.props.setMarketData(marketDataPayload);
     this.props.fetchApiData();
@@ -69,7 +62,7 @@ class App extends Component {
     this.holdButton = document.querySelector('a[href="#hold"]');
     this.holdButton.addEventListener("click", this.handleRejectAndHoldButtons);
 
-    if (!this.state.isLoggedIn) {
+    if (!this.props.session.logged) {
       this.setState({
         buttonText: "Logout"
       });
@@ -193,7 +186,7 @@ class App extends Component {
           item.url,
           item.id,
           person.reviewer,
-          formData.boosting,
+          this.props.boosting,
           this.validateFormDataArray(this.props.highlights.selected)
             ? this.props.highlights.selected.join(", ")
             : "-",
@@ -291,7 +284,8 @@ const mapStateToProps = state => {
     sheetId: state.spreadsheet.sheetId,
     highlights: state.highlights,
     promotions: state.promotions,
-    session: state.session
+    session: state.session,
+    boosting: state.boosting
   })
 }
 
