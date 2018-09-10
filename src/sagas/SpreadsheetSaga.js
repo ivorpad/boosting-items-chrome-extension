@@ -39,6 +39,5 @@ export function *sendDataToSheetsSaga() {
 }
 
 export const actions = {
-  sendDataToSheetsInit: (token, sheetId, payload) => ({ type: SEND_DATA_TO_SHEETS_INIT, token, sheetId, payload}),
   sendDataToSheets: (token, sheetId, payload) => ({ type: SEND_DATA_TO_SHEETS, token, sheetId, payload })
 };
