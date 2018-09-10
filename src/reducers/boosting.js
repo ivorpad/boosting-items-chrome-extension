@@ -1,10 +1,8 @@
 const SET_BOOSTING_DATA = "MARKETPLACE/SET_BOOSTING_DATA";
 
-const initialState = {
-  boosting: "Good"
-}
+const initialState = "Good"
 
-export default (state = initialState, action) => {
+export default (state = "Good", action) => {
   switch (action.type) {
 
     case SET_BOOSTING_DATA:
@@ -24,7 +22,7 @@ export default (state = initialState, action) => {
         default:
           boosting = 'Good';
       }
-      return { ...state, boosting }
+      return boosting
 
   default:
     return state

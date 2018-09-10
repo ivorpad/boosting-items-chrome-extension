@@ -5,6 +5,7 @@ import highlights from "./highlights";
 import promotions from "./promotions";
 import session from "./session";
 import boosting from "./boosting";
+import notices from "./notices";
 
 const rootReducer = combineReducers({
   currentItem: marketplace,
@@ -12,6 +13,7 @@ const rootReducer = combineReducers({
   spreadsheet,
   highlights,
   promotions,
-  session
+  session,
+  notices
 });
 export default rootReducer;

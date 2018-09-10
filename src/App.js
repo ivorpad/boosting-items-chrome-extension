@@ -16,14 +16,12 @@ import { actions as authSagaActions } from "./sagas/AuthSaga";
 import { actions as marketplaceActions } from './reducers/marketplace';
 import { actions as spreadsheetActions } from './reducers/spreadsheet';
 import { actions as spreadsheetSagaActions } from './sagas/SpreadsheetSaga';
- 
+import { actions as noticesActions } from './reducers/notices'
+
 class App extends Component {
   state = {
     isHidden: true,
-    formData: {
-      boosting: "Good",
-    },
-    notices: [],
+    isLogged: false
   };
 
   componentDidMount() {
@@ -34,6 +32,13 @@ class App extends Component {
     this.props.handleLoginInit()
     this.checkSheetValue();
     this.checkBaseUrlValue();
+
+    const session_info = localStorage.getItem("session_access_token");
+
+    if(!session_info) {
+      this.props.showNotice("You are not logged in, please log in to continue", "warning", false);
+    }
+
   }
 
   componentWillMount = () => {
@@ -114,11 +119,7 @@ class App extends Component {
     chrome.storage.sync.get(["sheetIdValue"], value => {
       if (!value.sheetIdValue) {
         const message = `Please set the Google Sheet ID option. Go to the Extension Options Panel.`;
-        this.setState(prevState => {
-          return {
-            notices: [...prevState.notices, { class: "error", message }]
-          };
-        });
+        this.props.showNotice(message, "error")
       } else {
         this.props.setSpreadsheetId(value.sheetIdValue);
       }
@@ -129,12 +130,8 @@ class App extends Component {
     //eslint-disable-next-line no-undef
     chrome.storage.sync.get(["baseUrlValue"], value => {
       if (!value.baseUrlValue) {
-        const message = `Please set the WordPress Site URL option. Go to the Extension Options Panel.`;
-        this.setState(prevState => {
-          return {
-            notices: [...prevState.notices, { class: "error", message }]
-          };
-        });
+        const message = `Please set the WordPress Site URL option. Go to the Extension Options Panel.`; 
+        this.props.showNotice(message, "error");
       }
     })
 
@@ -170,7 +167,6 @@ class App extends Component {
   handleBigApproveButton = () => {
     this.cloneAndChangeButtonAttr();
 
-    const { formData } = this.state;
     const { person, item } = this.props.currentItem;
     const domain = extractDomainName(window.location.host);
     const range = `${domain}!A2`;
@@ -216,17 +212,11 @@ class App extends Component {
   }
 
   render() {
-    console.log('from render', this.props);
-    const {
-      notices,
-      isHidden
-    } = this.state;
-
+    const { isHidden } = this.state;
     const { logged } = this.props.session
-
     return (
       <div className="App">
-        <Notices notices={notices} />
+        <Notices />
         <Loading
           render={() => {
             return (this.props.promotions.isFetching || this.props.highlights.isFetching) && logged && !isHidden ? (
@@ -264,7 +254,7 @@ class App extends Component {
 
             {logged ? (
               <React.Fragment>
-                <Boosting handleFormData={this.handleFormData} />
+                <Boosting />
                 <Highlights />
                 <Promotions />
               </React.Fragment>
@@ -285,7 +275,8 @@ const mapStateToProps = state => {
     highlights: state.highlights,
     promotions: state.promotions,
     session: state.session,
-    boosting: state.boosting
+    boosting: state.boosting,
+    notices: state.notices
   })
 }
 
@@ -297,6 +288,7 @@ const mapDispatchToProps = (dispatch) => {
     ...marketplaceActions, 
     ...spreadsheetActions, 
     ...spreadsheetSagaActions,
+    ...noticesActions,
     fetchApiData, 
     ...authSagaActions }, 
     dispatch); 

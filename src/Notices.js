@@ -1,10 +1,12 @@
 import React, {Fragment} from 'react'
 import Notice from "./Notice";
+import {connect} from 'react-redux';
+import { actions as noticesActions } from './reducers/notices'
 
-export default ({notices}) => {
+const Notices = ({notices}) => {
   return (
     <Fragment>
-      {notices.length
+    {notices.length
         ? notices.map(notice => {
           return (
             <Notice class={notice.class}>
@@ -18,3 +20,14 @@ export default ({notices}) => {
     </Fragment>
   )
 }
+
+const mapStateToProps = (state) => ({
+  notices: state.notices
+})
+
+const NoticesContainer = connect(
+  mapStateToProps,
+  ...noticesActions
+)(Notices)
+
+export default NoticesContainer;
