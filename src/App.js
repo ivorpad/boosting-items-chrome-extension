@@ -19,10 +19,8 @@ import { actions as spreadsheetSagaActions } from './sagas/SpreadsheetSaga';
 import { actions as noticesActions } from './reducers/notices'
 
 class App extends Component {
-  state = {
-    isHidden: true,
-    isLogged: false
-  };
+  
+  state = { isHidden: true };
 
   componentDidMount() {
     removeItemBundleCount();
@@ -135,17 +133,6 @@ class App extends Component {
       }
     })
 
-  };
-
-  handleFormData = (values, key) => {
-    this.setState(prevState => {
-      return {
-        formData: {
-          ...prevState.formData,
-          [key]: values
-        }
-      };
-    });
   };
 
   cloneAndChangeButtonAttr = () => {
