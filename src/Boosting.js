@@ -1,6 +1,9 @@
 import 'rc-slider/assets/index.css';
 import React, { Component } from 'react';
 import Slider from 'rc-slider';
+import {connect} from 'react-redux';
+import { actions as boostingActions } from './reducers/boosting'
+
 const style = { marginTop: 10, marginBottom: 50, marginLeft: 20, marginRight: 20 };
 
 const marks = {
@@ -26,6 +29,7 @@ class Boosting extends Component {
     }
 
     handleItemRating = (rating) => {
+      this.props.setBoosting(rating);
       this.props.handleFormData(this.itemBoostingChange(rating), 'boosting')
     }
 
@@ -42,4 +46,14 @@ class Boosting extends Component {
     }
 }
 
-export default Boosting;
+const mapStateToProps = (state) => ({
+  boosting: state.boosting
+})
+
+const BoostingContainer = connect(
+  mapStateToProps,
+  { ...boostingActions}
+)(Boosting)
+
+
+export default BoostingContainer;

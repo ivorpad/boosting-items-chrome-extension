@@ -1,42 +1,49 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
+import { connect } from "react-redux";
+import { actions as HighlightsActions } from "./reducers/highlights";
 
 class Highlights extends Component {
+  componentDidMount = () => {
+    this.select.selectedIndex = "-1";
+  };
 
-    state = { selectedOptions: [] }
-    
-    shouldComponentUpdate = (nextProps, nextState) => {
-      if (this.state.selectedOptions !== nextState.selectedOptions) {
-        return true;
-      }
-      return false;
-    }
-    
-    handleOptionChange = (e) => {
-      const selected = [...e.target.selectedOptions];
-      this.setState({
-        selectedOptions: selected.map((val) => val.innerText)
-      });
-    }
-
-    componentDidUpdate = (prevProps, prevState) => {
-      if(this.state.selectedOptions !== prevState.selectedOptions) {
-        this.props.handleFormData(this.state.selectedOptions, "highlights");
-      }
-    }
-    
-    render() {
-        return (
-          <div className="highlights" style={{ paddingTop: 20, fontWeight: 'bold' }}><label htmlFor="highlights">Highlights:</label>
-            <select name="highlights" id="highlights" class="highlights__select" multiple="multiple" onChange={this.handleOptionChange}>
-              {this.props.highlightsData.map(({ title }, index) => {
-                return(
-                  <option key={index} value={title.rendered}>{title.rendered}</option>
-                )
-              })}
-            </select>
-         </div>
-        );
-    }
+  render() {
+    return (
+      <div
+        className="highlights"
+        style={{ paddingTop: 20, fontWeight: "bold" }}
+      >
+        <label htmlFor="highlights">Highlights:</label>
+        <select
+          ref={select => (this.select = select)}
+          name="highlights"
+          id="highlights"
+          class="highlights__select"
+          multiple="multiple"
+          onChange={e => this.props.setHighlights(e.target)}
+        >
+          {this.props.highlights.data.map(({ title }, index) => {
+            return (
+              <option key={index} value={title.rendered}>
+                {title.rendered}
+              </option>
+            );
+          })}
+        </select>
+      </div>
+    );
+  }
 }
 
-export default Highlights;
+const mapStateToProps = state => ({
+  highlights: state.highlights
+});
+
+const HighlightsContainer = connect(
+  mapStateToProps,
+  {
+    ...HighlightsActions
+  }
+)(Highlights);
+
+export default HighlightsContainer;
