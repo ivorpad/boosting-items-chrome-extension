@@ -6,24 +6,18 @@ import Promotions from "./Promotions";
 import Button from "./Button";
 import Loading from "./Loading";
 import Notices from "./Notices";
-import SheetApi from "./helpers/API";
 import moment from "moment";
-import { actions as restApiDataSagaActions } from "./sagas/restApiDataSaga";
-import { actions as authSagaActions } from "./sagas/AuthSaga";
 import { bindActionCreators } from "redux";
 import { connect } from 'react-redux';
+import { actions as restApiDataSagaActions } from "./sagas/restApiDataSaga";
+import { actions as authSagaActions } from "./sagas/AuthSaga";
 import { actions as marketplaceActions } from './reducers/marketplace';
 import { actions as spreadsheetActions } from './reducers/spreadsheet';
-import {store} from './index'
+import { actions as spreadsheetSagaActions } from './sagas/SpreadsheetSaga';
  
-import {
-  extractDomainName,
-  removeItemBundleCount
-} from "./helpers/helpers";
+import { extractDomainName, removeItemBundleCount } from "./helpers/helpers";
 import loading from "./loading.svg";
 
-const domain = extractDomainName(window.location.host);
-const range = `${domain}!A2`;
 
 removeItemBundleCount();
 
@@ -45,11 +39,11 @@ class App extends Component {
     this.props.setMarketData(marketDataPayload);
     this.props.fetchApiData();
     this.props.handleLoginInit()
-    this.checkSheetUrlOption();
+    this.checkSheetValue();
+    this.checkBaseUrlValue();
   }
 
   componentWillMount = () => {
-    this.checkIfLoggedIn();
     this.bigApproveButton = document.getElementById("approve").children["proofing_action"];
     this.bigApproveButton.addEventListener("click",this.handleBigApproveButton);
 
@@ -122,7 +116,7 @@ class App extends Component {
     }
   };
 
-  checkSheetUrlOption = () => {
+  checkSheetValue = () => {
     //eslint-disable-next-line no-undef
     chrome.storage.sync.get(["sheetIdValue"], value => {
       if (!value.sheetIdValue) {
@@ -138,70 +132,19 @@ class App extends Component {
     });
   };
 
-  //// fetchDataFromApi = () => {
-  //   // eslint-disable-next-line no-undef
-  ////       chrome.storage.sync.get()
-  ////       .then()
-  ////       .catch(e => {
-  ////         const message = `Please set the WordPress Site URL option. Go to the Extension Options Panel.`;
-  //         // TODO: dispatch action
-  ////         this.setState(prevState => {
-  ////           return {
-  ////             notices: [...prevState.notices, { class: "error", message }]
-  ////           };
-  ////         });
-  ////       });
-  ////   });
-  //// };
-
-  handleLogin = e => {
-    e.preventDefault();
-
-    // eslint-disable-next-line no-undef
-    chrome.runtime.sendMessage(
-      { type: "login" },
-      function(response) {
-        this.setState({
-          isLoggedIn: response.isLoggedIn,
-          notices: this.state.notices.filter(notice => notice.type !== "logout")
+  checkBaseUrlValue = () => {
+    //eslint-disable-next-line no-undef
+    chrome.storage.sync.get(["baseUrlValue"], value => {
+      if (!value.baseUrlValue) {
+        const message = `Please set the WordPress Site URL option. Go to the Extension Options Panel.`;
+        this.setState(prevState => {
+          return {
+            notices: [...prevState.notices, { class: "error", message }]
+          };
         });
-        if (response.access_token) {
-          this.handleRefresh();
-        }
-      }.bind(this)
-    );
-  };
+      }
+    })
 
-  handleRefresh = () => {
-    // eslint-disable-next-line no-undef
-    chrome.runtime.sendMessage(
-      { type: "refresh" },
-      function(response) {
-        console.log(response);
-        localStorage.setItem("start_token_refresh", response.startTokenRefresh);
-        this.setState({
-          startTokenRefresh: JSON.parse(
-            localStorage.getItem("start_token_refresh")
-          )
-        });
-      }.bind(this)
-    );
-  };
-
-  handleLogout = (e, prevent) => {
-    if (prevent) {
-      e.preventDefault();
-    }
-    // eslint-disable-next-line no-undef
-    chrome.runtime.sendMessage(
-      {type: "logout"},
-      function(response) {
-        console.log(response);
-        this.setState({
-          isLoggedIn: response.isLoggedIn
-        });
-      }.bind(this)
-    );
   };
 
   handleFormData = (values, key) => {
@@ -213,43 +156,6 @@ class App extends Component {
         }
       };
     });
-  };
-
-  // TODO: Improve this method name to also check if the expires_in time is less than 10 minutes
-  // so we can re-issue a new token
-  checkIfLoggedIn = () => {
-    // eslint-disable-next-line no-undef
-    chrome.storage.sync.get(
-      ["access_token"],
-      function(result) {
-        fetch(
-          `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${
-            result.access_token
-          }`
-        )
-          .then(resp => resp.json())
-          .then(val => {
-            if (val.error_description) {
-              throw new Error("Not logged in, please login to continue.");
-            } else {
-              this.setState({
-                isLoggedIn: true
-              });
-            }
-          })
-          .catch(err => {
-            this.setState(prevState => {
-              return {
-                isLoggedIn: false,
-                notices: [
-                  ...prevState.notices,
-                  { type: "logout", class: "warning", message: err.message }
-                ]
-              };
-            });
-          });
-      }.bind(this)
-    );
   };
 
   cloneAndChangeButtonAttr = () => {
@@ -273,6 +179,8 @@ class App extends Component {
 
     const { formData } = this.state;
     const { person, item } = this.props.currentItem;
+    const domain = extractDomainName(window.location.host);
+    const range = `${domain}!A2`;
 
     const payload = {
       range: range,
@@ -295,29 +203,7 @@ class App extends Component {
         ]
       ]
     };
-
-    this.postDataToSpreadsheet(payload);
-  };
-
-  postDataToSpreadsheet = payload => {
-    // eslint-disable-next-line no-undef
-    chrome.storage.sync.get(
-      ["access_token"],
-      result => {
-        if (!result.access_token) {
-          return;
-        }
-        SheetApi.defaults.headers.post["Authorization"] = `Bearer ${result.access_token}`;
-        SheetApi.post(`/${this.props.sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`,payload)
-          .then(response => {
-            // TODO: Remove
-            console.log(response);
-          })
-          .catch(e => {
-            console.log(e.response);
-          });
-      }
-    );
+    this.props.sendDataToSheets(this.props.session.access_token, this.props.sheetId, payload);
   };
 
   handleApproveButton = () => {
@@ -326,12 +212,12 @@ class App extends Component {
     });
   };
 
-  handleReduxLogin = (e) => {
+  handleLogin = (e) => {
     e.preventDefault()
     this.props.handleLoginAction();
   }
 
-  handleReduxLogout = (e) => {
+  handleLogout = (e) => {
     e.preventDefault();
     this.props.handleSignOut();
   }
@@ -340,16 +226,17 @@ class App extends Component {
     console.log('from render', this.props);
     const {
       notices,
-      isLoggedIn,
       isHidden
     } = this.state;
+
+    const { logged } = this.props.session
 
     return (
       <div className="App">
         <Notices notices={notices} />
         <Loading
           render={() => {
-            return (this.props.promotions.isFetching || this.props.highlights.isFetching) && isLoggedIn && !isHidden ? (
+            return (this.props.promotions.isFetching || this.props.highlights.isFetching) && logged && !isHidden ? (
               <img
                 src={
                   // eslint-disable-next-line no-undef
@@ -365,28 +252,24 @@ class App extends Component {
           <React.Fragment>
             <hr className="app__separator" />
             <h4 className="app__title">Item Boosting</h4>
-
-            <button onClick={(e) => this.handleReduxLogin(e)}>Login with Redux</button>
-            <button onClick={(e) => this.handleReduxLogout(e)}>Signout with Redux</button>
-
             <Button
               render={() => {
                 return (
                   <button
-                    className={isLoggedIn ? "logout" : "login"}
+                    className={logged ? "logout" : "login"}
                     onClick={
-                      isLoggedIn
-                        ? e => this.handleLogout(e, true)
-                        : this.handleLogin
+                      logged
+                        ? e => this.handleLogout(e)
+                        : e => this.handleLogin(e)
                     }
                   >
-                    {isLoggedIn ? "Logout" : "Login"}
+                    {logged ? "Logout" : "Login"}
                   </button>
                 );
               }}
             />
 
-            {isLoggedIn ? (
+            {logged ? (
               <React.Fragment>
                 <Boosting handleFormData={this.handleFormData} />
                 <Highlights />
@@ -419,6 +302,7 @@ const mapDispatchToProps = (dispatch) => {
   return bindActionCreators({ 
     ...marketplaceActions, 
     ...spreadsheetActions, 
+    ...spreadsheetSagaActions,
     fetchApiData, 
     ...authSagaActions }, 
     dispatch); 

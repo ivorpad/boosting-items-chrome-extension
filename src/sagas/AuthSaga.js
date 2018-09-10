@@ -32,7 +32,6 @@ function* verifyToken(token) {
 }
 
 const requestAuthToken = type => {
-  console.log("called");
   return new Promise((resolve, reject) => {
     // eslint-disable-next-line no-undef
     chrome.runtime.sendMessage({ type }, function(response) {
@@ -78,7 +77,7 @@ function* authorize(refresh, storedToken) {
       var { access_token } = JSON.parse(storedToken);
       ({ expires_in } = yield call(verifyToken, access_token));
 
-      if (refresh && Number(expires_in) <= 3590) {
+      if (refresh && Number(expires_in) <= 900) {
         token = yield call(requestAuthToken, "refresh");
         yield call(storeToken, token, expires_in, "true");
       } else {

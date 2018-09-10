@@ -1,15 +1,9 @@
-export const types = {
-  SET_SPREADSHEET_ID: "SPREADSHEET/SET_SPREADSHEET_ID"
-};
-
+import { SET_SPREADSHEET_ID, SEND_DATA_TO_SHEETS } from "../constants/sagas";
 
 const defaultState = {
-  sheetId: ""
+  sheetId: "",
+  payload: {}
 }
-
-const {
-  SET_SPREADSHEET_ID
-} = types
 
 export default (state = defaultState, action) => {
   switch(action.type) {
@@ -17,7 +11,10 @@ export default (state = defaultState, action) => {
       return {
         ...state,
         sheetId: action.id
-      }  
+      }
+    case SEND_DATA_TO_SHEETS:
+      console.log(action)
+    return state    
     default:
       return state
   }
