@@ -179,27 +179,6 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 				})
 			});
 			return true;
-
-			// case "refresh":
-			// 	console.log("bg refresh");
-			// 	chrome.storage.sync.get(["access_token"], function (result) {
-			// 		if (result.access_token) {
-						
-			// 			TokenFactory.tokenInfo(result.access_token)
-			// 				.then(resp => {
-			// 				console.log(`interval set to: ${Number(resp.expires_in) * 1000 - 900000}` );
-			// 				interval = setInterval(function () {
-
-			// 					TokenFactory.getNewToken(false).then(token => {
-			// 						console.log('getting a new token')
-			// 						chrome.storage.sync.set({ access_token: token });
-			// 						console.log(token);
-			// 					});
-			// 				}, Number(resp.expires_in) * 1000 - 900000);
-			// 			});
-			// 		}
-			// 	});
-			// return true;
 		case "logout":
 			console.log("prepare logout");
 
