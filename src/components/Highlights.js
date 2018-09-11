@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { actions as HighlightsActions } from "./reducers/highlights";
+import { actions as HighlightsActions } from "../reducers/highlights";
 
 class Highlights extends Component {
   componentDidMount = () => {

@@ -61,9 +61,7 @@ function* authorize(refresh, storedToken) {
   try {
     let token;
     let expires_in;
-    
-    console.log('TCL: function*authorize -> storedToken', storedToken);
-    
+        
     if (!storedToken) {
       token = yield call(requestAuthToken, "login");
       if (token) {

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { actions as PromotionActions } from "./reducers/promotions";
+import { actions as PromotionActions } from "../reducers/promotions";
 
 class Promotions extends Component {
   componentDidMount = () => {

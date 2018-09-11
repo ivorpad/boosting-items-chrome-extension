@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "./App.css";
-import { extractDomainName, removeItemBundleCount } from "./helpers/helpers";
+import { extractDomainName, removeItemBundleCount } from "../helpers/helpers";
 import loading from "./loading.svg";
 import Boosting from "./Boosting";
 import Highlights from "./Highlights";
@@ -11,12 +11,12 @@ import Notices from "./Notices";
 import moment from "moment";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
-import { actions as restApiDataSagaActions } from "./sagas/restApiDataSaga";
-import { actions as authSagaActions } from "./sagas/AuthSaga";
-import { actions as marketplaceActions } from "./reducers/marketplace";
-import { actions as spreadsheetActions } from "./reducers/spreadsheet";
-import { actions as spreadsheetSagaActions } from "./sagas/SpreadsheetSaga";
-import { actions as noticesActions } from "./reducers/notices";
+import { actions as restApiDataSagaActions } from "../sagas/restApiDataSaga";
+import { actions as authSagaActions } from "../sagas/AuthSaga";
+import { actions as marketplaceActions } from "../reducers/marketplace";
+import { actions as spreadsheetActions } from "../reducers/spreadsheet";
+import { actions as spreadsheetSagaActions } from "../sagas/SpreadsheetSaga";
+import { actions as noticesActions } from "../reducers/notices";
 
 class App extends Component {
   state = { isHidden: true };

@@ -2,7 +2,7 @@ import "rc-slider/assets/index.css";
 import React, { Component } from "react";
 import Slider from "rc-slider";
 import { connect } from "react-redux";
-import { actions as boostingActions } from "./reducers/boosting";
+import { actions as boostingActions } from "../reducers/boosting";
 
 const style = {
   marginTop: 10,
