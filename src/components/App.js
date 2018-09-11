@@ -132,7 +132,6 @@ class App extends Component {
   checkSheetValue = () => {
     //eslint-disable-next-line no-undef
     chrome.storage.sync.get(["sheetIdValue"], value => {
-      console.log(value)
       if (!value.sheetIdValue) {
         const message = `Please set the Google Sheet ID option. Go to the Extension Options Panel.`;
         this.props.showNotice(message, "error");
