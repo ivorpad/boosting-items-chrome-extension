@@ -4,7 +4,6 @@ export default (state = [], action) => {
   switch (action.type) {
 
     case SHOW_NOTICE:
-    console.log(action)
       return [
         ...state,
         {

@@ -10,38 +10,47 @@ import Loading from "./Loading";
 import Notices from "./Notices";
 import moment from "moment";
 import { bindActionCreators } from "redux";
-import { connect } from 'react-redux';
+import { connect } from "react-redux";
 import { actions as restApiDataSagaActions } from "./sagas/restApiDataSaga";
 import { actions as authSagaActions } from "./sagas/AuthSaga";
-import { actions as marketplaceActions } from './reducers/marketplace';
-import { actions as spreadsheetActions } from './reducers/spreadsheet';
-import { actions as spreadsheetSagaActions } from './sagas/SpreadsheetSaga';
-import { actions as noticesActions } from './reducers/notices'
+import { actions as marketplaceActions } from "./reducers/marketplace";
+import { actions as spreadsheetActions } from "./reducers/spreadsheet";
+import { actions as spreadsheetSagaActions } from "./sagas/SpreadsheetSaga";
+import { actions as noticesActions } from "./reducers/notices";
 
 class App extends Component {
-  
   state = { isHidden: true };
 
   componentDidMount() {
+
+    const { setMarketData, fetchApiData, handleLoginInit, showNotice } = this.props;
+
     removeItemBundleCount();
     const marketDataPayload = this.prepareMarketData();
-    this.props.setMarketData(marketDataPayload);
-    this.props.fetchApiData();
-    this.props.handleLoginInit()
+    setMarketData(marketDataPayload);
+    fetchApiData();
+    handleLoginInit();
     this.checkSheetValue();
     this.checkBaseUrlValue();
 
     const session_info = localStorage.getItem("session_access_token");
 
-    if(!session_info) {
-      this.props.showNotice("You are not logged in, please log in to continue", "warning", false);
+    if (!session_info) {
+      showNotice(
+        "You are not logged in, please log in to continue",
+        "warning"
+      );
     }
-
   }
 
   componentWillMount = () => {
-    this.bigApproveButton = document.getElementById("approve").children["proofing_action"];
-    this.bigApproveButton.addEventListener("click",this.handleBigApproveButton);
+    this.bigApproveButton = document.getElementById("approve").children[
+      "proofing_action"
+    ];
+    this.bigApproveButton.addEventListener(
+      "click",
+      this.handleBigApproveButton
+    );
 
     this.approveButton = document.querySelector(
       ".reviewer-proofing-actions"
@@ -52,7 +61,6 @@ class App extends Component {
       ".header-right-container"
     ).firstElementChild;
     this.exitButton.addEventListener("click", e => {
-      this.handleLogout(e, false);
       this.props.handleLogout();
     });
 
@@ -73,11 +81,20 @@ class App extends Component {
   };
 
   componentWillUnmount = () => {
-    this.bigApproveButton.removeEventListener("click",this.handleBigApproveButton);
+    this.bigApproveButton.removeEventListener(
+      "click",
+      this.handleBigApproveButton
+    );
     this.approveButton.removeEventListener("click", this.handleApproveButton);
     this.exitButton.removeEventListener("click", this.handleLogout);
-    this.rejectButton.removeEventListener("click",this.handleRejectAndHoldButtons);
-    this.holdButton.removeEventListener("click", this.handleRejectAndHoldButtons);
+    this.rejectButton.removeEventListener(
+      "click",
+      this.handleRejectAndHoldButtons
+    );
+    this.holdButton.removeEventListener(
+      "click",
+      this.handleRejectAndHoldButtons
+    );
   };
 
   prepareMarketData = () => {
@@ -117,7 +134,7 @@ class App extends Component {
     chrome.storage.sync.get(["sheetIdValue"], value => {
       if (!value.sheetIdValue) {
         const message = `Please set the Google Sheet ID option. Go to the Extension Options Panel.`;
-        this.props.showNotice(message, "error")
+        this.props.showNotice(message, "error");
       } else {
         this.props.setSpreadsheetId(value.sheetIdValue);
       }
@@ -128,15 +145,16 @@ class App extends Component {
     //eslint-disable-next-line no-undef
     chrome.storage.sync.get(["baseUrlValue"], value => {
       if (!value.baseUrlValue) {
-        const message = `Please set the WordPress Site URL option. Go to the Extension Options Panel.`; 
+        const message = `Please set the WordPress Site URL option. Go to the Extension Options Panel.`;
         this.props.showNotice(message, "error");
       }
-    })
-
+    });
   };
 
   cloneAndChangeButtonAttr = () => {
-    const bigApproveButton = document.getElementById("approve").children["proofing_action"];
+    const bigApproveButton = document.getElementById("approve").children[
+      "proofing_action"
+    ];
     const approveAction = document.getElementById("approve");
     const newButton = bigApproveButton.cloneNode(true);
 
@@ -149,7 +167,8 @@ class App extends Component {
     approveAction.append(newButton);
   };
 
-  validateFormDataArray = array => Array.isArray(array) && array.length > 0 && typeof array !== "undefined";
+  validateFormDataArray = array =>
+    Array.isArray(array) && array.length > 0 && typeof array !== "undefined";
 
   handleBigApproveButton = () => {
     this.cloneAndChangeButtonAttr();
@@ -157,6 +176,8 @@ class App extends Component {
     const { person, item } = this.props.currentItem;
     const domain = extractDomainName(window.location.host);
     const range = `${domain}!A2`;
+
+    const { highlights, promotions, session, sheetId } = this.props;
 
     const payload = {
       range: range,
@@ -170,16 +191,16 @@ class App extends Component {
           item.id,
           person.reviewer,
           this.props.boosting,
-          this.validateFormDataArray(this.props.highlights.selected)
-            ? this.props.highlights.selected.join(", ")
+          this.validateFormDataArray(highlights.selected)
+            ? highlights.selected.join(", ")
             : "-",
-          this.validateFormDataArray(this.props.promotions.selected)
-            ? this.props.promotions.selected.join(", ")
+          this.validateFormDataArray(promotions.selected)
+            ? promotions.selected.join(", ")
             : "-"
         ]
       ]
     };
-    this.props.sendDataToSheets(this.props.session.access_token, this.props.sheetId, payload);
+    this.props.sendDataToSheets(session.access_token, sheetId, payload);
   };
 
   handleApproveButton = () => {
@@ -188,25 +209,29 @@ class App extends Component {
     });
   };
 
-  handleLogin = (e) => {
-    e.preventDefault()
+  handleLogin = e => {
+    e.preventDefault();
     this.props.handleLoginAction();
-  }
+  };
 
-  handleLogout = (e) => {
+  handleLogout = e => {
     e.preventDefault();
     this.props.handleSignOut();
-  }
+  };
 
   render() {
     const { isHidden } = this.state;
-    const { logged } = this.props.session
+    const { logged } = this.props.session;
     return (
       <div className="App">
         <Notices />
         <Loading
           render={() => {
-            return (this.props.promotions.isFetching || this.props.highlights.isFetching) && logged && !isHidden ? (
+            const { promotions, highlights } = this.props;
+
+            return (promotions.isFetching || highlights.isFetching) &&
+              logged &&
+              !isHidden ? (
               <img
                 src={
                   // eslint-disable-next-line no-undef
@@ -255,31 +280,41 @@ class App extends Component {
 
 // =============== \REDUX =============== //
 
-const mapStateToProps = state => {
-  return ({
-    currentItem: state.currentItem,
-    sheetId: state.spreadsheet.sheetId,
-    highlights: state.highlights,
-    promotions: state.promotions,
-    session: state.session,
-    boosting: state.boosting,
-    notices: state.notices
-  })
-}
+const mapStateToProps = ({
+  currentItem,
+  sheetId,
+  highlights,
+  promotions,
+  session,
+  boosting,
+  notices
+}) => {
+  return {
+    currentItem,
+    sheetId,
+    highlights,
+    promotions,
+    session,
+    boosting,
+    notices
+  };
+};
 
 const { fetchApiData } = restApiDataSagaActions;
 
-
-const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({ 
-    ...marketplaceActions, 
-    ...spreadsheetActions, 
-    ...spreadsheetSagaActions,
-    ...noticesActions,
-    fetchApiData, 
-    ...authSagaActions }, 
-    dispatch); 
-}
+const mapDispatchToProps = dispatch => {
+  return bindActionCreators(
+    {
+      ...marketplaceActions,
+      ...spreadsheetActions,
+      ...spreadsheetSagaActions,
+      ...noticesActions,
+      ...authSagaActions,
+      fetchApiData
+    },
+    dispatch
+  );
+};
 
 const AppContainer = connect(
   mapStateToProps,

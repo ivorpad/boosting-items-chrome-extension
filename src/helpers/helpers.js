@@ -22,8 +22,8 @@ export const getDataFrom = (array, marketplace) => {
 export const getFromStorageSync = (key) => {
 	return new Promise(function (resolve) {
 		//eslint-disable-next-line no-undef
-		chrome.storage.sync.get(key, function (items) {
-			resolve(items)
+		chrome.storage.sync.get(key, function (value) {
+			resolve(value)
 		})
 	})
 }

@@ -42,19 +42,8 @@ export function *fetchApiDataSagaWatcher() {
 }
 
 export const actions = {
-  fetchApiData: () => {
-    return { type: FETCH_API_DATA }
-  },
-
-  fetchApiDataPromotionsSuccess: (payload) => {
-    return { type: FETCH_PROMOTIONS_SUCCESS, payload};
-  },
-
-  fetchApiDataHighlightsSuccess: (payload) => {
-    return { type: FETCH_HIGHLIGHTS_SUCCESS, payload};
-  },
-
-  failure: (error) => {
-    return { type: ON_FETCH_ERROR, error };
-  },
+  fetchApiData: () => ({ type: FETCH_API_DATA }),
+  fetchApiDataPromotionsSuccess: (payload) => ({ type: FETCH_PROMOTIONS_SUCCESS, payload }),
+  fetchApiDataHighlightsSuccess: (payload) => ({ type: FETCH_HIGHLIGHTS_SUCCESS, payload}),
+  failure: (error) => ({ type: ON_FETCH_ERROR, error }),
 }

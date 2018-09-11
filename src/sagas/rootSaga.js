@@ -7,6 +7,5 @@ export default function* rootSaga() {
     fetchApiDataSagaWatcher(),
     requestAuthWatcher(),
     sendDataToSheetsSaga()
-    // add other watchers to the array
   ];
 }

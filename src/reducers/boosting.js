@@ -1,7 +1,5 @@
 const SET_BOOSTING_DATA = "MARKETPLACE/SET_BOOSTING_DATA";
 
-const initialState = "Good"
-
 export default (state = "Good", action) => {
   switch (action.type) {
 
