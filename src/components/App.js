@@ -132,6 +132,7 @@ class App extends Component {
   checkSheetValue = () => {
     //eslint-disable-next-line no-undef
     chrome.storage.sync.get(["sheetIdValue"], value => {
+      console.log(value)
       if (!value.sheetIdValue) {
         const message = `Please set the Google Sheet ID option. Go to the Extension Options Panel.`;
         this.props.showNotice(message, "error");
@@ -246,7 +247,7 @@ class App extends Component {
         {!isHidden ? (
           <React.Fragment>
             <hr className="app__separator" />
-            <h4 className="app__title">Item Boosting</h4>
+            {!logged && <h4 className="app__title">Item Boosting</h4> }
             <Button
               render={() => {
                 return (
@@ -282,7 +283,7 @@ class App extends Component {
 
 const mapStateToProps = ({
   currentItem,
-  sheetId,
+  spreadsheet,
   highlights,
   promotions,
   session,
@@ -291,7 +292,7 @@ const mapStateToProps = ({
 }) => {
   return {
     currentItem,
-    sheetId,
+    sheetId: spreadsheet.sheetId,
     highlights,
     promotions,
     session,
