@@ -7,6 +7,11 @@ export const extractDomainName = (hostname) => {
 	return host;
 }
 
+export const removeIdParamFromUrl = (url) => {
+	const index = url.lastIndexOf('/')
+	return url.substr(0, index);
+}
+
 export const removeItemBundleCount = () => {
 	Array.from(document.querySelectorAll('.e-form__label')).filter(function (v, i) {
 		return v.innerText === 'Item Bundle Count';

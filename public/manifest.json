@@ -12,11 +12,6 @@
     "default_icon": "/img/48.png"
   },
   "permissions": [
-    "https://themeforest.net/admin/awesome_proofing/*",
-    "https://codecanyon.net/admin/awesome_proofing/*",
-    "https://videohive.net/admin/awesome_proofing/*",
-    "https://graphicriver.net/admin/awesome_proofing/*",
-    "https://3docean.net/admin/awesome_proofing/*",
     "storage",
     "tabs",
     "identity",
@@ -35,7 +30,8 @@
   "content_scripts": [
     {
       "matches": [
-        "*://*/*admin/awesome_proofing*"
+        "*://*/*admin/awesome_proofing*",
+        "*://*/*admin/item/edit*"
       ],
       "css": ["/static/css/main.css"],
       "js": ["/static/js/main.js"]
@@ -48,7 +44,7 @@
   "options_page": "options.html",
   "content_security_policy": "script-src 'self' https://apis.google.com; object-src 'self'",
   "oauth2": {
-  	"client_id": "1078144084270-l7spsd4d748ihd8tj687bdtvegc9j3kc.apps.googleusercontent.com",
+  	"client_id": "661096566532-7mbtiq6p5eabfsluteg2pal0ss7o1dvd.apps.googleusercontent.com",
     "scopes": [
       "https://www.googleapis.com/auth/drive.file",
       "https://www.googleapis.com/auth/drive.readonly",

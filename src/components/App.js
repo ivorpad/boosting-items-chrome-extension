@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import uuid from 'uuid/v4';
 import "./App.css";
 import { extractDomainName, removeItemBundleCount } from "../helpers/helpers";
 import loading from "./loading.svg";
@@ -17,6 +18,11 @@ import { actions as marketplaceActions } from "../reducers/marketplace";
 import { actions as spreadsheetActions } from "../reducers/spreadsheet";
 import { actions as spreadsheetSagaActions } from "../sagas/SpreadsheetSaga";
 import { actions as noticesActions } from "../reducers/notices";
+import {
+	removeIdParamFromUrl
+} from '../helpers/helpers'
+
+const path = removeIdParamFromUrl(window.location.pathname);
 
 class App extends Component {
   state = { isHidden: true };
@@ -38,40 +44,48 @@ class App extends Component {
     if (!session_info) {
       showNotice(
         "You are not logged in, please log in to continue",
+        uuid(),
         "warning"
       );
+    }
+
+    
+    if (path === "/admin/item/edit") {
+      this.setState({
+        isHidden: false
+      })
     }
   }
 
   componentWillMount = () => {
-    this.bigApproveButton = document.getElementById("approve").children[
-      "proofing_action"
-    ];
-    this.bigApproveButton.addEventListener(
-      "click",
-      this.handleBigApproveButton
-    );
+    
+    if (path === "/admin/awesome_proofing") {
+       this.bigApproveButton = document.getElementById("approve").children["proofing_action"];
+       this.approveButton = document.querySelector(".reviewer-proofing-actions").firstElementChild;
+       this.exitButton = document.querySelector(".header-right-container").firstElementChild;
+       this.rejectButton = document.querySelector('a[href="#reject"]');
+       this.holdButton = document.querySelector('a[href="#hold"]');
+    
 
-    this.approveButton = document.querySelector(
-      ".reviewer-proofing-actions"
-    ).firstElementChild;
-    this.approveButton.addEventListener("click", this.handleApproveButton);
+        this.bigApproveButton.addEventListener(
+          "click",
+          this.handleBigApproveButton
+        );
 
-    this.exitButton = document.querySelector(
-      ".header-right-container"
-    ).firstElementChild;
-    this.exitButton.addEventListener("click", e => {
-      this.props.handleLogout();
-    });
+        this.approveButton.addEventListener("click", this.handleApproveButton);
 
-    this.rejectButton = document.querySelector('a[href="#reject"]');
-    this.rejectButton.addEventListener(
-      "click",
-      this.handleRejectAndHoldButtons
-    );
+        this.exitButton.addEventListener("click", e => {
+          this.props.handleLogout();
+        });
 
-    this.holdButton = document.querySelector('a[href="#hold"]');
-    this.holdButton.addEventListener("click", this.handleRejectAndHoldButtons);
+        
+        this.rejectButton.addEventListener(
+          "click",
+          this.handleRejectAndHoldButtons
+        );
+
+        this.holdButton.addEventListener("click", this.handleRejectAndHoldButtons);
+    }
 
     if (!this.props.session.logged) {
       this.setState({
@@ -81,20 +95,22 @@ class App extends Component {
   };
 
   componentWillUnmount = () => {
-    this.bigApproveButton.removeEventListener(
-      "click",
-      this.handleBigApproveButton
-    );
-    this.approveButton.removeEventListener("click", this.handleApproveButton);
-    this.exitButton.removeEventListener("click", this.handleLogout);
-    this.rejectButton.removeEventListener(
-      "click",
-      this.handleRejectAndHoldButtons
-    );
-    this.holdButton.removeEventListener(
-      "click",
-      this.handleRejectAndHoldButtons
-    );
+    if (path === "/admin/awesome_proofing") {
+      this.bigApproveButton.removeEventListener(
+        "click",
+        this.handleBigApproveButton
+      );
+      this.approveButton.removeEventListener("click", this.handleApproveButton);
+      this.exitButton.removeEventListener("click", this.handleLogout);
+      this.rejectButton.removeEventListener(
+        "click",
+        this.handleRejectAndHoldButtons
+      );
+      this.holdButton.removeEventListener(
+        "click",
+        this.handleRejectAndHoldButtons
+      );
+    }
   };
 
   prepareMarketData = () => {
@@ -102,15 +118,30 @@ class App extends Component {
     const { name } = JSON.parse(
       intercomSetup.getAttribute("data-intercom-settings-payload")
     );
-    const itemName = document.querySelector(".existing-value").innerText;
-    const itemUrl = document.querySelector(".submission-details > a").href;
-    const authorName = document.querySelectorAll(
-      'a[title="author profile page"]'
-    )[0].innerText;
-    const itemId = document
-      .querySelector(".submission-details > a")
-      .href.split("/")
-      .slice(-1)[0];
+
+    let itemName;
+    let itemUrl;
+    let authorName;
+    let itemId;
+
+    const getItemId = (url) => {
+      return url.split("/").slice(-1)[0];
+    }
+    
+    if (path === "/admin/awesome_proofing") {
+      itemName = document.querySelector(".existing-value").innerText;
+      itemUrl = document.querySelector(".submission-details > a").href;
+      authorName = authorName = document.querySelectorAll(
+        'a[title="author profile page"]'
+      )[0].innerText;
+      itemId = getItemId(itemUrl)
+    } else {
+      itemName = document.querySelectorAll('.f-input.-type-string.-width-full')[0].value
+      itemUrl = document.querySelector('.t-link.-decoration-none').href;
+      const authorNode = document.querySelectorAll('.disable-on-submit.e-form.-layout-horizontal .e-form__group')[1]
+      authorName = authorNode.querySelector('a.t-link').innerText;
+      itemId = getItemId(itemUrl);
+    }
 
     return {
       name,
@@ -220,11 +251,12 @@ class App extends Component {
   };
 
   render() {
+    console.log(this.props)
     const { isHidden } = this.state;
     const { logged } = this.props.session;
     return (
       <div className="App">
-        <Notices />
+        { path === "/admin/awesome_proofing" ? <Notices /> : null }
         <Loading
           render={() => {
             const { promotions, highlights } = this.props;
@@ -258,7 +290,7 @@ class App extends Component {
                         : e => this.handleLogin(e)
                     }
                   >
-                    {logged ? "Logout" : "Login"}
+                    {logged ? "Logout" : "Login with Google"}
                   </button>
                 );
               }}

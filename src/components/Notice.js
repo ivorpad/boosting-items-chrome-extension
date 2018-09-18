@@ -1,7 +1,6 @@
 import { Component } from 'react'
 import ReactDOM from 'react-dom';
 
-//const app_root = document.getElementById('root')
 const awesome_proofing = document.querySelector(".awesome-proofing");
 
 export default class Notice extends Component {

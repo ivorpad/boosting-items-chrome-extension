@@ -8,6 +8,7 @@ export default (state = [], action) => {
         ...state,
         {
           message: action.message,
+          id: action.id,
           class: action.cssClass
         }
       ]
@@ -17,5 +18,5 @@ export default (state = [], action) => {
 }
 
 export const actions = {
-  showNotice: (message, cssClass) => ({ type: SHOW_NOTICE, message, cssClass })
+  showNotice: (message, id, cssClass) => ({ type: SHOW_NOTICE, message, id, cssClass })
 }

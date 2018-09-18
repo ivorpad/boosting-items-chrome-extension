@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { extractDomainName } from "../helpers/helpers";
-import { takeLatest, call } from "redux-saga/effects";
-import { SEND_DATA_TO_SHEETS, SEND_DATA_TO_SHEETS_INIT } from '../constants/sagas'
+import { takeLatest, call, put } from "redux-saga/effects";
+import { SEND_DATA_TO_SHEETS } from '../constants/sagas'
 
 const domain = extractDomainName(window.location.host);
 const range = `${domain}!A2`;
@@ -30,8 +30,8 @@ function *postDataToSpreadsheet({token, sheetId, payload}) {
     });
 };
 
-function *handleSendDataToSheets(data) {
-  yield call(postDataToSpreadsheet, data)
+function *handleSendDataToSheets(action) {
+  yield call(postDataToSpreadsheet, action)
 }
 
 export function *sendDataToSheetsSaga() {
