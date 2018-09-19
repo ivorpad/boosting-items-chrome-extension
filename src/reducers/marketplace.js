@@ -31,7 +31,8 @@ export default (state = defaultState, action) => {
         item: {
           url: action.payload.itemUrl,
           title: action.payload.itemName,
-          id: action.payload.itemId
+          id: action.payload.itemId,
+          category: action.payload.categoryName
         }
       };
     default:
@@ -40,5 +41,5 @@ export default (state = defaultState, action) => {
 };
 
 export const actions = { 
-  setMarketData: payload => ({ type: types.SET_MARKET_DATA, payload }) 
+  setMarketData: (payload) => ({ type: types.SET_MARKET_DATA, payload }) 
 };

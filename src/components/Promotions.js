@@ -1,6 +1,14 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { actions as PromotionActions } from "../reducers/promotions";
+import styled from "styled-components";
+
+const PromotionsSection = styled.div`
+    margin-top: 20px;
+    .promotions__legend {
+      font-size: 14px;
+    }
+`
 
 class Promotions extends Component {
   componentDidMount = () => {
@@ -13,7 +21,7 @@ class Promotions extends Component {
 
   render() {
     return (
-      <div className="promotions">
+      <PromotionsSection>
         <div className="promotions__form">
           <legend className="promotions__legend">Promotions</legend>
           <form
@@ -45,7 +53,7 @@ class Promotions extends Component {
             )}
           </form>
         </div>
-      </div>
+      </PromotionsSection>
     );
   }
 }

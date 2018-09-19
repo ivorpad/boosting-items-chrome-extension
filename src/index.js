@@ -20,9 +20,9 @@ if (path === "/admin/awesome_proofing") {
   let node = nodes[nodes.length - 1];
   const newDiv = document.createElement("div");
   newDiv.id = "root";
-  node.append(newDiv);
+  newDiv.className = "e-fieldset";
+  node.parentElement.append(newDiv);
 }
-
 
 const sagaMiddleware = createSagaMiddleware();
 

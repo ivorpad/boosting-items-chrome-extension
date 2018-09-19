@@ -1,6 +1,26 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { actions as HighlightsActions } from "../reducers/highlights";
+import styled from "styled-components";
+
+const HighlightsSection = styled.div`
+  padding-top: 20px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  label {
+    font-size: 14px;
+  }
+  select#highlights {
+    width: 65%;
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgb(187, 187, 187);
+    border-image: initial;
+    border-radius: 5px;
+    padding: 3px;
+  }
+`
 
 class Highlights extends Component {
   componentDidMount = () => {
@@ -9,10 +29,7 @@ class Highlights extends Component {
 
   render() {
     return (
-      <div
-        className="highlights"
-        style={{ paddingTop: 20, fontWeight: "bold" }}
-      >
+      <HighlightsSection>
         <label htmlFor="highlights">Highlights:</label>
         <select
           ref={select => (this.select = select)}
@@ -30,7 +47,7 @@ class Highlights extends Component {
             );
           })}
         </select>
-      </div>
+      </HighlightsSection>
     );
   }
 }

@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import uuid from 'uuid/v4';
 import "./App.css";
 import { extractDomainName, removeItemBundleCount } from "../helpers/helpers";
 import loading from "./loading.svg";
@@ -19,37 +18,43 @@ import { actions as spreadsheetActions } from "../reducers/spreadsheet";
 import { actions as spreadsheetSagaActions } from "../sagas/SpreadsheetSaga";
 import { actions as noticesActions } from "../reducers/notices";
 import {
-	removeIdParamFromUrl
+  removeIdParamFromUrl,
+  getItemCategory
 } from '../helpers/helpers'
 
 const path = removeIdParamFromUrl(window.location.pathname);
 
 class App extends Component {
-  state = { isHidden: true };
+  state = {
+  	isHidden: true,
+  	submitButtonText: "Submit"
+  };
 
   componentDidMount() {
 
-    const { setMarketData, fetchApiData, handleLoginInit, showNotice } = this.props;
+    const { setMarketData, fetchApiData, handleLoginInit } = this.props;
 
     removeItemBundleCount();
     const marketDataPayload = this.prepareMarketData();
-    setMarketData(marketDataPayload);
+
+    if (path === "/admin/awesome_proofing") {
+      setMarketData(marketDataPayload);
+    } else {
+      const itemUrl = document.querySelector('.t-link.-decoration-none').href;
+      getItemCategory(itemUrl).then( category => {
+        setMarketData( { 
+          ...marketDataPayload,
+          categoryName: category
+         });
+      })
+    }
+
+    
     fetchApiData();
     handleLoginInit();
     this.checkSheetValue();
     this.checkBaseUrlValue();
 
-    const session_info = localStorage.getItem("session_access_token");
-
-    if (!session_info) {
-      showNotice(
-        "You are not logged in, please log in to continue",
-        uuid(),
-        "warning"
-      );
-    }
-
-    
     if (path === "/admin/item/edit") {
       this.setState({
         isHidden: false
@@ -123,6 +128,7 @@ class App extends Component {
     let itemUrl;
     let authorName;
     let itemId;
+    let categoryName;
 
     const getItemId = (url) => {
       return url.split("/").slice(-1)[0];
@@ -134,7 +140,9 @@ class App extends Component {
       authorName = authorName = document.querySelectorAll(
         'a[title="author profile page"]'
       )[0].innerText;
-      itemId = getItemId(itemUrl)
+      itemId = getItemId(itemUrl);
+      categoryName = Array.from(document.querySelectorAll('.submission-details > div > a')).filter(n => n.pathname.startsWith('/category/'))[0].innerText;
+
     } else {
       itemName = document.querySelectorAll('.f-input.-type-string.-width-full')[0].value
       itemUrl = document.querySelector('.t-link.-decoration-none').href;
@@ -148,7 +156,8 @@ class App extends Component {
       itemName,
       itemUrl,
       authorName,
-      itemId
+      itemId,
+      categoryName
     };
   };
 
@@ -201,14 +210,21 @@ class App extends Component {
   validateFormDataArray = array =>
     Array.isArray(array) && array.length > 0 && typeof array !== "undefined";
 
-  handleBigApproveButton = () => {
-    this.cloneAndChangeButtonAttr();
+    //TODO: Rename method
+  handleBigApproveButton = (e) => {
+    
+    if(path === "/admin/item/edit") {
+      e.preventDefault();
+      e.target.disabled = true;
+    } else {
+      this.cloneAndChangeButtonAttr();
+    }
 
     const { person, item } = this.props.currentItem;
     const domain = extractDomainName(window.location.host);
     const range = `${domain}!A2`;
 
-    const { highlights, promotions, session, sheetId } = this.props;
+    const { highlights, promotions, session, spreadsheet } = this.props;
 
     const payload = {
       range: range,
@@ -220,6 +236,7 @@ class App extends Component {
           item.title,
           item.url,
           item.id,
+          item.category,
           person.reviewer,
           this.props.boosting,
           this.validateFormDataArray(highlights.selected)
@@ -231,7 +248,7 @@ class App extends Component {
         ]
       ]
     };
-    this.props.sendDataToSheets(session.access_token, sheetId, payload);
+    this.props.sendDataToSheets(session.access_token, spreadsheet.sheetId, payload);
   };
 
   handleApproveButton = () => {
@@ -250,12 +267,17 @@ class App extends Component {
     this.props.handleSignOut();
   };
 
+  handleAdminEditSubmit = (e) => {
+    e.preventDefault();
+
+  }
+
   render() {
-    console.log(this.props)
     const { isHidden } = this.state;
     const { logged } = this.props.session;
+    const { buttonText } = this.props.spreadsheet;
     return (
-      <div className="App">
+      <div className="App" style={{ padding: '20px' }}>
         { path === "/admin/awesome_proofing" ? <Notices /> : null }
         <Loading
           render={() => {
@@ -301,6 +323,9 @@ class App extends Component {
                 <Boosting />
                 <Highlights />
                 <Promotions />
+                { path === "/admin/item/edit" ? 
+                  <button onClick={e => this.handleBigApproveButton(e)} style={{ width: '20%', marginTop: '20px' }}> { !buttonText ? "Submit" : buttonText } </button>
+                : null  }
               </React.Fragment>
             ) : null}
           </React.Fragment>
@@ -323,7 +348,7 @@ const mapStateToProps = ({
 }) => {
   return {
     currentItem,
-    sheetId: spreadsheet.sheetId,
+    spreadsheet,
     highlights,
     promotions,
     session,

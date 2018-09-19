@@ -1,7 +1,10 @@
 import axios from 'axios';
 import { extractDomainName } from "../helpers/helpers";
 import { takeLatest, call, put } from "redux-saga/effects";
-import { SEND_DATA_TO_SHEETS } from '../constants/sagas'
+import {
+	SEND_DATA_TO_SHEETS,
+	SEND_DATA_TO_SHEETS_SUCCESS
+} from '../constants/sagas'
 
 const domain = extractDomainName(window.location.host);
 const range = `${domain}!A2`;
@@ -20,14 +23,22 @@ function *postDataToSpreadsheet({token, sheetId, payload}) {
     }
   });
 
+  let success;
+
   SheetApi.defaults.headers.post["Authorization"] = `Bearer ${token}`;
-  SheetApi.post(`/${sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`, payload)
+  yield SheetApi.post(`/${sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`, payload)
     .then(response => {
+      success = true;
       console.log(response);
     })
     .catch(e => {
       console.log(e.response);
     });
+
+    if(success) {
+      yield put(actions.sendDataToSheetsSuccess())
+    }
+
 };
 
 function *handleSendDataToSheets(action) {
@@ -39,5 +50,6 @@ export function *sendDataToSheetsSaga() {
 }
 
 export const actions = {
-  sendDataToSheets: (token, sheetId, payload) => ({ type: SEND_DATA_TO_SHEETS, token, sheetId, payload })
+  sendDataToSheets: (token, sheetId, payload) => ({ type: SEND_DATA_TO_SHEETS, token, sheetId, payload }),
+  sendDataToSheetsSuccess: () => ({ type: SEND_DATA_TO_SHEETS_SUCCESS })
 };
