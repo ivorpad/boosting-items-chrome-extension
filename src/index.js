@@ -6,11 +6,10 @@ import { createStore, applyMiddleware, compose } from "redux";
 import createSagaMiddleware from "redux-saga";
 import rootReducer from './reducers/index';
 import rootSaga from './sagas/rootSaga';
-import { removeIdParamFromUrl } from './helpers/helpers'
 
-const path = removeIdParamFromUrl(window.location.pathname)
+const path = window.location.pathname;
 
-if (path === "/admin/awesome_proofing") {
+if (path.startsWith("/admin/awesome_proofing")) {
   const reviewerProofingActions = document.querySelector(".reviewer-proofing-actions");
   const newDiv = document.createElement("div");
   newDiv.id = "root";

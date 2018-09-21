@@ -3,7 +3,8 @@ import { extractDomainName } from "../helpers/helpers";
 import { takeLatest, call, put } from "redux-saga/effects";
 import {
 	SEND_DATA_TO_SHEETS,
-	SEND_DATA_TO_SHEETS_SUCCESS
+  SEND_DATA_TO_SHEETS_SUCCESS,
+  SEND_DATA_TO_SHEETS_FAILURE
 } from '../constants/sagas'
 
 const domain = extractDomainName(window.location.host);
@@ -32,11 +33,14 @@ function *postDataToSpreadsheet({token, sheetId, payload}) {
       console.log(response);
     })
     .catch(e => {
+      success = false;
       console.log(e.response);
     });
 
     if(success) {
       yield put(actions.sendDataToSheetsSuccess())
+    } else {
+      yield put(actions.sendDataToSheetsError())
     }
 
 };
@@ -51,5 +55,6 @@ export function *sendDataToSheetsSaga() {
 
 export const actions = {
   sendDataToSheets: (token, sheetId, payload) => ({ type: SEND_DATA_TO_SHEETS, token, sheetId, payload }),
-  sendDataToSheetsSuccess: () => ({ type: SEND_DATA_TO_SHEETS_SUCCESS })
+  sendDataToSheetsSuccess: () => ({ type: SEND_DATA_TO_SHEETS_SUCCESS }),
+  sendDataToSheetsSuccess: () => ({ type: SEND_DATA_TO_SHEETS_FAILURE })
 };

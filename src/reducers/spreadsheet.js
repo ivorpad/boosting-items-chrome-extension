@@ -1,4 +1,9 @@
-import { SET_SPREADSHEET_ID, SEND_DATA_TO_SHEETS, SEND_DATA_TO_SHEETS_SUCCESS } from "../constants/sagas";
+import {
+	SET_SPREADSHEET_ID,
+	SEND_DATA_TO_SHEETS,
+	SEND_DATA_TO_SHEETS_SUCCESS,
+	SEND_DATA_TO_SHEETS_FAILURE
+} from "../constants/sagas";
 
 const defaultState = {
   sheetId: "",
@@ -20,6 +25,11 @@ export default (state = defaultState, action) => {
       return {
         ...state,
         buttonText: 'Submitted!'
+      }
+    case SEND_DATA_TO_SHEETS_FAILURE:
+      return {
+        ...state,
+        buttonText: 'Error. Try again.'
       }
     default:
       return state

@@ -17,12 +17,9 @@ import { actions as marketplaceActions } from "../reducers/marketplace";
 import { actions as spreadsheetActions } from "../reducers/spreadsheet";
 import { actions as spreadsheetSagaActions } from "../sagas/SpreadsheetSaga";
 import { actions as noticesActions } from "../reducers/notices";
-import {
-  removeIdParamFromUrl,
-  getItemCategory
-} from '../helpers/helpers'
+import { getItemCategory } from '../helpers/helpers'
 
-const path = removeIdParamFromUrl(window.location.pathname);
+const isAwesomeProofing = window.location.pathname.startsWith("/admin/awesome_proofing")
 
 class App extends Component {
   state = {
@@ -37,7 +34,7 @@ class App extends Component {
     removeItemBundleCount();
     const marketDataPayload = this.prepareMarketData();
 
-    if (path === "/admin/awesome_proofing") {
+    if (isAwesomeProofing) {
       setMarketData(marketDataPayload);
     } else {
       const itemUrl = document.querySelector('.t-link.-decoration-none').href;
@@ -55,7 +52,7 @@ class App extends Component {
     this.checkSheetValue();
     this.checkBaseUrlValue();
 
-    if (path === "/admin/item/edit") {
+    if (!isAwesomeProofing) {
       this.setState({
         isHidden: false
       })
@@ -64,7 +61,7 @@ class App extends Component {
 
   componentWillMount = () => {
     
-    if (path === "/admin/awesome_proofing") {
+    if (isAwesomeProofing) {
        this.bigApproveButton = document.getElementById("approve").children["proofing_action"];
        this.approveButton = document.querySelector(".reviewer-proofing-actions").firstElementChild;
        this.exitButton = document.querySelector(".header-right-container").firstElementChild;
@@ -100,7 +97,7 @@ class App extends Component {
   };
 
   componentWillUnmount = () => {
-    if (path === "/admin/awesome_proofing") {
+    if (isAwesomeProofing) {
       this.bigApproveButton.removeEventListener(
         "click",
         this.handleBigApproveButton
@@ -134,7 +131,7 @@ class App extends Component {
       return url.split("/").slice(-1)[0];
     }
     
-    if (path === "/admin/awesome_proofing") {
+    if (isAwesomeProofing) {
       itemName = document.querySelector(".existing-value").innerText;
       itemUrl = document.querySelector(".submission-details > a").href;
       authorName = authorName = document.querySelectorAll(
@@ -213,7 +210,7 @@ class App extends Component {
     //TODO: Rename method
   handleBigApproveButton = (e) => {
     
-    if(path === "/admin/item/edit") {
+    if (!isAwesomeProofing) {
       e.preventDefault();
       e.target.disabled = true;
     } else {
@@ -278,7 +275,9 @@ class App extends Component {
     const { buttonText } = this.props.spreadsheet;
     return (
       <div className="App" style={{ padding: '20px' }}>
-        { path === "/admin/awesome_proofing" ? <Notices /> : null }
+        {
+        	isAwesomeProofing ? < Notices / > : null
+        }
         <Loading
           render={() => {
             const { promotions, highlights } = this.props;
@@ -323,7 +322,8 @@ class App extends Component {
                 <Boosting />
                 <Highlights />
                 <Promotions />
-                { path === "/admin/item/edit" ? 
+                {
+                	!isAwesomeProofing ?
                   <button onClick={e => this.handleBigApproveButton(e)} style={{ width: '20%', marginTop: '20px' }}> { !buttonText ? "Submit" : buttonText } </button>
                 : null  }
               </React.Fragment>
