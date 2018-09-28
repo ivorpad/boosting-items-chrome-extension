@@ -31,7 +31,7 @@ class App extends Component {
 
     const { setMarketData, fetchApiData, handleLoginInit } = this.props;
 
-    removeItemBundleCount();
+    //removeItemBundleCount();
     const marketDataPayload = this.prepareMarketData();
 
     if (isAwesomeProofing) {
