@@ -12,7 +12,12 @@ import { ON_FETCH_ERROR, FETCH_API_DATA } from "../constants/sagas";
 const fetchApiDataRequest = async (endpoint) => {
   let url = await getFromStorageSync("baseUrlValue");
   return axios
-    .get(`https://${url.baseUrlValue}/wp-json/wp/v2/${endpoint}?filter[marketplace]=${extractDomainName(window.location.host)}`)
+    .get(`https://${url.baseUrlValue}/wp-json/wp/v2/${endpoint}?filter[marketplace]=${extractDomainName(window.location.host)}`, {
+      headers: {
+        'accept': 'application/json',
+        'content-type': 'application/x-www-form-urlencoded'
+       }
+    })
     .then(response => response)
     .catch(error => {
       throw new Error(error);

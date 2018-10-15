@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { actions as HighlightsActions } from "../reducers/highlights";
 import styled from "styled-components";
+import he from "he";
 
 const HighlightsSection = styled.div`
   padding-top: 20px;
@@ -38,11 +39,12 @@ class Highlights extends Component {
           class="highlights__select"
           multiple="multiple"
           onChange={e => this.props.setHighlights(e.target)}
-        >
+        > 
+          
           {this.props.highlights.data.map(({ title }, index) => {
             return (
-              <option key={index} value={title.rendered}>
-                {title.rendered}
+              <option key={index} value={he.decode(title.rendered)}>
+                {he.decode(title.rendered)}
               </option>
             );
           })}

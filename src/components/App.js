@@ -138,7 +138,12 @@ class App extends Component {
         'a[title="author profile page"]'
       )[0].innerText;
       itemId = getItemId(itemUrl);
-      categoryName = Array.from(document.querySelectorAll('.submission-details > div > a')).filter(n => n.pathname.startsWith('/category/'))[0].innerText;
+
+      if (window.location.host === "graphicriver.net") {
+        categoryName = Array.from(document.querySelectorAll('.submission-details > div > a'))[4].innerText;
+      } else {
+        categoryName = Array.from(document.querySelectorAll('.submission-details > div > a')).filter(n => n.pathname.startsWith('/category/'))[0].innerText;
+      }
 
     } else {
       itemName = document.querySelectorAll('.f-input.-type-string.-width-full')[0].value
@@ -209,7 +214,7 @@ class App extends Component {
 
     //TODO: Rename method
   handleBigApproveButton = (e) => {
-    
+ 
     if (!isAwesomeProofing) {
       e.preventDefault();
       e.target.disabled = true;
@@ -222,7 +227,6 @@ class App extends Component {
     const range = `${domain}!A2`;
 
     const { highlights, promotions, session, spreadsheet } = this.props;
-
     const payload = {
       range: range,
       majorDimension: "ROWS",
@@ -264,10 +268,6 @@ class App extends Component {
     this.props.handleSignOut();
   };
 
-  handleAdminEditSubmit = (e) => {
-    e.preventDefault();
-
-  }
 
   render() {
     const { isHidden } = this.state;

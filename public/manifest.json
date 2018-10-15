@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Envato Market Item Boosting",
-  "version": "0.2.5",
+  "version": "0.2.7",
   "description": "Envato Market Item Boosting",
   "icons": {
     "16": "/img/16.png",
@@ -21,7 +21,9 @@
     "https://googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/*",
     "https://www.apis.google.com/*",
-    "*://*.google.com/*"
+    "*://*.google.com/*",
+    "https://tfsnippets.ivorpad.com/*",
+    "https://sheets.googleapis.com/v4/spreadsheets/*"
   ],
   "web_accessible_resources": [
     "/oauth2/*",
@@ -40,6 +42,17 @@
   "background": {
     "page": "background.html",
     "persistent": true 
+  },
+  "applications": {
+    "gecko": {
+      "id": "{2a552076-2685-4284-9f9c-3609496c4bde}",
+      "strict_min_version": "60.0"
+    }
+  },
+  "options_ui": {
+    "page": "options.html",
+    "browser_style": true,
+    "chrome_style": true
   },
   "options_page": "options.html",
   "content_security_policy": "script-src 'self' https://apis.google.com; object-src 'self'",

@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { actions as PromotionActions } from "../reducers/promotions";
 import styled from "styled-components";
+import he from "he";
 
 const PromotionsSection = styled.div`
     margin-top: 20px;
@@ -44,9 +45,9 @@ class Promotions extends Component {
                       type="checkbox"
                       id={slug}
                       name="promotions"
-                      value={title.rendered}
+                      value={he.decode(title.rendered)}
                     />
-                    <label for={slug}>{title.rendered}</label>
+                    <label for={slug}>{he.decode(title.rendered)}</label>
                   </div>
                 );
               })
