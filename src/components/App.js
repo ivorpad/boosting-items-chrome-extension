@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "./App.css";
-import { extractDomainName, removeItemBundleCount } from "../helpers/helpers";
+import { extractDomainName } from "../helpers/helpers";
 import loading from "./loading.svg";
 import Boosting from "./Boosting";
 import Highlights from "./Highlights";
@@ -31,7 +31,6 @@ class App extends Component {
 
     const { setMarketData, fetchApiData, handleLoginInit } = this.props;
 
-    //removeItemBundleCount();
     const marketDataPayload = this.prepareMarketData();
 
     if (isAwesomeProofing) {
@@ -64,7 +63,7 @@ class App extends Component {
     if (isAwesomeProofing) {
        this.bigApproveButton = document.getElementById("approve").children["proofing_action"];
        this.approveButton = document.querySelector(".reviewer-proofing-actions").firstElementChild;
-       this.exitButton = document.querySelector(".header-right-container").firstElementChild;
+      //  this.exitButton = document.querySelector(".header-right-container").firstElementChild;
        this.rejectButton = document.querySelector('a[href="#reject"]');
        this.holdButton = document.querySelector('a[href="#hold"]');
     
@@ -76,9 +75,9 @@ class App extends Component {
 
         this.approveButton.addEventListener("click", this.handleApproveButton);
 
-        this.exitButton.addEventListener("click", e => {
-          this.props.handleLogout();
-        });
+        // this.exitButton.addEventListener("click", e => {
+        //   this.props.handleSignOut();
+        // });
 
         
         this.rejectButton.addEventListener(
@@ -103,7 +102,7 @@ class App extends Component {
         this.handleBigApproveButton
       );
       this.approveButton.removeEventListener("click", this.handleApproveButton);
-      this.exitButton.removeEventListener("click", this.handleLogout);
+      // this.exitButton.removeEventListener("click", this.props.handleSignOut());
       this.rejectButton.removeEventListener(
         "click",
         this.handleRejectAndHoldButtons
@@ -273,6 +272,7 @@ class App extends Component {
     const { isHidden } = this.state;
     const { logged } = this.props.session;
     const { buttonText } = this.props.spreadsheet;
+    const { highlights, promotions } = this.props;
     return (
       <div className="App" style={{ padding: '20px' }}>
         {
@@ -316,12 +316,11 @@ class App extends Component {
                 );
               }}
             />
-
             {logged ? (
               <React.Fragment>
                 <Boosting />
-                <Highlights />
-                <Promotions />
+                {highlights.data.length !== 0 && <Highlights /> }
+                {promotions.data.length !== 0 && <Promotions /> }
                 {
                 	!isAwesomeProofing ?
                   <button onClick={e => this.handleBigApproveButton(e)} style={{ width: '20%', marginTop: '20px' }}> { !buttonText ? "Submit" : buttonText } </button>
