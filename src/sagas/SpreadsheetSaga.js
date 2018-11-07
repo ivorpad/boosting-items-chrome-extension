@@ -40,7 +40,7 @@ function *postDataToSpreadsheet({token, sheetId, payload}) {
     if(success) {
       yield put(actions.sendDataToSheetsSuccess())
     } else {
-      yield put(actions.sendDataToSheetsError())
+      yield put(actions.sendDataToSheetsFailure())
     }
 
 };
@@ -56,5 +56,5 @@ export function *sendDataToSheetsSaga() {
 export const actions = {
   sendDataToSheets: (token, sheetId, payload) => ({ type: SEND_DATA_TO_SHEETS, token, sheetId, payload }),
   sendDataToSheetsSuccess: () => ({ type: SEND_DATA_TO_SHEETS_SUCCESS }),
-  sendDataToSheetsSuccess: () => ({ type: SEND_DATA_TO_SHEETS_FAILURE })
+  sendDataToSheetsFailure: () => ({ type: SEND_DATA_TO_SHEETS_FAILURE })
 };
