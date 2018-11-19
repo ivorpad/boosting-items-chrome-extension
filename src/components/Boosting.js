@@ -3,6 +3,7 @@ import React, { Component } from "react";
 import Slider from "rc-slider";
 import { connect } from "react-redux";
 import { actions as boostingActions } from "../reducers/boosting";
+import { extractDomainName } from '../helpers/helpers'
 
 const style = {
   marginTop: 10,
@@ -11,12 +12,23 @@ const style = {
   marginRight: 20
 };
 
-const marks = {
-  0: <strong>Good</strong>,
-  1: <strong>Great</strong>,
-  2: <strong>Exceptional</strong>,
-  3: <strong>WOW!</strong>
-};
+const domain = extractDomainName(window.location.hostname);
+
+let marks;
+
+if (domain !== "audiojungle") {
+  marks = {
+    0: <strong>Good</strong>,
+    1: <strong>Great</strong>,
+    2: <strong>Exceptional</strong>,
+    3: <strong>WOW!</strong>
+  };
+} else {
+  marks = {
+    0: <strong>Good</strong>,
+    1: <strong>WOW!</strong>
+  };
+}
 
 class Boosting extends Component {
   handleItemRating = rating => {
@@ -30,7 +42,7 @@ class Boosting extends Component {
           <div style={style}>
             <Slider
               min={0}
-              max={3}
+              max={domain !== "audiojungle" ? 3 : 1}
               marks={marks}
               step={null}
               onChange={this.handleItemRating}
