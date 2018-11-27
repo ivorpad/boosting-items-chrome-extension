@@ -17,13 +17,14 @@ export default (state = initiaState, action) => {
     case FETCH_HIGHLIGHTS:
       return { ...state, isFetching: true };
     case FETCH_HIGHLIGHTS_SUCCESS:
+      console.log(action)
       return {
         ...state,
         data: action.payload.data,
         isFetching: false
       };
     case SET_HIGHLIGHTS_PAYLOAD:
-      let selected = [...action.payload.selectedOptions].map( option => option.innerText )
+      let selected = [...action.payload.selectedOptions].map( option => option.textContent );
       return {
         ...state,
         selected: selected
