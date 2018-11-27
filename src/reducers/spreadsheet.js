@@ -18,10 +18,8 @@ export default (state = defaultState, action) => {
         sheetId: action.id
       }
     case SEND_DATA_TO_SHEETS:
-      console.log(action)
     return state
     case SEND_DATA_TO_SHEETS_SUCCESS:
-      console.log(action)
       return {
         ...state,
         buttonText: 'Submitted!'

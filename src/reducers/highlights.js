@@ -17,7 +17,6 @@ export default (state = initiaState, action) => {
     case FETCH_HIGHLIGHTS:
       return { ...state, isFetching: true };
     case FETCH_HIGHLIGHTS_SUCCESS:
-      console.log(action)
       return {
         ...state,
         data: action.payload.data,
@@ -30,7 +29,6 @@ export default (state = initiaState, action) => {
         selected: selected
       }
     case ON_FETCH_ERROR:
-      console.log(action)
       return {
         ...state
       }  

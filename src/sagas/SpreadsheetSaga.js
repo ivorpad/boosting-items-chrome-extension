@@ -30,11 +30,9 @@ function *postDataToSpreadsheet({token, sheetId, payload}) {
   yield SheetApi.post(`/${sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`, payload)
     .then(response => {
       success = true;
-      console.log(response);
     })
     .catch(e => {
       success = false;
-      console.log(e.response);
     });
 
     if(success) {

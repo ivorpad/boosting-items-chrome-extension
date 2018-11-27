@@ -41,7 +41,6 @@ export default (state = initiaState, action) => {
         selected
       };
     case ON_FETCH_ERROR:
-      console.log(action)
       return {
         ...state
       }  

@@ -226,7 +226,6 @@ class App extends Component {
     const range = `${domain}!A2`;
 
     const { highlights, promotions, session, spreadsheet } = this.props;
-    console.log(highlights.selected);
     const payload = {
       range: range,
       majorDimension: "ROWS",

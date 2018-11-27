@@ -18,7 +18,6 @@ export default (state = initialState, action) => {
         logged: true
        }
     case ON_SIGN_OUT:
-      console.log(action)
       return {
         ...state,
         logged: false
@@ -33,13 +32,10 @@ export default (state = initialState, action) => {
       logged: Boolean(logged)
     }    
     case ON_LOGIN_ACTION:
-      console.log(action)
     return {...state}
     case ON_LOGIN_FAILURE:
-      console.log(action)
       return state;
     case 'ON_LOGIN_FAILURE':
-      console.log(action)
       return state;
   default:
     return state
