@@ -15,7 +15,7 @@ const initiaState = {
 export default (state = initiaState, action) => {
   switch (action.type) {
     case FETCH_PROMOTIONS:
-      return { ...state, isFetching: true };
+    return { ...state, isFetching: true };
     case FETCH_PROMOTIONS_SUCCESS:
       return {
         ...state,
