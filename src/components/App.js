@@ -17,18 +17,19 @@ import { actions as marketplaceActions } from "../reducers/marketplace";
 import { actions as spreadsheetActions } from "../reducers/spreadsheet";
 import { actions as spreadsheetSagaActions } from "../sagas/SpreadsheetSaga";
 import { actions as noticesActions } from "../reducers/notices";
-import { getItemCategory } from '../helpers/helpers'
+import { getItemCategory } from "../helpers/helpers";
 
-const isAwesomeProofing = window.location.pathname.startsWith("/admin/awesome_proofing")
+const isAwesomeProofing = window.location.pathname.startsWith(
+  "/admin/awesome_proofing"
+);
 
 class App extends Component {
   state = {
-  	isHidden: true,
-  	submitButtonText: "Submit"
+    isHidden: true,
+    submitButtonText: "Submit"
   };
 
   componentDidMount() {
-
     const { setMarketData, fetchApiData, handleLoginInit } = this.props;
 
     const marketDataPayload = this.prepareMarketData();
@@ -36,16 +37,15 @@ class App extends Component {
     if (isAwesomeProofing) {
       setMarketData(marketDataPayload);
     } else {
-      const itemUrl = document.querySelector('.t-link.-decoration-none').href;
-      getItemCategory(itemUrl).then( category => {
-        setMarketData( { 
+      const itemUrl = document.querySelector(".t-link.-decoration-none").href;
+      getItemCategory(itemUrl).then(category => {
+        setMarketData({
           ...marketDataPayload,
           categoryName: category
-         });
-      })
+        });
+      });
     }
 
-    
     fetchApiData();
     handleLoginInit();
     this.checkSheetValue();
@@ -54,38 +54,48 @@ class App extends Component {
     if (!isAwesomeProofing) {
       this.setState({
         isHidden: false
-      })
+      });
     }
   }
 
   componentWillMount = () => {
-    
     if (isAwesomeProofing) {
-       this.bigApproveButton = document.getElementById("approve").children["proofing_action"];
-       this.approveButton = document.querySelector(".reviewer-proofing-actions").firstElementChild;
-      //  this.exitButton = document.querySelector(".header-right-container").firstElementChild;
-       this.rejectButton = document.querySelector('a[href="#reject"]');
-       this.holdButton = document.querySelector('a[href="#hold"]');
-    
+      this.bigApproveButton = document.getElementById("approve").children[
+        "proofing_action"
+      ];
+      this.approveButton = document.querySelector(
+        ".reviewer-proofing-actions"
+      ).firstElementChild;
 
-        this.bigApproveButton.addEventListener(
-          "click",
-          this.handleBigApproveButton
-        );
+      if (!window.location.href.endsWith(`library_management`)) {
+        this.rejectButton = document.querySelector('a[href="#reject"]');
 
-        this.approveButton.addEventListener("click", this.handleApproveButton);
-
-        // this.exitButton.addEventListener("click", e => {
-        //   this.props.handleSignOut();
-        // });
-
-        
         this.rejectButton.addEventListener(
           "click",
           this.handleRejectAndHoldButtons
         );
+      } else {
+        this.disableButton = document.querySelector('a[href="#disable"]');
 
-        this.holdButton.addEventListener("click", this.handleRejectAndHoldButtons);
+        this.disableButton.addEventListener(
+          "click",
+          this.handleRejectAndHoldButtons
+        );
+      }
+
+      this.holdButton = document.querySelector('a[href="#hold"]');
+
+      this.bigApproveButton.addEventListener(
+        "click",
+        this.handleBigApproveButton
+      );
+
+      this.approveButton.addEventListener("click", this.handleApproveButton);
+
+      this.holdButton.addEventListener(
+        "click",
+        this.handleRejectAndHoldButtons
+      );
     }
 
     if (!this.props.session.logged) {
@@ -102,11 +112,19 @@ class App extends Component {
         this.handleBigApproveButton
       );
       this.approveButton.removeEventListener("click", this.handleApproveButton);
-      // this.exitButton.removeEventListener("click", this.props.handleSignOut());
-      this.rejectButton.removeEventListener(
-        "click",
-        this.handleRejectAndHoldButtons
-      );
+
+      if (!window.location.href.endsWith(`library_management`)) {
+        this.rejectButton.removeEventListener(
+          "click",
+          this.handleRejectAndHoldButtons
+        );
+      } else {
+        this.disableButton.removeEventListener(
+          "click",
+          this.handleRejectAndHoldButtons
+        );
+      }
+
       this.holdButton.removeEventListener(
         "click",
         this.handleRejectAndHoldButtons
@@ -126,10 +144,10 @@ class App extends Component {
     let itemId;
     let categoryName;
 
-    const getItemId = (url) => {
+    const getItemId = url => {
       return url.split("/").slice(-1)[0];
-    }
-    
+    };
+
     if (isAwesomeProofing) {
       itemName = document.querySelector(".existing-value").innerText;
       itemUrl = document.querySelector(".submission-details > a").href;
@@ -139,16 +157,23 @@ class App extends Component {
       itemId = getItemId(itemUrl);
 
       if (window.location.host === "graphicriver.net") {
-        categoryName = Array.from(document.querySelectorAll('.submission-details > div > a'))[4].innerText;
+        categoryName = Array.from(
+          document.querySelectorAll(".submission-details > div > a")
+        )[4].innerText;
       } else {
-        categoryName = Array.from(document.querySelectorAll('.submission-details > div > a')).filter(n => n.pathname.startsWith('/category/'))[0].innerText;
+        categoryName = Array.from(
+          document.querySelectorAll(".submission-details > div > a")
+        ).filter(n => n.pathname.startsWith("/category/"))[0].innerText;
       }
-
     } else {
-      itemName = document.querySelectorAll('.f-input.-type-string.-width-full')[0].value
-      itemUrl = document.querySelector('.t-link.-decoration-none').href;
-      const authorNode = document.querySelectorAll('.disable-on-submit.e-form.-layout-horizontal .e-form__group')[1]
-      authorName = authorNode.querySelector('a.t-link').innerText;
+      itemName = document.querySelectorAll(
+        ".f-input.-type-string.-width-full"
+      )[0].value;
+      itemUrl = document.querySelector(".t-link.-decoration-none").href;
+      const authorNode = document.querySelectorAll(
+        ".disable-on-submit.e-form.-layout-horizontal .e-form__group"
+      )[1];
+      authorName = authorNode.querySelector("a.t-link").innerText;
       itemId = getItemId(itemUrl);
     }
 
@@ -211,9 +236,8 @@ class App extends Component {
   validateFormDataArray = array =>
     Array.isArray(array) && array.length > 0 && typeof array !== "undefined";
 
-    //TODO: Rename method
-  handleBigApproveButton = (e) => {
- 
+  //TODO: Rename method
+  handleBigApproveButton = e => {
     if (!isAwesomeProofing) {
       e.preventDefault();
       e.target.disabled = true;
@@ -248,7 +272,11 @@ class App extends Component {
         ]
       ]
     };
-    this.props.sendDataToSheets(session.access_token, spreadsheet.sheetId, payload);
+    this.props.sendDataToSheets(
+      session.access_token,
+      spreadsheet.sheetId,
+      payload
+    );
   };
 
   handleApproveButton = () => {
@@ -267,17 +295,14 @@ class App extends Component {
     this.props.handleSignOut();
   };
 
-
   render() {
     const { isHidden } = this.state;
     const { logged } = this.props.session;
     const { buttonText } = this.props.spreadsheet;
     const { highlights, promotions } = this.props;
     return (
-      <div className="App" style={{ padding: '20px' }}>
-        {
-        	isAwesomeProofing ? < Notices / > : null
-        }
+      <div className="App" style={{ padding: "20px" }}>
+        {isAwesomeProofing ? <Notices /> : null}
         <Loading
           render={() => {
             const { promotions, highlights } = this.props;
@@ -299,7 +324,7 @@ class App extends Component {
         {!isHidden ? (
           <React.Fragment>
             <hr className="app__separator" />
-            {!logged && <h4 className="app__title">Item Boosting</h4> }
+            {!logged && <h4 className="app__title">Item Boosting</h4>}
             <Button
               render={() => {
                 return (
@@ -309,8 +334,7 @@ class App extends Component {
                       logged
                         ? e => this.handleLogout(e)
                         : e => this.handleLogin(e)
-                    }
-                  >
+                    }>
                     {logged ? "Logout" : "Login with Google"}
                   </button>
                 );
@@ -319,12 +343,16 @@ class App extends Component {
             {logged ? (
               <React.Fragment>
                 <Boosting />
-                {highlights.data.length !== 0 && <Highlights /> }
-                {promotions.data.length !== 0 && <Promotions /> }
-                {
-                	!isAwesomeProofing ?
-                  <button onClick={e => this.handleBigApproveButton(e)} style={{ width: '20%', marginTop: '20px' }}> { !buttonText ? "Submit" : buttonText } </button>
-                : null  }
+                {highlights.data.length !== 0 && <Highlights />}
+                {promotions.data.length !== 0 && <Promotions />}
+                {!isAwesomeProofing ? (
+                  <button
+                    onClick={e => this.handleBigApproveButton(e)}
+                    style={{ width: "20%", marginTop: "20px" }}>
+                    {" "}
+                    {!buttonText ? "Submit" : buttonText}{" "}
+                  </button>
+                ) : null}
               </React.Fragment>
             ) : null}
           </React.Fragment>
