@@ -236,7 +236,6 @@ class App extends Component {
   validateFormDataArray = array =>
     Array.isArray(array) && array.length > 0 && typeof array !== "undefined";
 
-  //TODO: Rename method
   handleBigApproveButton = e => {
     if (!isAwesomeProofing) {
       e.preventDefault();
@@ -249,7 +248,13 @@ class App extends Component {
     const domain = extractDomainName(window.location.host);
     const range = `${domain}!A2`;
 
-    const { highlights, promotions, session, spreadsheet } = this.props;
+    const {
+      highlights,
+      promotions,
+      session,
+      spreadsheet,
+      boosting
+    } = this.props;
     const payload = {
       range: range,
       majorDimension: "ROWS",
@@ -262,7 +267,7 @@ class App extends Component {
           item.id,
           item.category,
           person.reviewer,
-          this.props.boosting,
+          boosting,
           this.validateFormDataArray(highlights.selected)
             ? highlights.selected.join(", ")
             : "-",
@@ -272,11 +277,18 @@ class App extends Component {
         ]
       ]
     };
-    this.props.sendDataToSheets(
-      session.access_token,
-      spreadsheet.sheetId,
-      payload
-    );
+
+    if (
+      this.props.boosting ||
+      promotions.selected.length > 0 ||
+      highlights.selected.length > 0
+    ) {
+      this.props.sendDataToSheets(
+        session.access_token,
+        spreadsheet.sheetId,
+        payload
+      );
+    }
   };
 
   handleApproveButton = () => {
@@ -300,6 +312,7 @@ class App extends Component {
     const { logged } = this.props.session;
     const { buttonText } = this.props.spreadsheet;
     const { highlights, promotions } = this.props;
+
     return (
       <div className="App" style={{ padding: "20px" }}>
         {isAwesomeProofing ? <Notices /> : null}

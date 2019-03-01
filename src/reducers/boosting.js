@@ -1,32 +1,33 @@
 const SET_BOOSTING_DATA = "MARKETPLACE/SET_BOOSTING_DATA";
 
-export default (state = "Good", action) => {
+export default (state = "", action) => {
   switch (action.type) {
-
     case SET_BOOSTING_DATA:
-
-     let boosting;
+      let boosting;
 
       switch (action.payload) {
         case 1:
-          boosting = 'Great';
+          boosting = "Good";
           break;
         case 2:
-          boosting = 'Exceptional';
-          break
+          boosting = "Great";
+          break;
         case 3:
-          boosting = 'WOW!'
-          break
+          boosting = "Exceptional";
+          break;
+        case 4:
+          boosting = "Wow!";
+          break;
         default:
-          boosting = 'Good';
+          boosting = "";
       }
-      return boosting
+      return boosting;
 
-  default:
-    return state
+    default:
+      return state;
   }
-}
+};
 
 export const actions = {
-  setBoosting: payload => ({ type: SET_BOOSTING_DATA, payload})
-}
+  setBoosting: payload => ({ type: SET_BOOSTING_DATA, payload })
+};
