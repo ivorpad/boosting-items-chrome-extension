@@ -7,7 +7,7 @@ function save_options() {
   const sheetIdValue = document.getElementById('sheet_id').value;
   const baseUrlValue = document.getElementById('base_url').value;
 
-	chrome.storage.sync.set({
+	browser.storage.sync.set({
 	sheetIdValue: sheetIdValue,
 	baseUrlValue: baseUrlValue
 	}, function () {
@@ -23,7 +23,7 @@ function save_options() {
 // Restores select box and checkbox state using the preferences
 // stored in chrome.storage.
 function restore_options() {
-	chrome.storage.sync.get({
+	browser.storage.sync.get({
 	sheetIdValue: '',
 	baseUrlValue: ''
 	}, function (items) {

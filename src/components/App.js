@@ -195,7 +195,7 @@ class App extends Component {
 
   checkSheetValue = () => {
     //eslint-disable-next-line no-undef
-    chrome.storage.sync.get(["sheetIdValue"], value => {
+    browser.storage.sync.get(["sheetIdValue"], value => {
       if (!value.sheetIdValue) {
         const message = `Please set the Google Sheet ID option. Go to the Extension Options Panel.`;
         this.props.showNotice(message, "error");
@@ -207,7 +207,7 @@ class App extends Component {
 
   checkBaseUrlValue = () => {
     //eslint-disable-next-line no-undef
-    chrome.storage.sync.get(["baseUrlValue"], value => {
+    browser.storage.sync.get(["baseUrlValue"], value => {
       if (!value.baseUrlValue) {
         const message = `Please set the WordPress Site URL option. Go to the Extension Options Panel.`;
         this.props.showNotice(message, "error");
