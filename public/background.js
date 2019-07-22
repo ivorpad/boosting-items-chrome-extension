@@ -80,9 +80,7 @@ function Token() {
         },
         function(redirectUri) {
           if (chrome.runtime.lastError) {
-            console.log(chrome.runtime.lastError);
             reject(chrome.runtime.lastError.message);
-            //throw new Error(chrome.runtime.lastError.message)
             return;
           }
 
@@ -135,13 +133,13 @@ const TokenFactory = new Token();
 /*eslint-disable no-undef*/
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  
   switch (request.type) {
     case "login":
       console.log("prepare login");
 
       TokenFactory.getNewToken(true)
         .then(token => {
-          console.log(token);
 
           chrome.storage.sync.set({
             access_token: token
@@ -200,6 +198,42 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
       clearInterval(interval);
       // return true otherwise sendResponse() won't be async
+      return true;
+    case "fetchTokenInfo": 
+      (async () => {
+        let response = await fetch(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${request.token}`)
+        response.json().then(r => sendResponse(r))
+      })()
+      return true;
+     
+    case "fetchApiData":
+      (async () => {
+        let { baseUrl, endpoint, marketplace } = request;
+
+        let url = `https://${baseUrl.baseUrlValue}/wp-json/wp/v2/${endpoint}?filter[marketplace]=${marketplace}`;
+        let response = await fetch(url)
+        response.json().then(r => sendResponse(r))
+      })();
+
+      return true;
+    
+      case "postApiData": 
+
+      (async () => {
+        let response = await fetch(`${request.baseUrl}/${request.sheetId}/values/${request.range}:append?valueInputOption=USER_ENTERED`, {
+          method: 'post',
+          headers: {
+            'Authorization': `Bearer ${request.token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(request.payload)
+        })
+
+        if (response.ok) {
+          response.json().then(r => sendResponse({ success: true }))
+        }
+      })();
+
       return true;
     default:
       console.log("request wasn't found");

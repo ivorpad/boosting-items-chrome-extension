@@ -19,7 +19,7 @@ export default (state = initiaState, action) => {
     case FETCH_PROMOTIONS_SUCCESS:
       return {
         ...state,
-        data: action.payload.data,
+        data: action.payload,
         isFetching: false
       };
     case SET_PROMOTIONS_PAYLOAD:
