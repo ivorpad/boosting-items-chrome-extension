@@ -195,20 +195,20 @@ class App extends Component {
 
   checkSheetValue = () => {
     //eslint-disable-next-line no-undef
-    browser.storage.sync.get(["sheetIdValue"], value => {
-      if (!value.sheetIdValue) {
+    browser.storage.sync.get("sheetIdValue").then(({ sheetIdValue }) => {
+      if (!sheetIdValue) {
         const message = `Please set the Google Sheet ID option. Go to the Extension Options Panel.`;
         this.props.showNotice(message, "error");
       } else {
-        this.props.setSpreadsheetId(value.sheetIdValue);
+        this.props.setSpreadsheetId(sheetIdValue);
       }
     });
   };
 
   checkBaseUrlValue = () => {
     //eslint-disable-next-line no-undef
-    browser.storage.sync.get(["baseUrlValue"], value => {
-      if (!value.baseUrlValue) {
+    browser.storage.sync.get("baseUrlValue").then(({baseUrlValue}) => {
+      if (!baseUrlValue) {
         const message = `Please set the WordPress Site URL option. Go to the Extension Options Panel.`;
         this.props.showNotice(message, "error");
       }
