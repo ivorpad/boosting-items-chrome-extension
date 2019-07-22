@@ -21,14 +21,24 @@ import {
   AUTH_STATUS_CHECK
 } from "../constants/sagas";
 
-function* verifyToken(token) {
-  while (true) {
-    const tokenInfo = yield fetch(
-      `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${token}`
-    );
+// async function tokenData(data) {
+//   let a = await verifyToken()
+// }
 
-    return yield tokenInfo.json();
-  }
+function verifyToken(token) {
+  /* eslint-disable no-undef */
+  
+    return new Promise(resolve => {
+      chrome.runtime.sendMessage({
+        type: "fetchTokenInfo", token
+      }, data => resolve(data))
+    }) 
+
+    // const tokenInfo = yield fetch(
+    //   `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${token}`
+    // );
+
+    //return yield tokenInfo.json();
 }
 
 const requestAuthToken = type => {

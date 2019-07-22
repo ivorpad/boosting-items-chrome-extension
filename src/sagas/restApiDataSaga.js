@@ -11,17 +11,29 @@ import { ON_FETCH_ERROR, FETCH_API_DATA } from "../constants/sagas";
 
 const fetchApiDataRequest = async (endpoint) => {
   let url = await getFromStorageSync("baseUrlValue");
-  return axios
-    .get(`https://${url.baseUrlValue}/wp-json/wp/v2/${endpoint}?filter[marketplace]=${extractDomainName(window.location.host)}`, {
-      headers: {
-        'accept': 'application/json',
-        'content-type': 'application/x-www-form-urlencoded'
-       }
+
+  return new Promise((resolve, reject) => {
+    // eslint-disable-next-line no-undef
+    chrome.runtime.sendMessage({ type: 'fetchApiData', baseUrl: url, endpoint, marketplace: extractDomainName(window.location.host) }, function (response) {
+      if(response) {
+        resolve(response)
+      } else {
+        reject(response)
+      }
     })
-    .then(response => response)
-    .catch(error => {
-      throw new Error(error);
-    });
+  });
+
+  // return axios
+  //   .get(`https://${url.baseUrlValue}/wp-json/wp/v2/${endpoint}?filter[marketplace]=${extractDomainName(window.location.host)}`, {
+  //     headers: {
+  //       'accept': 'application/json',
+  //       'content-type': 'application/x-www-form-urlencoded'
+  //      }
+  //   })
+  //   .then(response => response)
+  //   .catch(error => {
+  //     throw new Error(error);
+  //   });
 }
 
 function *fetchApiDataSaga(action) {

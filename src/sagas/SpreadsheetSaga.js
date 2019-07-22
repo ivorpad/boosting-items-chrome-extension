@@ -1,6 +1,6 @@
-import axios from 'axios';
 import { extractDomainName } from "../helpers/helpers";
-import { takeLatest, call, put } from "redux-saga/effects";
+import { channel } from 'redux-saga';
+import { takeLatest, call, put, take } from "redux-saga/effects";
 import {
 	SEND_DATA_TO_SHEETS,
   SEND_DATA_TO_SHEETS_SUCCESS,
@@ -9,38 +9,26 @@ import {
 
 const domain = extractDomainName(window.location.host);
 const range = `${domain}!A2`;
-
-function *postDataToSpreadsheet({token, sheetId, payload}) {
+const postChannel = channel();
+function postDataToSpreadsheet({token, sheetId, payload}) {
 
   if (!token) {
     return;
   }
-
   const BASE_URL = `https://sheets.googleapis.com/v4/spreadsheets`;
-  const SheetApi = yield axios.create({
-    baseURL: BASE_URL,
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  });
 
-  let success;
 
-  SheetApi.defaults.headers.post["Authorization"] = `Bearer ${token}`;
-  yield SheetApi.post(`/${sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`, payload)
-    .then(response => {
-      success = true;
-    })
-    .catch(e => {
-      success = false;
+
+  return new Promise((resolve, reject) => {
+    // eslint-disable-next-line no-undef
+    chrome.runtime.sendMessage({ type: 'postApiData', baseUrl: BASE_URL, token, sheetId, range, payload }, function (response) {
+      if (response.success) {
+        postChannel.put(actions.sendDataToSheetsSuccess())
+      } else {
+        postChannel.put(actions.sendDataToSheetsFailure())
+      }
     });
-
-    if(success) {
-      yield put(actions.sendDataToSheetsSuccess())
-    } else {
-      yield put(actions.sendDataToSheetsFailure())
-    }
-
+  })
 };
 
 function *handleSendDataToSheets(action) {
@@ -49,6 +37,13 @@ function *handleSendDataToSheets(action) {
 
 export function *sendDataToSheetsSaga() {
   yield takeLatest(SEND_DATA_TO_SHEETS, handleSendDataToSheets)
+}
+
+export function* watchDownloadFileChannel() {
+  while (true) {
+    const action = yield take(postChannel)
+    yield put(action)
+  }
 }
 
 export const actions = {
