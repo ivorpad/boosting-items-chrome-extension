@@ -1,3 +1,4 @@
+
 var rand = function(length) {
   return Math.random()
     .toString(length)
@@ -132,7 +133,7 @@ const TokenFactory = new Token();
 
 /*eslint-disable no-undef*/
 
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   
   switch (request.type) {
     case "login":
@@ -141,7 +142,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       TokenFactory.getNewToken(true)
         .then(token => {
 
-          chrome.storage.sync.set({
+          browser.storage.sync.set({
             access_token: token
           });
 
@@ -173,7 +174,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     case "logout":
       console.log("prepare logout");
 
-      chrome.storage.sync.get(["access_token"], function(result) {
+      browser.storage.sync.get(["access_token"], function(result) {
         if (result.access_token) {
           fetch(
             `https://accounts.google.com/o/oauth2/revoke?token=${
@@ -181,7 +182,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
             }`
           )
             .then(r => {
-              chrome.storage.sync.remove("access_token", function() {
+              browser.storage.sync.remove("access_token", function() {
                 localStorage.removeItem("state");
                 localStorage.removeItem("nonce");
                 localStorage.removeItem("login_hint");

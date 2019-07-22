@@ -1,6 +1,5 @@
 import { takeLatest, call, fork, put } from 'redux-saga/effects';
 import { getFromStorageSync, extractDomainName } from "../helpers/helpers";
-
 import {
   FETCH_PROMOTIONS_SUCCESS,
   FETCH_HIGHLIGHTS_SUCCESS
@@ -13,8 +12,9 @@ const fetchApiDataRequest = async (endpoint) => {
 
   return new Promise((resolve, reject) => {
     // eslint-disable-next-line no-undef
-    chrome.runtime.sendMessage({ type: 'fetchApiData', baseUrl: url, endpoint, marketplace: extractDomainName(window.location.host) }, function (response) {
-      if(response) {
+    const sending = browser.runtime.sendMessage({ type: 'fetchApiData', baseUrl: url, endpoint, marketplace: extractDomainName(window.location.host) });
+    sending.then(response => {
+      if (response) {
         resolve(response)
       } else {
         reject(response)

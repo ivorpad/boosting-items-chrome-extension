@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Envato Market Item Boosting",
-  "version": "0.3",
+  "version": "0.3.1",
   "description": "Envato Market Item Boosting",
   "icons": {
     "16": "/img/16.png",
@@ -30,12 +30,15 @@
     {
       "matches": ["*://*/*admin/awesome_proofing*", "*://*/*admin/item/edit*"],
       "css": ["/static/css/main.css"],
-      "js": ["/static/js/main.js"]
+      "js": ["browser-polyfill.js", "/static/js/main.js"]
     }
   ],
   "background": {
-    "page": "background.html",
-    "persistent": true
+    "persistent": true,
+    "scripts": [
+      "browser-polyfill.js",
+      "background.js"
+    ]
   },
   "applications": {
     "gecko": {
