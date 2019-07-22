@@ -17,9 +17,7 @@ function postDataToSpreadsheet({token, sheetId, payload}) {
   }
   const BASE_URL = `https://sheets.googleapis.com/v4/spreadsheets`;
 
-
-
-  return new Promise((resolve, reject) => {
+  return new Promise(() => {
     // eslint-disable-next-line no-undef
     chrome.runtime.sendMessage({ type: 'postApiData', baseUrl: BASE_URL, token, sheetId, range, payload }, function (response) {
       if (response.success) {

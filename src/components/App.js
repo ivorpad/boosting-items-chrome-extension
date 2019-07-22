@@ -104,18 +104,6 @@ class App extends Component {
         buttonText: "Logout"
       });
     }
-
-    const elem = document.createElement('button');
-    elem.textContent = 'send data'; 
-    elem.id = 'buttonbutton'
-
-    this.bigApproveButton.parentElement.append(elem);
-
-    elem.addEventListener('click', function(e) {
-      e.preventDefault();
-      this.handleBigApproveButton()
-    }.bind(this))
-
   };
 
   componentWillUnmount = () => {
@@ -146,7 +134,7 @@ class App extends Component {
   };
 
   prepareMarketData = () => {
-    //const intercomSetup = document.getElementById("intercom-setup");
+
     const name  = document.getElementById('spec-user-username').textContent;
 
     let itemName;
@@ -248,14 +236,12 @@ class App extends Component {
     Array.isArray(array) && array.length > 0 && typeof array !== "undefined";
 
   handleBigApproveButton = e => {
-    // if (!isAwesomeProofing) {
-    //   e.preventDefault();
-    //   e.target.disabled = true;
-    // } else {
-    //   this.cloneAndChangeButtonAttr();
-    // }
-
-    //e.preventDefault()
+    if (!isAwesomeProofing) {
+      e.preventDefault();
+      e.target.disabled = true;
+    } else {
+      this.cloneAndChangeButtonAttr();
+    }
 
     const { person, item } = this.props.currentItem;
     const domain = extractDomainName(window.location.host);
@@ -291,7 +277,7 @@ class App extends Component {
         ]
       ]
     };
-    
+
     if (
       this.props.boosting ||
       promotions.selected.length > 0 ||
