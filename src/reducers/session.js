@@ -2,7 +2,6 @@ import {
   ON_LOGIN_INIT_SUCCESS,
   ON_LOGIN_ACTION,
   ON_LOGIN_FAILURE,
-  ON_LOGIN_USER_REJECTION,
   ON_SIGN_OUT,
   AUTH_STATUS_CHECK
 } from "../constants/sagas";
