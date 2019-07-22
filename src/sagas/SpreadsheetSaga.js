@@ -19,13 +19,14 @@ function postDataToSpreadsheet({token, sheetId, payload}) {
 
   return new Promise(() => {
     // eslint-disable-next-line no-undef
-    chrome.runtime.sendMessage({ type: 'postApiData', baseUrl: BASE_URL, token, sheetId, range, payload }, function (response) {
+    const sending = browser.runtime.sendMessage({ type: 'postApiData', baseUrl: BASE_URL, token, sheetId, range, payload });
+    sending.then(response => {
       if (response.success) {
         postChannel.put(actions.sendDataToSheetsSuccess())
       } else {
         postChannel.put(actions.sendDataToSheetsFailure())
       }
-    });
+    })
   })
 };
 

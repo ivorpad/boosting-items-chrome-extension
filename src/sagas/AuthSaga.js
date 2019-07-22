@@ -29,28 +29,25 @@ function verifyToken(token) {
   /* eslint-disable no-undef */
   
     return new Promise(resolve => {
-      chrome.runtime.sendMessage({
+      const sending = browser.runtime.sendMessage({
         type: "fetchTokenInfo", token
-      }, data => resolve(data))
+      });
+
+      sending.then(data => resolve(data))
     }) 
 
-    // const tokenInfo = yield fetch(
-    //   `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${token}`
-    // );
-
-    //return yield tokenInfo.json();
 }
 
 const requestAuthToken = type => {
   return new Promise((resolve, reject) => {
-    // eslint-disable-next-line no-undef
-    chrome.runtime.sendMessage({ type }, function(response) {
+    const sending = browser.runtime.sendMessage({ type });
+    sending.then(response => {
       if (response.access_token) {
         resolve(response.access_token);
       } else {
         reject(response.error);
       }
-    });
+    })
   });
 };
 
