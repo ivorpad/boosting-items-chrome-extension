@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { takeLatest, call, fork, put } from 'redux-saga/effects';
 import { getFromStorageSync, extractDomainName } from "../helpers/helpers";
 
@@ -22,18 +21,6 @@ const fetchApiDataRequest = async (endpoint) => {
       }
     })
   });
-
-  // return axios
-  //   .get(`https://${url.baseUrlValue}/wp-json/wp/v2/${endpoint}?filter[marketplace]=${extractDomainName(window.location.host)}`, {
-  //     headers: {
-  //       'accept': 'application/json',
-  //       'content-type': 'application/x-www-form-urlencoded'
-  //      }
-  //   })
-  //   .then(response => response)
-  //   .catch(error => {
-  //     throw new Error(error);
-  //   });
 }
 
 function *fetchApiDataSaga(action) {

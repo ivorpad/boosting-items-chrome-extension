@@ -8,7 +8,6 @@ import Promotions from "./Promotions";
 import Button from "./Button";
 import Loading from "./Loading";
 import Notices from "./Notices";
-import moment from "moment";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { actions as restApiDataSagaActions } from "../sagas/restApiDataSaga";
@@ -260,7 +259,7 @@ class App extends Component {
       majorDimension: "ROWS",
       values: [
         [
-          moment(Date.now()).format("MM-DD-YYYY"),
+          new Date().toLocaleDateString("en-US"),
           person.author,
           item.title,
           item.url,
