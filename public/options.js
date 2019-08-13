@@ -20,7 +20,6 @@ function save_options() {
 // stored in browser.storage.
 function restore_options() {
 	browser.storage.sync.get({ sheetIdValue: '', baseUrlValue: ''}).then( (items) => {
-		console.log(items)
 		document.getElementById('sheet_id').value = items.sheetIdValue;
 		document.getElementById("base_url").value = items.baseUrlValue;
 

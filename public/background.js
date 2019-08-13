@@ -99,7 +99,6 @@ function Token() {
           const { access_token } = paramsObj(paramsSearch);
 
           tokenInfo(access_token).then(resp => {
-            //console.log(resp)
             localStorage.setItem("login_hint", resp.email);
           });
 
