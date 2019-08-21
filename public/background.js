@@ -25,24 +25,13 @@ const paramsObj = params => {
   return obj;
 };
 
-let interval = null;
-
 function Token() {
   /* eslint-disable no-undef */
   const authUri = "https://accounts.google.com/o/oauth2/v2/auth";
-  const redirectURL = chrome.identity.getRedirectURL("oauth2");
-
-  // const auth_global_params = {
-  //   client_id: chrome.runtime.getManifest().oauth2.client_id,
-  //   redirect_uri: redirectURL,
-  //   response_type: "id_token token",
-  //   access_type: "online",
-  //   scope: "https://www.googleapis.com/auth/spreadsheets profile email"
-  // };
 
   const auth_global_params = {
     client_id: chrome.runtime.getManifest().oauth2.client_id,
-    redirect_uri: redirectURL,
+    redirect_uri: chrome.identity.getRedirectURL("oauth2"),
     response_type: "id_token token code",
     access_type: "offline",
     scope: "https://www.googleapis.com/auth/spreadsheets profile email"
@@ -264,13 +253,10 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       }
     });
 
-      clearInterval(interval);
-      console.log(interval)
-      // return true otherwise sendResponse() won't be async
-      return true;
+    // return true otherwise sendResponse() won't be async
+    return true;
     case "fetchTokenInfo": 
       (async () => {
-
         let response = await fetch(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${request.token}`)
 
           if(!response.ok) {
@@ -298,7 +284,6 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       return true;
     
       case "postApiData": 
-
       (async () => {
         let response = await fetch(`${request.baseUrl}/${request.sheetId}/values/${request.range}:append?valueInputOption=USER_ENTERED`, {
           method: 'post',
