@@ -25,7 +25,8 @@ const isAwesomeProofing = window.location.pathname.startsWith(
 class App extends Component {
   state = {
     isHidden: true,
-    submitButtonText: "Submit"
+    submitButtonText: "Submit",
+    debugMode: false
   };
 
   componentDidMount() {
@@ -44,6 +45,13 @@ class App extends Component {
         });
       });
     }
+
+    /* eslint-disable no-undef */
+    browser.storage.sync.get("debugModeValue").then( ({ debugModeValue }) => {
+      this.setState({
+        debugMode: debugModeValue || false
+      });
+    })
 
     fetchApiData();
     handleLoginInit();
@@ -234,12 +242,15 @@ class App extends Component {
   validateFormDataArray = array =>
     Array.isArray(array) && array.length > 0 && typeof array !== "undefined";
 
-  handleBigApproveButton = e => {
+  handleBigApproveButton = (e, debug = false) => {
     if (!isAwesomeProofing) {
       e.preventDefault();
       e.target.disabled = true;
-    } else {
-      this.cloneAndChangeButtonAttr();
+    } 
+    else {
+      if(!this.state.debugMode) {
+        this.cloneAndChangeButtonAttr();
+      }
     }
 
     const { person, item } = this.props.currentItem;
@@ -302,7 +313,14 @@ class App extends Component {
   };
 
   handleLogout = e => {
+    /* eslint-disable no-undef */
+
     e.preventDefault();
+
+    browser.runtime.sendMessage({
+      type: "logout"
+    })
+
     this.props.handleSignOut();
   };
 
@@ -367,6 +385,17 @@ class App extends Component {
                 ) : null}
               </React.Fragment>
             ) : null}
+
+            {(this.state.debugMode && logged) && (
+              <button
+                style={{ marginTop: "20px" }}
+                onClick={e => {
+                  e.preventDefault();
+                  this.handleBigApproveButton(e, this.state.debugMode);
+                }}>
+                Submit Payload
+              </button>
+            )}
           </React.Fragment>
         ) : null}
       </div>

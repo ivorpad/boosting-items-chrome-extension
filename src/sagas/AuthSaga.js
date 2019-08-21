@@ -21,10 +21,6 @@ import {
   AUTH_STATUS_CHECK
 } from "../constants/sagas";
 
-// async function tokenData(data) {
-//   let a = await verifyToken()
-// }
-
 function verifyToken(token) {
   /* eslint-disable no-undef */
   
@@ -76,8 +72,6 @@ function* authorize(refresh, storedToken) {
         yield call(storeToken, token, expires_in, "true");
       }
     } else {
-
-      let storedToken = yield call(getStoredToken);
 
       var { access_token } = JSON.parse(storedToken);
       ({ expires_in } = yield call(verifyToken, access_token));

@@ -26,7 +26,7 @@ h3.subtitle {
   font-weight: bold;
 }
 
-input {
+input[type="text"] {
   padding: 5px;
   border-radius: 3px;
   border: 1px solid #ccc;
@@ -47,4 +47,8 @@ input {
 .description {
   font-style: italic;
   color: grey;
+}
+
+.form-control {
+  margin-bottom: 15px;
 }

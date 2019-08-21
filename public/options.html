@@ -13,17 +13,29 @@
         <h2 class="title">Envato Market Item Boosting</h2>
         <h3 class="subtitle">Options</h3>
         <form id="sheet_id__form">
-          <label for="sheet_id" class="sheet_id__label">Google Sheet ID</label>
-          <small class="description">Paste here a Google Sheet ID. <a href="#" target="_blank">See example</a>.</small><!-- /.description -->
-          <input id="sheet_id" type="text" class="sheet_id__input" value="" placeholder="Google Sheet ID">
-          <br>
-          <label for="base_url" class="base_url__label">WordPress URL</label>
-          <small class="description">A WordPress site with REST API enabled and the Envato Boosting WP Plugin installed</small><!-- /.description -->
-          <input id="base_url" type="text" class="base_url__input" value="" placeholder="site.example.com">
+
+          <div class="form-control">
+            <label for="sheet_id" class="sheet_id__label">Google Sheet ID</label>
+            <small class="description">Paste here a Google Sheet ID. <a href="#" target="_blank">See example</a>.</small><!-- /.description -->
+            <input id="sheet_id" type="text" class="sheet_id__input" value="" placeholder="Google Sheet ID">
+          </div><!-- /.form-control -->
+
+           <div class="form-control">
+            <label for="base_url" class="base_url__label">WordPress URL</label>
+            <small class="description">A WordPress site with REST API enabled and the Envato Boosting WP Plugin installed</small><!-- /.description -->
+            <input id="base_url" type="text" class="base_url__input" value="" placeholder="site.example.com">
+           </div>
+
+          <div class="form-control">
+            <input style="float: left; margin-right: 5px" type="checkbox" name="debug_mode" id="debug_mode">
+            <label for="debug_mode" class="base_url__label">Enable Debug Mode</label>
+            <small class="description">Enable this option only when the extension is misbehaving</small><!-- /.description --> 
+          </div><!-- /.form-control -->
+
         </form>
         
-        <div id="status"></div>
-        <button id="save">Save</button>
+        <div style="margin-top: 15px" id="status"></div>
+        <button style="margin-top: 15px" id="save">Save</button>
       </div><!-- /.card -->
     </div><!-- /.container -->
 

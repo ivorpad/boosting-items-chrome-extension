@@ -31,18 +31,27 @@ function Token() {
   /* eslint-disable no-undef */
   const authUri = "https://accounts.google.com/o/oauth2/v2/auth";
   const redirectURL = chrome.identity.getRedirectURL("oauth2");
+
+  // const auth_global_params = {
+  //   client_id: chrome.runtime.getManifest().oauth2.client_id,
+  //   redirect_uri: redirectURL,
+  //   response_type: "id_token token",
+  //   access_type: "online",
+  //   scope: "https://www.googleapis.com/auth/spreadsheets profile email"
+  // };
+
   const auth_global_params = {
     client_id: chrome.runtime.getManifest().oauth2.client_id,
     redirect_uri: redirectURL,
-    response_type: "id_token token",
-    access_type: "online",
+    response_type: "id_token token code",
+    access_type: "offline",
     scope: "https://www.googleapis.com/auth/spreadsheets profile email"
   };
 
-  let login_hint;
-  let paramsString;
-  let paramsSearch;
-  let launchWebAuthFlowParams;
+  let login_hint, 
+      paramsString,
+      paramsSearch,
+      launchWebAuthFlowParams;
 
   /**
    * Gets a new interactive access token to access Google APIs
@@ -80,6 +89,9 @@ function Token() {
           interactive: true
         },
         function(redirectUri) {
+
+          //console.log(redirectUri);
+
           if (chrome.runtime.lastError) {
             reject(chrome.runtime.lastError.message);
             return;
@@ -96,7 +108,10 @@ function Token() {
             return;
           }
 
-          const { access_token } = paramsObj(paramsSearch);
+          const { access_token, code } = paramsObj(paramsSearch);
+
+          //console.log(code);
+          getRefreshToken(code)
 
           tokenInfo(access_token).then(resp => {
             localStorage.setItem("login_hint", resp.email);
@@ -109,7 +124,7 @@ function Token() {
   }
 
   /**
-   * Returns an object with the information about the access token (email, expiration time, etcetera).
+   * Returns an object with the information about the access token (email, expiration time, etc).
    *
    * @param {string} token
    * @return {obj}
@@ -128,6 +143,34 @@ function Token() {
   /* eslint-enable no-undef */
 }
 
+/**
+  * Retrieve a refresh token to be used to get a new access token.
+  *
+  * @param {string} code
+  * @return {string} refresh_token
+  */
+async function getRefreshToken(code) {
+  /* eslint-disable no-undef */
+  const refresh_params = {
+    code,
+    grant_type: "authorization_code",
+    client_id: chrome.runtime.getManifest().oauth2.client_id,
+    client_secret: "_NYuIDvR2PoiM3mFSh1QShow",
+    redirect_uri: chrome.identity.getRedirectURL("oauth2")
+  };
+
+  const res = await fetch(`https://www.googleapis.com/oauth2/v4/token`, {
+    method: "post",
+    body: JSON.stringify(refresh_params)
+  }).then(r => r.json());
+
+  const { refresh_token } = res;
+
+  localStorage.setItem("boosting_ext_refresh_token", refresh_token);
+
+  return refresh_token;
+}
+
 const TokenFactory = new Token();
 
 /*eslint-disable no-undef*/
@@ -139,14 +182,14 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       console.log("prepare login");
 
       TokenFactory.getNewToken(true)
-        .then(token => {
-
+        .then(access_token => {
+          
           browser.storage.sync.set({
-            access_token: token
+            access_token
           });
 
           sendResponse({
-            access_token: token,
+            access_token,
             isLoggedIn: true
           });
         })
@@ -161,48 +204,85 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     case "refresh":
       console.log("bg refresh");
 
-      TokenFactory.getNewToken(false).then(token => {
-        console.log(token);
+      const refresh_token = localStorage.getItem('boosting_ext_refresh_token');
+      
+      if (refresh_token) {
+        
+        const access_token_params = {
+          refresh_token,
+          client_id: chrome.runtime.getManifest().oauth2.client_id,
+          client_secret: "_NYuIDvR2PoiM3mFSh1QShow",
+          grant_type: "refresh_token"
+        };
 
-        sendResponse({
-          access_token: token,
-          isLoggedIn: true
-        });
-      });
+        fetch(`https://www.googleapis.com/oauth2/v4/token`, {
+          method: "post",
+          body: JSON.stringify(access_token_params)
+        }).then(r => r.json()).then(results => {
+
+          const { access_token } = results;
+
+          // TODO: Pass Identity of the Reviewer to store their real name and email in the sheet
+          // idToken is also in the results object, so we can easily get the name
+          // and email of the reviewer.
+
+          sendResponse({
+            access_token,
+            isLoggedIn: true
+          })
+
+        })
+    
+      } else {
+        console.error('token not found, could not refresh')
+        return;
+      }
       return true;
     case "logout":
-      console.log("prepare logout");
+     console.log("prepare logout");
 
-      browser.storage.sync.get(["access_token"], function(result) {
-        if (result.access_token) {
-          fetch(
-            `https://accounts.google.com/o/oauth2/revoke?token=${
-              result.access_token
-            }`
-          )
-            .then(r => {
-              browser.storage.sync.remove("access_token", function() {
-                localStorage.removeItem("state");
-                localStorage.removeItem("nonce");
-                localStorage.removeItem("login_hint");
-                localStorage.removeItem("start_token_refresh");
-                sendResponse({
-                  access_token: null,
-                  isLoggedIn: false
-                });
-              });
+     browser.storage.sync.get("access_token").then(({ access_token }) => {
+      if (access_token) {
+        fetch(
+          `https://accounts.google.com/o/oauth2/revoke?token=${
+            access_token
+          }`
+        )
+          .then(r => {
+            browser.storage.sync.remove("access_token").then(() => {
+               localStorage.removeItem("state");
+               localStorage.removeItem("nonce");
+               localStorage.removeItem("start_token_refresh");
+               localStorage.removeItem("boosting_ext_refresh_token");
+               sendResponse({
+                 access_token: null,
+                 isLoggedIn: false
+               });
             })
-            .catch(err => console.log(err));
-        }
-      });
+          })
+          .catch(err => console.log(err));
+      }
+    });
 
       clearInterval(interval);
+      console.log(interval)
       // return true otherwise sendResponse() won't be async
       return true;
     case "fetchTokenInfo": 
       (async () => {
+
         let response = await fetch(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${request.token}`)
-        response.json().then(r => sendResponse(r))
+
+          if(!response.ok) {
+            console.log('invalid token, login again')
+            return;
+          }
+
+          response.json()
+            .then(r => {
+              sendResponse(r);
+            })
+            .catch(err => console.log(err))
       })()
       return true;
      
