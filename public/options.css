@@ -1,5 +1,6 @@
 body {
-  background: #f1f1f1
+  background: #f1f1f1;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; 
 }
 
 .container {
@@ -10,15 +11,23 @@ body {
 }
 
 h2.title {
-    margin-bottom: 5px;
-    padding: 0;
-    margin-top: 0;
+  margin-bottom: 5px;
+  padding: 0;
+  margin-top: 0;
+  font-size: 20px;
+  font-weight: 500;
 }
 
 h3.subtitle {
-    padding-top: 0;
-    margin-top: 0;
-    color: #545151;
+  padding-top: 0;
+  margin-top: 0;
+  color: #545151;
+  font-size: 16px;
+}
+
+.form-control > label {
+  font-size: 12px;
+  font-weight: 600 !important;
 }
 
 #sheet_id__form label {
@@ -47,8 +56,17 @@ input[type="text"] {
 .description {
   font-style: italic;
   color: grey;
+  font-size: 11px;
 }
 
 .form-control {
   margin-bottom: 15px;
+}
+
+#addon-inline-options {
+  height: 500px !important;
+}
+
+#status {
+  font-size: 12px;
 }
