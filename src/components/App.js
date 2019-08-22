@@ -288,6 +288,12 @@ class App extends Component {
       ]
     };
 
+    if(this.state.debugMode) {
+      console.log({
+        payload
+      })
+    }
+
     if (
       this.props.boosting ||
       promotions.selected.length > 0 ||
@@ -325,6 +331,14 @@ class App extends Component {
   };
 
   render() {
+
+    if(this.state.debugMode) {
+      console.log({
+        state: this.state,
+        props: this.props
+      })
+    }
+
     const { isHidden } = this.state;
     const { logged } = this.props.session;
     const { buttonText } = this.props.spreadsheet;

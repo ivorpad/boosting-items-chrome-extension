@@ -29,9 +29,11 @@ function Token() {
   /* eslint-disable no-undef */
   const authUri = "https://accounts.google.com/o/oauth2/v2/auth";
 
+  const redirectURL = chrome.identity.getRedirectURL("oauth2")
+
   const auth_global_params = {
     client_id: chrome.runtime.getManifest().oauth2.client_id,
-    redirect_uri: chrome.identity.getRedirectURL("oauth2"),
+    redirect_uri: redirectURL,
     response_type: "id_token token code",
     access_type: "offline",
     scope: "https://www.googleapis.com/auth/spreadsheets profile email"
@@ -140,6 +142,7 @@ function Token() {
   */
 async function getRefreshToken(code) {
   /* eslint-disable no-undef */
+
   const refresh_params = {
     code,
     grant_type: "authorization_code",
@@ -158,6 +161,32 @@ async function getRefreshToken(code) {
   localStorage.setItem("boosting_ext_refresh_token", refresh_token);
 
   return refresh_token;
+}
+
+async function getAccessTokenWithRefreshToken() {
+
+  const refresh_token = localStorage.getItem('boosting_ext_refresh_token');
+
+  if (refresh_token) {
+    const access_token_params = {
+      refresh_token,
+      client_id: chrome.runtime.getManifest().oauth2.client_id,
+      client_secret: "_NYuIDvR2PoiM3mFSh1QShow",
+      grant_type: "refresh_token"
+    };
+
+    return await fetch(`https://www.googleapis.com/oauth2/v4/token`, {
+      method: "post",
+      body: JSON.stringify(access_token_params)
+    }).then(r => r.json()).then(results => {
+     
+      const { access_token } = results; 
+      return new Promise((resolve) => {
+        resolve(access_token)
+      })
+      
+    })
+  }
 }
 
 const TokenFactory = new Token();
@@ -193,39 +222,13 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     case "refresh":
       console.log("bg refresh");
 
-      const refresh_token = localStorage.getItem('boosting_ext_refresh_token');
-      
-      if (refresh_token) {
-        
-        const access_token_params = {
-          refresh_token,
-          client_id: chrome.runtime.getManifest().oauth2.client_id,
-          client_secret: "_NYuIDvR2PoiM3mFSh1QShow",
-          grant_type: "refresh_token"
-        };
-
-        fetch(`https://www.googleapis.com/oauth2/v4/token`, {
-          method: "post",
-          body: JSON.stringify(access_token_params)
-        }).then(r => r.json()).then(results => {
-
-          const { access_token } = results;
-
-          // TODO: Pass Identity of the Reviewer to store their real name and email in the sheet
-          // idToken is also in the results object, so we can easily get the name
-          // and email of the reviewer.
-
-          sendResponse({
-            access_token,
-            isLoggedIn: true
-          })
-
+      getAccessTokenWithRefreshToken().then(access_token => {
+        sendResponse({
+          access_token,
+          isLoggedIn: true
         })
-    
-      } else {
-        console.error('token not found, could not refresh')
-        return;
-      }
+      })
+
       return true;
     case "logout":
      console.log("prepare logout");
@@ -258,17 +261,23 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     case "fetchTokenInfo": 
       (async () => {
         let response = await fetch(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${request.token}`)
-
           if(!response.ok) {
-            console.log('invalid token, login again')
-            return;
+            console.log('invalid token, refreshing...');
+
+            getAccessTokenWithRefreshToken().then(access_token => {
+              console.log(access_token)
+              sendResponse({
+                access_token,
+                isLoggedIn: true
+              })
+            })
           }
 
-          response.json()
-            .then(r => {
-              sendResponse(r);
-            })
-            .catch(err => console.log(err))
+      response.json()
+        .then(r => {
+          console.log(r)
+          sendResponse(r);
+        }).catch(err => console.log(err))
       })()
       return true;
      
