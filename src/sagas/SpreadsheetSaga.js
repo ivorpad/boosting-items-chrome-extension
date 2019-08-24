@@ -38,7 +38,7 @@ export function *sendDataToSheetsSaga() {
   yield takeLatest(SEND_DATA_TO_SHEETS, handleSendDataToSheets)
 }
 
-export function* watchDownloadFileChannel() {
+export function* watchSentDataToApiChannel() {
   while (true) {
     const action = yield take(postChannel)
     yield put(action)

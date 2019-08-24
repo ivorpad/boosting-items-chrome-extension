@@ -179,10 +179,13 @@ async function getAccessTokenWithRefreshToken() {
       method: "post",
       body: JSON.stringify(access_token_params)
     }).then(r => r.json()).then(results => {
-     
-      const { access_token } = results; 
+
+      const { access_token, expires_in } = results; 
       return new Promise((resolve) => {
-        resolve(access_token)
+        resolve({
+          access_token,
+          expires_in
+        })
       })
       
     })
@@ -220,11 +223,12 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
       return true;
     case "refresh":
-      console.log("bg refresh");
+      console.log(`background refresh — ${new Date().toLocaleString()}`);
 
-      getAccessTokenWithRefreshToken().then(access_token => {
+      getAccessTokenWithRefreshToken().then(({access_token, expires_in}) => {
         sendResponse({
           access_token,
+          expires_in,
           isLoggedIn: true
         })
       })
@@ -260,27 +264,26 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     return true;
     case "fetchTokenInfo": 
       (async () => {
-        let response = await fetch(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${request.token}`)
-          if(!response.ok) {
-            console.log('invalid token, refreshing...');
 
-            getAccessTokenWithRefreshToken().then(access_token => {
-              console.log(access_token)
-              sendResponse({
-                access_token,
-                isLoggedIn: true
-              })
-            })
-          }
+        let tokenInfo = fetch(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${request.access_token}`)
 
-      response.json()
-        .then(r => {
-          console.log(r)
-          sendResponse(r);
-        }).catch(err => console.log(err))
+        tokenInfo
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`Something went wrong with the request.`);
+            }
+            return response.json();
+          })
+          .then(({ expires_in }) => {
+            sendResponse({ expires_in });
+          })
+          .catch((err) => {
+            sendResponse({ error: err.message  });
+          });
+          return true;
       })()
+
       return true;
-     
     case "fetchApiData":
       (async () => {
         let { baseUrl, endpoint, marketplace } = request;

@@ -21,15 +21,16 @@ import {
   AUTH_STATUS_CHECK
 } from "../constants/sagas";
 
-function verifyToken(token) {
+function verifyToken(access_token) {
   /* eslint-disable no-undef */
-  
     return new Promise(resolve => {
       const sending = browser.runtime.sendMessage({
-        type: "fetchTokenInfo", token
+        type: "fetchTokenInfo", access_token
       });
 
-      sending.then(data => resolve(data))
+      sending.then(data => {
+        resolve(data)
+      })
     }) 
 
 }
@@ -39,7 +40,7 @@ const requestAuthToken = type => {
     const sending = browser.runtime.sendMessage({ type });
     sending.then(response => {
       if (response.access_token) {
-        resolve(response.access_token);
+        resolve(response);
       } else {
         reject(response.error);
       }
@@ -62,33 +63,25 @@ const removeStoredToken = () => {
 
 function* authorize(refresh, storedToken) {
   try {
-    let token;
-    let expires_in;
-        
+    let access_token, expires_in, results;
+
     if (!storedToken) {
-      token = yield call(requestAuthToken, "login");
-      if (token) {
-        ({ expires_in } = yield call(verifyToken, token));
-        yield call(storeToken, token, expires_in, "true");
+      let data = yield call(requestAuthToken, "login");
+      access_token = data.access_token
+      if (access_token) {
+        results = yield call(verifyToken, access_token);
+        expires_in = results.expires_in
+        yield call(storeToken, access_token, expires_in, "true");
       }
     } else {
-
-      var { access_token } = JSON.parse(storedToken);
-      ({ expires_in } = yield call(verifyToken, access_token));
-
-      if (refresh && Number(expires_in) <= 900) {
-        token = yield call(requestAuthToken, "refresh");
-        yield call(storeToken, token, expires_in, "true");
-      } else {
-        token = access_token;
-      }
+      ({access_token, expires_in} = yield call(verify, storedToken))
     }
 
-    yield put(actions.handleLoginSuccess(token));
+    yield put(actions.handleLoginSuccess(access_token));
 
     return {
-      access_token: access_token || token,
-      expires_in: expires_in
+      access_token,
+      expires_in
     };
   } catch (error) {
     yield call(removeStoredToken);
@@ -96,14 +89,47 @@ function* authorize(refresh, storedToken) {
   }
 }
 
+function *verify(storedToken) {
+  let access_token, expires_in;
+  ({ access_token, expires_in } = JSON.parse(storedToken));
+    
+    let results = yield call(verifyToken, access_token);
+
+    if ((results.error && storedToken !== null) || results.expires_in <= 900) {
+      const data = yield call(requestAuthToken, "refresh")
+      yield call(storeToken, data.access_token, data.expires_in, data.isLoggedIn);
+
+      access_token = data.access_token;
+      expires_in = data.expires_in;     
+    } else {
+      browser.storage.sync.get('debugModeValue').then(({debugModeValue}) => {
+        if (debugModeValue) {
+          console.log(`Refresh not necessary.`)
+        }
+      });
+    }
+  
+  return {
+    access_token,
+    expires_in
+  }
+
+}
+
 function* authorizeLoop(token) {
   try {
     while (true) {
       const refresh = token != null;
+      let access_token;
+      if(refresh) {
+        access_token = yield call(verify, token);
+      } else {
+        access_token = yield call(authorize, token);
+        return;
+      }
 
-      token = yield call(authorize, refresh, token);
-      if (token == null) return;
-      const fortyFiveMinutes = (token.expires_in - 900) * 1000;
+      // const fiveSeconds = 5000; just for testing 
+      const fortyFiveMinutes = (access_token.expires_in - 900) * 1000;
       yield call(delay, fortyFiveMinutes);
     }
   } finally {
@@ -118,6 +144,7 @@ function* authenticate() {
 
   if (storedTokenInfo) {
     yield put(actions.authStatusCheck(storedTokenInfo));
+    yield call(verify, storedTokenInfo)
   }
 
   const authLoopTask = yield fork(authorizeLoop, storedTokenInfo);
@@ -135,7 +162,7 @@ function* authenticate() {
 
 function* loginInit() {
   let stored = yield call(getStoredToken);
-
+  
   if (!stored) {
     yield takeEvery(ON_LOGIN_ACTION, authenticate);
   } else {
