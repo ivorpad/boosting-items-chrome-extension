@@ -1,17 +1,16 @@
-
-var rand = function(length) {
+var rand = function (length) {
   return Math.random()
     .toString(length)
     .substr(2);
 };
 
-var token = function(length) {
+var token = function (length) {
   return rand(length) + rand(length);
 };
 
 const convertParamsToString = params => {
   return Object.keys(params)
-    .map(function(k) {
+    .map(function (k) {
       return k + "=" + params[k];
     })
     .join("&");
@@ -29,7 +28,7 @@ function Token() {
   /* eslint-disable no-undef */
   const authUri = "https://accounts.google.com/o/oauth2/v2/auth";
 
-  const redirectURL = chrome.identity.getRedirectURL("oauth2")
+  const redirectURL = chrome.identity.getRedirectURL("oauth2");
 
   const auth_global_params = {
     client_id: chrome.runtime.getManifest().oauth2.client_id,
@@ -39,10 +38,7 @@ function Token() {
     scope: "https://www.googleapis.com/auth/spreadsheets profile email"
   };
 
-  let login_hint, 
-      paramsString,
-      paramsSearch,
-      launchWebAuthFlowParams;
+  let login_hint, paramsString, paramsSearch, launchWebAuthFlowParams;
 
   /**
    * Gets a new interactive access token to access Google APIs
@@ -59,7 +55,7 @@ function Token() {
     localStorage.setItem("state", token(36));
     localStorage.setItem("nonce", token(36));
 
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
       let get_new_token_params = {
         ...auth_global_params,
         state: localStorage.getItem("state"),
@@ -79,10 +75,7 @@ function Token() {
           url: authUri.concat(`?${launchWebAuthFlowParams}`),
           interactive: true
         },
-        function(redirectUri) {
-
-          //console.log(redirectUri);
-
+        function (redirectUri) {
           if (chrome.runtime.lastError) {
             reject(chrome.runtime.lastError.message);
             return;
@@ -101,8 +94,7 @@ function Token() {
 
           const { access_token, code } = paramsObj(paramsSearch);
 
-          //console.log(code);
-          getRefreshToken(code)
+          getRefreshToken(code);
 
           tokenInfo(access_token).then(resp => {
             localStorage.setItem("login_hint", resp.email);
@@ -135,11 +127,11 @@ function Token() {
 }
 
 /**
-  * Retrieve a refresh token to be used to get a new access token.
-  *
-  * @param {string} code
-  * @return {string} refresh_token
-  */
+ * Retrieve a refresh token to be used to get a new access token.
+ *
+ * @param {string} code
+ * @return {string} refresh_token
+ */
 async function getRefreshToken(code) {
   /* eslint-disable no-undef */
 
@@ -164,8 +156,7 @@ async function getRefreshToken(code) {
 }
 
 async function getAccessTokenWithRefreshToken() {
-
-  const refresh_token = localStorage.getItem('boosting_ext_refresh_token');
+  const refresh_token = localStorage.getItem("boosting_ext_refresh_token");
 
   if (refresh_token) {
     const access_token_params = {
@@ -178,17 +169,17 @@ async function getAccessTokenWithRefreshToken() {
     return await fetch(`https://www.googleapis.com/oauth2/v4/token`, {
       method: "post",
       body: JSON.stringify(access_token_params)
-    }).then(r => r.json()).then(results => {
-
-      const { access_token, expires_in } = results; 
-      return new Promise((resolve) => {
-        resolve({
-          access_token,
-          expires_in
-        })
-      })
-      
     })
+      .then(r => r.json())
+      .then(results => {
+        const { access_token, expires_in } = results;
+        return new Promise(resolve => {
+          resolve({
+            access_token,
+            expires_in
+          });
+        });
+      });
   }
 }
 
@@ -196,15 +187,13 @@ const TokenFactory = new Token();
 
 /*eslint-disable no-undef*/
 
-browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  
+browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   switch (request.type) {
     case "login":
       console.log("prepare login");
 
       TokenFactory.getNewToken(true)
         .then(access_token => {
-          
           browser.storage.sync.set({
             access_token
           });
@@ -225,47 +214,46 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     case "refresh":
       console.log(`background refresh — ${new Date().toLocaleString()}`);
 
-      getAccessTokenWithRefreshToken().then(({access_token, expires_in}) => {
+      getAccessTokenWithRefreshToken().then(({ access_token, expires_in }) => {
         sendResponse({
           access_token,
           expires_in,
           isLoggedIn: true
-        })
-      })
+        });
+      });
 
       return true;
     case "logout":
-     console.log("prepare logout");
+      console.log("prepare logout");
 
-     browser.storage.sync.get("access_token").then(({ access_token }) => {
-      if (access_token) {
-        fetch(
-          `https://accounts.google.com/o/oauth2/revoke?token=${
-            access_token
-          }`
-        )
-          .then(r => {
-            browser.storage.sync.remove("access_token").then(() => {
-               localStorage.removeItem("state");
-               localStorage.removeItem("nonce");
-               localStorage.removeItem("start_token_refresh");
-               localStorage.removeItem("boosting_ext_refresh_token");
-               sendResponse({
-                 access_token: null,
-                 isLoggedIn: false
-               });
+      browser.storage.sync.get("access_token").then(({ access_token }) => {
+        if (access_token) {
+          fetch(
+            `https://accounts.google.com/o/oauth2/revoke?token=${access_token}`
+          )
+            .then(r => {
+              browser.storage.sync.remove("access_token").then(() => {
+                localStorage.removeItem("state");
+                localStorage.removeItem("nonce");
+                localStorage.removeItem("start_token_refresh");
+                localStorage.removeItem("boosting_ext_refresh_token");
+                sendResponse({
+                  access_token: null,
+                  isLoggedIn: false
+                });
+              });
             })
-          })
-          .catch(err => console.log(err));
-      }
-    });
+            .catch(err => console.log(err));
+        }
+      });
 
-    // return true otherwise sendResponse() won't be async
-    return true;
-    case "fetchTokenInfo": 
+      // return true otherwise sendResponse() won't be async
+      return true;
+    case "fetchTokenInfo":
       (async () => {
-
-        let tokenInfo = fetch(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${request.access_token}`)
+        let tokenInfo = fetch(
+          `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${request.access_token}`
+        );
 
         tokenInfo
           .then(response => {
@@ -277,11 +265,11 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
           .then(({ expires_in }) => {
             sendResponse({ expires_in });
           })
-          .catch((err) => {
-            sendResponse({ error: err.message  });
+          .catch(err => {
+            sendResponse({ error: err.message });
           });
-          return true;
-      })()
+        return true;
+      })();
 
       return true;
     case "fetchApiData":
@@ -289,25 +277,28 @@ browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         let { baseUrl, endpoint, marketplace } = request;
 
         let url = `https://${baseUrl.baseUrlValue}/wp-json/wp/v2/${endpoint}?filter[marketplace]=${marketplace}`;
-        let response = await fetch(url)
-        response.json().then(r => sendResponse(r))
+        let response = await fetch(url);
+        response.json().then(r => sendResponse(r));
       })();
 
       return true;
-    
-      case "postApiData": 
+
+    case "postApiData":
       (async () => {
-        let response = await fetch(`${request.baseUrl}/${request.sheetId}/values/${request.range}:append?valueInputOption=USER_ENTERED`, {
-          method: 'post',
-          headers: {
-            'Authorization': `Bearer ${request.token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(request.payload)
-        })
+        let response = await fetch(
+          `${request.baseUrl}/${request.sheetId}/values/${request.range}:append?valueInputOption=USER_ENTERED`,
+          {
+            method: "post",
+            headers: {
+              Authorization: `Bearer ${request.token}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(request.payload)
+          }
+        );
 
         if (response.ok) {
-          response.json().then(r => sendResponse({ success: true }))
+          response.json().then(r => sendResponse({ success: true }));
         }
       })();
 

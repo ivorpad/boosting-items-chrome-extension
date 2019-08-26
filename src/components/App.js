@@ -47,11 +47,11 @@ class App extends Component {
     }
 
     /* eslint-disable no-undef */
-    browser.storage.sync.get("debugModeValue").then( ({ debugModeValue }) => {
+    browser.storage.sync.get("debugModeValue").then(({ debugModeValue }) => {
       this.setState({
         debugMode: debugModeValue || false
       });
-    })
+    });
 
     fetchApiData();
     handleLoginInit();
@@ -70,7 +70,7 @@ class App extends Component {
       this.bigApproveButton = document.getElementById("approve").children[
         "proofing_action"
       ];
-      
+
       this.approveButton = document.querySelector(
         ".reviewer-proofing-actions"
       ).firstElementChild;
@@ -141,8 +141,7 @@ class App extends Component {
   };
 
   prepareMarketData = () => {
-
-    const name  = document.getElementById('spec-user-username').textContent;
+    const name = document.getElementById("spec-user-username").textContent;
 
     let itemName;
     let itemUrl;
@@ -215,7 +214,7 @@ class App extends Component {
 
   checkBaseUrlValue = () => {
     //eslint-disable-next-line no-undef
-    browser.storage.sync.get("baseUrlValue").then(({baseUrlValue}) => {
+    browser.storage.sync.get("baseUrlValue").then(({ baseUrlValue }) => {
       if (!baseUrlValue) {
         const message = `Please set the WordPress Site URL option. Go to the Extension Options Panel.`;
         this.props.showNotice(message, "error");
@@ -246,9 +245,8 @@ class App extends Component {
     if (!isAwesomeProofing) {
       e.preventDefault();
       e.target.disabled = true;
-    } 
-    else {
-      if(!this.state.debugMode) {
+    } else {
+      if (!this.state.debugMode) {
         this.cloneAndChangeButtonAttr();
       }
     }
@@ -288,10 +286,10 @@ class App extends Component {
       ]
     };
 
-    if(this.state.debugMode) {
+    if (this.state.debugMode) {
       console.log({
         payload
-      })
+      });
     }
 
     if (
@@ -325,18 +323,17 @@ class App extends Component {
 
     browser.runtime.sendMessage({
       type: "logout"
-    })
+    });
 
     this.props.handleSignOut();
   };
 
   render() {
-
-    if(this.state.debugMode) {
+    if (this.state.debugMode) {
       console.log({
         state: this.state,
         props: this.props
-      })
+      });
     }
 
     const { isHidden } = this.state;
@@ -354,14 +351,14 @@ class App extends Component {
             return (promotions.isFetching || highlights.isFetching) &&
               logged &&
               !isHidden ? (
-              <img
-                src={
-                  // eslint-disable-next-line no-undef
-                  chrome.extension.getURL(loading)
-                }
-                alt="Loading"
-              />
-            ) : null;
+                <img
+                  src={
+                    // eslint-disable-next-line no-undef
+                    chrome.extension.getURL(loading)
+                  }
+                  alt="Loading"
+                />
+              ) : null;
           }}
         />
 
@@ -378,7 +375,8 @@ class App extends Component {
                       logged
                         ? e => this.handleLogout(e)
                         : e => this.handleLogin(e)
-                    }>
+                    }
+                  >
                     {logged ? "Logout" : "Login with Google"}
                   </button>
                 );
@@ -392,7 +390,8 @@ class App extends Component {
                 {!isAwesomeProofing ? (
                   <button
                     onClick={e => this.handleBigApproveButton(e)}
-                    style={{ width: "20%", marginTop: "20px" }}>
+                    style={{ width: "20%", marginTop: "20px" }}
+                  >
                     {" "}
                     {!buttonText ? "Submit" : buttonText}{" "}
                   </button>
@@ -400,13 +399,14 @@ class App extends Component {
               </React.Fragment>
             ) : null}
 
-            {(this.state.debugMode && logged) && (
+            {this.state.debugMode && logged && (
               <button
                 style={{ marginTop: "20px" }}
                 onClick={e => {
                   e.preventDefault();
                   this.handleBigApproveButton(e, this.state.debugMode);
-                }}>
+                }}
+              >
                 Submit Payload
               </button>
             )}

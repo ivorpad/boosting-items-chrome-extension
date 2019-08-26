@@ -23,16 +23,16 @@ import {
 
 function verifyToken(access_token) {
   /* eslint-disable no-undef */
-    return new Promise(resolve => {
-      const sending = browser.runtime.sendMessage({
-        type: "fetchTokenInfo", access_token
-      });
+  return new Promise(resolve => {
+    const sending = browser.runtime.sendMessage({
+      type: "fetchTokenInfo",
+      access_token
+    });
 
-      sending.then(data => {
-        resolve(data)
-      })
-    }) 
-
+    sending.then(data => {
+      resolve(data);
+    });
+  });
 }
 
 const requestAuthToken = type => {
@@ -44,7 +44,7 @@ const requestAuthToken = type => {
       } else {
         reject(response.error);
       }
-    })
+    });
   });
 };
 
@@ -67,14 +67,14 @@ function* authorize(refresh, storedToken) {
 
     if (!storedToken) {
       let data = yield call(requestAuthToken, "login");
-      access_token = data.access_token
+      access_token = data.access_token;
       if (access_token) {
         results = yield call(verifyToken, access_token);
-        expires_in = results.expires_in
+        expires_in = results.expires_in;
         yield call(storeToken, access_token, expires_in, "true");
       }
     } else {
-      ({access_token, expires_in} = yield call(verify, storedToken))
+      ({ access_token, expires_in } = yield call(verify, storedToken));
     }
 
     yield put(actions.handleLoginSuccess(access_token));
@@ -89,31 +89,30 @@ function* authorize(refresh, storedToken) {
   }
 }
 
-function *verify(storedToken) {
+function* verify(storedToken) {
   let access_token, expires_in;
   ({ access_token, expires_in } = JSON.parse(storedToken));
-    
-    let results = yield call(verifyToken, access_token);
 
-    if ((results.error && storedToken !== null) || results.expires_in <= 900) {
-      const data = yield call(requestAuthToken, "refresh")
-      yield call(storeToken, data.access_token, data.expires_in, data.isLoggedIn);
+  let results = yield call(verifyToken, access_token);
 
-      access_token = data.access_token;
-      expires_in = data.expires_in;     
-    } else {
-      browser.storage.sync.get('debugModeValue').then(({debugModeValue}) => {
-        if (debugModeValue) {
-          console.log(`Refresh not necessary.`)
-        }
-      });
-    }
-  
+  if ((results.error && storedToken !== null) || results.expires_in <= 900) {
+    const data = yield call(requestAuthToken, "refresh");
+    yield call(storeToken, data.access_token, data.expires_in, data.isLoggedIn);
+
+    access_token = data.access_token;
+    expires_in = data.expires_in;
+  } else {
+    browser.storage.sync.get("debugModeValue").then(({ debugModeValue }) => {
+      if (debugModeValue) {
+        console.log(`Refresh not necessary.`);
+      }
+    });
+  }
+
   return {
     access_token,
     expires_in
-  }
-
+  };
 }
 
 function* authorizeLoop(token) {
@@ -121,14 +120,14 @@ function* authorizeLoop(token) {
     while (true) {
       const refresh = token != null;
       let access_token;
-      if(refresh) {
+      if (refresh) {
         access_token = yield call(verify, token);
       } else {
         access_token = yield call(authorize, token);
         return;
       }
 
-      // const fiveSeconds = 5000; just for testing 
+      // const fiveSeconds = 5000; just for testing
       const fortyFiveMinutes = (access_token.expires_in - 900) * 1000;
       yield call(delay, fortyFiveMinutes);
     }
@@ -144,7 +143,7 @@ function* authenticate() {
 
   if (storedTokenInfo) {
     yield put(actions.authStatusCheck(storedTokenInfo));
-    yield call(verify, storedTokenInfo)
+    yield call(verify, storedTokenInfo);
   }
 
   const authLoopTask = yield fork(authorizeLoop, storedTokenInfo);
@@ -162,7 +161,7 @@ function* authenticate() {
 
 function* loginInit() {
   let stored = yield call(getStoredToken);
-  
+
   if (!stored) {
     yield takeEvery(ON_LOGIN_ACTION, authenticate);
   } else {
