@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import "./App.css";
 import { extractDomainName } from "../helpers/helpers";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import loading from "./loading.svg";
 import Boosting from "./Boosting";
 import Highlights from "./Highlights";
@@ -22,6 +24,37 @@ const isAwesomeProofing = window.location.pathname.startsWith(
   "/admin/awesome_proofing"
 );
 
+toast.configure({
+  autoClose: 80000,
+  draggable: false,
+  //etc you get the idea
+});
+
+const copyToClipboard = str => {
+  const el = document.createElement('textarea');
+  el.value = str;
+  el.setAttribute('readonly', '');
+  el.style.position = 'absolute';
+  el.style.left = '-9999px';
+  document.body.appendChild(el);
+  el.select();
+  document.execCommand('copy');
+  document.body.removeChild(el);
+};
+
+const Msg = ({data, msg}) => {
+  return (
+    <div>
+      <h3>{data}</h3>
+      <p>{msg}</p>
+      <button className="copy-log" onClick={(e) => {
+        e.preventDefault();
+        copyToClipboard(data)
+      }}>Copy Log</button>
+    </div>
+  )
+}
+
 class App extends Component {
   state = {
     isHidden: true,
@@ -29,8 +62,41 @@ class App extends Component {
     debugMode: false
   };
 
+  flash = ({data, message}, type) => {
+    switch(type) {
+      case 'success':
+        toast.success(<Msg data={data} msg={message}/>, {
+          className: 'success-flash'
+        });
+        break;
+      case 'error':
+        toast.error(<Msg data={data} msg={message} />, {
+          className: 'error-flash',
+          closeOnClick: false,
+          autoClose: false
+        })
+        break;
+      default:
+        console.log('Something went wrong')    
+    }
+  }
+
   componentDidMount() {
     const { setMarketData, fetchApiData, handleLoginInit } = this.props;
+
+    const submitInfo = JSON.parse(localStorage.getItem('submitInfo'));
+
+    console.log(submitInfo)
+
+    if (submitInfo) {
+      if (submitInfo.ok) {
+        this.flash({ data: submitInfo.item, message: 'Item successfully recorded.' }, 'success');
+        localStorage.removeItem('submitInfo');
+      } else {
+        this.flash({ data: submitInfo.item, message: 'The item could not be recorded. Please click the button to copy the log and report it in Slack.'}, 'error');
+        localStorage.removeItem('submitInfo');
+      }
+    }
 
     const marketDataPayload = this.prepareMarketData();
 
@@ -337,9 +403,16 @@ class App extends Component {
     }
 
     const { isHidden } = this.state;
-    const { logged } = this.props.session;
-    const { buttonText } = this.props.spreadsheet;
-    const { highlights, promotions } = this.props;
+    // const { logged } = this.props.session;
+    // const { buttonText } = this.props.spreadsheet;
+    // const { highlights, promotions } = this.props;
+
+    const { 
+      highlights, 
+      promotions, 
+      spreadsheet: { buttonText }, 
+      session: { logged } 
+    } = this.props;
 
     return (
       <div className="App" style={{ padding: "20px" }}>
@@ -364,6 +437,7 @@ class App extends Component {
 
         {!isHidden ? (
           <React.Fragment>
+            <ToastContainer />
             <hr className="app__separator" />
             {!logged && <h4 className="app__title">Item Boosting</h4>}
             <Button
@@ -400,15 +474,23 @@ class App extends Component {
             ) : null}
 
             {this.state.debugMode && logged && (
-              <button
-                style={{ marginTop: "20px" }}
-                onClick={e => {
-                  e.preventDefault();
-                  this.handleBigApproveButton(e, this.state.debugMode);
-                }}
-              >
-                Submit Payload
+              <div>
+                <button
+                  style={{ marginTop: "20px" }}
+                  onClick={e => {
+                    e.preventDefault();
+                    this.handleBigApproveButton(e, this.state.debugMode);
+                  }}
+                >
+                  Submit Payload
               </button>
+              <button onClick={(e) => {
+                e.preventDefault()
+                console.log('click')
+              }}>
+                get data
+              </button>
+              </div>
             )}
           </React.Fragment>
         ) : null}

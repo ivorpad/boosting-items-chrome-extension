@@ -59,9 +59,10 @@ const getStoredToken = () => localStorage.getItem("session_access_token");
 
 const removeStoredToken = () => {
   localStorage.removeItem("session_access_token");
+  localStorage.removeItem("submitInfo");
 };
 
-function* authorize(refresh, storedToken) {
+function* authorize(storedToken) {
   try {
     let access_token, expires_in, results;
 
@@ -84,6 +85,7 @@ function* authorize(refresh, storedToken) {
       expires_in
     };
   } catch (error) {
+    console.log(error)
     yield call(removeStoredToken);
     yield put(actions.loginFailure(error));
   }
@@ -95,10 +97,11 @@ function* verify(storedToken) {
 
   let results = yield call(verifyToken, access_token);
 
+  console.log(results, storedToken)
+
   if ((results.error && storedToken !== null) || results.expires_in <= 900) {
     const data = yield call(requestAuthToken, "refresh");
     yield call(storeToken, data.access_token, data.expires_in, data.isLoggedIn);
-
     access_token = data.access_token;
     expires_in = data.expires_in;
   } else {

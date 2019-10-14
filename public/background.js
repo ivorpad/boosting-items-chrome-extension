@@ -247,27 +247,25 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         }
       });
 
-      // return true otherwise sendResponse() won't be async
       return true;
     case "fetchTokenInfo":
       (async () => {
-        let tokenInfo = fetch(
-          `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${request.access_token}`
-        );
+        try {
+          let response = await fetch(
+            `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${request.access_token}`
+          );
 
-        tokenInfo
-          .then(response => {
-            if (!response.ok) {
-              throw new Error(`Something went wrong with the request.`);
-            }
-            return response.json();
-          })
-          .then(({ expires_in }) => {
-            sendResponse({ expires_in });
-          })
-          .catch(err => {
-            sendResponse({ error: err.message });
-          });
+          if(!response.ok) {
+            throw new Error('Invalid Token')
+          } else {
+            return await response.json().then(({ expires_in }) => {
+              sendResponse({ expires_in });
+            })
+          }
+        } catch(err) {
+          sendResponse({ error: err.message });
+        }
+
         return true;
       })();
 
@@ -298,7 +296,11 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         );
 
         if (response.ok) {
-          response.json().then(r => sendResponse({ success: true }));
+          console.log({ values: request.payload.values })
+          response.json().then(r => sendResponse({ ok: true, item: request.payload.values[0][2] }));
+        } else {
+          console.log({ values: request.payload.values })
+          sendResponse({ ok: false, item: request.payload.values[0][2] })
         }
       })();
 

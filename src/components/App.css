@@ -121,3 +121,42 @@ h4.app__title {
 .notice {
   margin-top: 0 !important;
 }
+
+.success-flash, .error-flash {
+  top: 2em;
+  font-size: 12px;
+}
+
+.error-flash {
+  border-radius: 3px !important;
+  background: rgb(255, 204, 204) !important;
+  border: 1px solid rgb(243, 161, 161) !important;
+}
+
+.error-flash h3 {
+  color: rgb(136, 64, 64);
+  font-size: 12px;
+  font-weight: 800;
+  margin: 0;
+  padding: 0;
+}
+.error-flash p {
+  color: rgb(160, 78, 78) !important;
+}
+
+.error-flash button.copy-log {
+  font-size: 11px;
+  padding: 3px 15px;
+  color: white;
+  border-radius: 50px;
+}
+
+.error-flash .Toastify__close-button--error {
+  color: rgb(187, 78, 78);
+}
+
+.error-flash .Toastify__close-button--error:hover {
+  opacity: 1;
+  color: rgb(187, 78, 78);
+  background: none;
+}
