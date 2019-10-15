@@ -42,15 +42,21 @@ const copyToClipboard = str => {
   document.body.removeChild(el);
 };
 
-const Msg = ({data, msg}) => {
+const Msg = ({data, msg, isError}) => {
+
   return (
-    <div>
-      <h3>{data}</h3>
-      <p>{msg}</p>
-      <button className="copy-log" onClick={(e) => {
-        e.preventDefault();
-        copyToClipboard(data)
-      }}>Copy Log</button>
+    <div class="toasty">
+
+      {isError ? (
+        <div>
+          <h3><span>!!!ATTENTION:</span> {data.item}</h3>
+          <p>{msg} <a href="slack://channel?team=T0253B9P9&id=CPFBU2MV4">#help-boosting-tool</a></p> 
+          <button className="copy-log" onClick={(e) => {
+            e.preventDefault();
+            copyToClipboard(JSON.stringify(data))
+          }}>Copy Log</button>
+        </div>
+      ) : <p>{msg}</p>}
     </div>
   )
 }
@@ -65,12 +71,13 @@ class App extends Component {
   flash = ({data, message}, type) => {
     switch(type) {
       case 'success':
-        toast.success(<Msg data={data} msg={message}/>, {
-          className: 'success-flash'
+        toast.success(<Msg data={data} isError={false} msg={message}/>, {
+          className: 'success-flash',
+          autoClose: 1500
         });
         break;
       case 'error':
-        toast.error(<Msg data={data} msg={message} />, {
+        toast.error(<Msg data={data} isError={true} msg={message} />, {
           className: 'error-flash',
           closeOnClick: false,
           autoClose: false
@@ -86,14 +93,12 @@ class App extends Component {
 
     const submitInfo = JSON.parse(localStorage.getItem('submitInfo'));
 
-    console.log(submitInfo)
-
     if (submitInfo) {
       if (submitInfo.ok) {
         this.flash({ data: submitInfo.item, message: 'Item successfully recorded.' }, 'success');
         localStorage.removeItem('submitInfo');
       } else {
-        this.flash({ data: submitInfo.item, message: 'The item could not be recorded. Please click the button to copy the log and report it in Slack.'}, 'error');
+        this.flash({ data: submitInfo.item, message: 'The item couldn\'t be recorded. Click the button to copy the log and paste it at:'}, 'error');
         localStorage.removeItem('submitInfo');
       }
     }
@@ -483,12 +488,6 @@ class App extends Component {
                   }}
                 >
                   Submit Payload
-              </button>
-              <button onClick={(e) => {
-                e.preventDefault()
-                console.log('click')
-              }}>
-                get data
               </button>
               </div>
             )}

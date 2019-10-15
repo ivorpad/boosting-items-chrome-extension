@@ -127,21 +127,53 @@ h4.app__title {
   font-size: 12px;
 }
 
-.error-flash {
+.error-flash, .success-flash {
   border-radius: 3px !important;
-  background: rgb(255, 204, 204) !important;
-  border: 1px solid rgb(243, 161, 161) !important;
+  background: white !important;
+}
+
+.error-flash::before, .success-flash::before {
+  width: 5px;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  content: "";
+}
+
+.error-flash::before {
+  background: rgb(223, 44, 44);
+}
+
+.success-flash::before {
+  background: rgb(117, 187, 40)
 }
 
 .error-flash h3 {
-  color: rgb(136, 64, 64);
   font-size: 12px;
-  font-weight: 800;
   margin: 0;
   padding: 0;
 }
-.error-flash p {
-  color: rgb(160, 78, 78) !important;
+
+.error-flash h3 span {
+  font-weight: 800
+}
+
+.error-flash h3 {
+  color: #555;
+}
+
+.error-flash p, .success-flash p {
+  color: #555 !important;
+}
+
+.success-flash p {
+  margin-top: 2px;
+  padding: 0;
+}
+
+.Toastify__toast--success {
+  min-height: 5px !important;
 }
 
 .error-flash button.copy-log {
@@ -151,12 +183,26 @@ h4.app__title {
   border-radius: 50px;
 }
 
-.error-flash .Toastify__close-button--error {
-  color: rgb(187, 78, 78);
+
+.error-flash .Toastify__close-button, .success-flash .Toastify__close-button {
+  color: #555;
 }
 
-.error-flash .Toastify__close-button--error:hover {
+.error-flash .Toastify__close-button:hover, .success-flash .Toastify__close-button:hover {
   opacity: 1;
-  color: rgb(187, 78, 78);
+  color: #555;
   background: none;
+}
+
+.error-flash .Toastify__close-button:focus, 
+.error-flash .Toastify__close-button:active,
+.success-flash .Toastify__close-button:focus,
+.success-flash .Toastify__close-button:active {
+  opacity: 1;
+  color: #555;
+  background: none;
+}
+
+.toasty { 
+  margin-left: 5px;
 }

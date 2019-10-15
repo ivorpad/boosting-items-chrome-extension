@@ -85,7 +85,6 @@ function* authorize(storedToken) {
       expires_in
     };
   } catch (error) {
-    console.log(error)
     yield call(removeStoredToken);
     yield put(actions.loginFailure(error));
   }
@@ -96,8 +95,6 @@ function* verify(storedToken) {
   ({ access_token, expires_in } = JSON.parse(storedToken));
 
   let results = yield call(verifyToken, access_token);
-
-  console.log(results, storedToken)
 
   if ((results.error && storedToken !== null) || results.expires_in <= 900) {
     const data = yield call(requestAuthToken, "refresh");

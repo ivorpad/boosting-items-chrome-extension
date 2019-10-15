@@ -295,12 +295,17 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
           }
         );
 
+        var columns = ["date", "author", "item", "url", "id", "category", "reviewer", "boost", "highlights", "promotions"];
+
+        var result = request.payload.values[0].reduce(function (result, field, index) {
+          result[columns[index]] = field;
+          return result;
+        }, {})
+
         if (response.ok) {
-          console.log({ values: request.payload.values })
-          response.json().then(r => sendResponse({ ok: true, item: request.payload.values[0][2] }));
+          response.json().then(r => sendResponse({ ok: true, item: result }));
         } else {
-          console.log({ values: request.payload.values })
-          sendResponse({ ok: false, item: request.payload.values[0][2] })
+          sendResponse({ ok: false, item: result })
         }
       })();
 
