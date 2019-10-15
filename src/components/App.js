@@ -24,11 +24,7 @@ const isAwesomeProofing = window.location.pathname.startsWith(
   "/admin/awesome_proofing"
 );
 
-toast.configure({
-  autoClose: 80000,
-  draggable: false,
-  //etc you get the idea
-});
+toast.configure();
 
 const copyToClipboard = str => {
   const el = document.createElement('textarea');
@@ -73,7 +69,8 @@ class App extends Component {
       case 'success':
         toast.success(<Msg data={data} isError={false} msg={message}/>, {
           className: 'success-flash',
-          autoClose: 1500
+          autoClose: 2000,
+          hideProgressBar: true
         });
         break;
       case 'error':
