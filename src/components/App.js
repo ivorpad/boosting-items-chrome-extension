@@ -19,43 +19,15 @@ import { actions as spreadsheetActions } from "../reducers/spreadsheet";
 import { actions as spreadsheetSagaActions } from "../sagas/SpreadsheetSaga";
 import { actions as noticesActions } from "../reducers/notices";
 import { getItemCategory } from "../helpers/helpers";
+import { storeToken } from '../helpers/helpers'
+import ToastMessage from "./ToastMessage";
+
 
 const isAwesomeProofing = window.location.pathname.startsWith(
   "/admin/awesome_proofing"
 );
 
 toast.configure();
-
-const copyToClipboard = str => {
-  const el = document.createElement('textarea');
-  el.value = str;
-  el.setAttribute('readonly', '');
-  el.style.position = 'absolute';
-  el.style.left = '-9999px';
-  document.body.appendChild(el);
-  el.select();
-  document.execCommand('copy');
-  document.body.removeChild(el);
-};
-
-const Msg = ({data, msg, isError}) => {
-
-  return (
-    <div class="toasty">
-
-      {isError ? (
-        <div>
-          <h3><span>!!!ATTENTION:</span> {data.item}</h3>
-          <p>{msg} <a href="slack://channel?team=T0253B9P9&id=CPFBU2MV4">#help-boosting-tool</a></p> 
-          <button className="copy-log" onClick={(e) => {
-            e.preventDefault();
-            copyToClipboard(JSON.stringify(data))
-          }}>Copy Log</button>
-        </div>
-      ) : <p>{msg}</p>}
-    </div>
-  )
-}
 
 class App extends Component {
   state = {
@@ -67,14 +39,14 @@ class App extends Component {
   flash = ({data, message}, type) => {
     switch(type) {
       case 'success':
-        toast.success(<Msg data={data} isError={false} msg={message}/>, {
+        toast.success(<ToastMessage data={data} isError={false} msg={message}/>, {
           className: 'success-flash',
           autoClose: 2000,
           hideProgressBar: true
         });
         break;
       case 'error':
-        toast.error(<Msg data={data} isError={true} msg={message} />, {
+        toast.error(<ToastMessage data={data} isError={true} msg={message} />, {
           className: 'error-flash',
           closeOnClick: false,
           autoClose: false
@@ -85,17 +57,69 @@ class App extends Component {
     }
   }
 
+  componentDidUpdate(prevProps, _prevState) {
+    if(
+      prevProps.boosting !== this.props.boosting || 
+      prevProps.promotions.selected !== this.props.promotions.selected ||
+      prevProps.highlights.selected !== this.props.highlights.selected
+    ) {
+      
+      /* eslint-disable no-undef */
+      const tokenData = browser.storage.sync.get(["access_token", "expires_in", "logged"]);
+      
+      tokenData.then(({access_token}) => {
+        
+        const tokenInfo = browser.runtime.sendMessage({
+          type: "fetchTokenInfo",
+          access_token
+        });
+
+        tokenInfo.then((response) => {
+
+          if(!response.error) {
+
+            console.log({ response })
+
+            if(response.expires_in < 600) {
+              const token = browser.runtime.sendMessage({
+                type: "refresh"
+              });
+
+              token.then(results => {
+                console.log({ results })
+                storeToken(results.access_token, results.expires_in, results.isLoggedIn);
+              })
+            } 
+          } 
+          
+          else {
+            localStorage.removeItem('session_access_token');
+            browser.storage.sync.remove(['access_token', 'expires_in', 'logged'])
+            this.props.handleSignOut();
+          }
+        })
+      })
+      
+      /* eslint-disable no-undef */
+      
+
+
+      console.log('try to refresh')
+    }
+  }
+
   componentDidMount() {
+
     const { setMarketData, fetchApiData, handleLoginInit } = this.props;
 
     const submitInfo = JSON.parse(localStorage.getItem('submitInfo'));
 
     if (submitInfo) {
       if (submitInfo.ok) {
-        this.flash({ data: submitInfo.item, message: 'Item successfully recorded.' }, 'success');
+        this.flash({ data: submitInfo.item, message: 'Boost successfully recorded' }, 'success');
         localStorage.removeItem('submitInfo');
       } else {
-        this.flash({ data: submitInfo.item, message: 'The item couldn\'t be recorded. Click the button to copy the log and paste it at:'}, 'error');
+        this.flash({ data: submitInfo.item, message: 'The item couldn\'t be boosted. Click the button to copy the log and paste it at:'}, 'error');
         localStorage.removeItem('submitInfo');
       }
     }

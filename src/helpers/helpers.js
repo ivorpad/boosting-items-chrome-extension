@@ -44,3 +44,25 @@ export const getItemCategory = async (url) => {
 		}
 	})
 }
+
+export const copyToClipboard = str => {
+	const el = document.createElement('textarea');
+	el.value = str;
+	el.setAttribute('readonly', '');
+	el.style.position = 'absolute';
+	el.style.left = '-9999px';
+	document.body.appendChild(el);
+	el.select();
+	document.execCommand('copy');
+	document.body.removeChild(el);
+};
+
+export const storeToken = (access_token, expires_in, logged) => {
+	localStorage.setItem(
+		"session_access_token",
+		JSON.stringify({ access_token, expires_in, logged })
+	);
+
+	/* eslint-disable no-undef */
+	browser.storage.sync.set({ access_token, expires_in, logged })
+};

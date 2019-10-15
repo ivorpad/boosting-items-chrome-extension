@@ -21,6 +21,8 @@ import {
   AUTH_STATUS_CHECK
 } from "../constants/sagas";
 
+import { storeToken } from '../helpers/helpers'
+
 function verifyToken(access_token) {
   /* eslint-disable no-undef */
   return new Promise(resolve => {
@@ -46,13 +48,6 @@ const requestAuthToken = type => {
       }
     });
   });
-};
-
-const storeToken = (access_token, expires_in, logged) => {
-  localStorage.setItem(
-    "session_access_token",
-    JSON.stringify({ access_token, expires_in, logged })
-  );
 };
 
 const getStoredToken = () => localStorage.getItem("session_access_token");
@@ -96,23 +91,29 @@ function* verify(storedToken) {
 
   let results = yield call(verifyToken, access_token);
 
-  if ((results.error && storedToken !== null) || results.expires_in <= 900) {
-    const data = yield call(requestAuthToken, "refresh");
-    yield call(storeToken, data.access_token, data.expires_in, data.isLoggedIn);
-    access_token = data.access_token;
-    expires_in = data.expires_in;
+  if (results.error === "Invalid Token") {
+    yield put(actions.handleSignOut());
+    console.log('something to work on?')
   } else {
-    browser.storage.sync.get("debugModeValue").then(({ debugModeValue }) => {
-      if (debugModeValue) {
-        console.log(`Refresh not necessary.`);
-      }
-    });
-  }
+    console.log('hello2?')
+    if ((results.error && storedToken !== null) || results.expires_in <= 900) {
+      const data = yield call(requestAuthToken, "refresh");
+      yield call(storeToken, data.access_token, data.expires_in, data.isLoggedIn);
+      access_token = data.access_token;
+      expires_in = data.expires_in;
+    } else {
+      browser.storage.sync.get("debugModeValue").then(({ debugModeValue }) => {
+        if (debugModeValue) {
+          console.log(`Refresh not necessary.`);
+        }
+      });
+    }
 
-  return {
-    access_token,
-    expires_in
-  };
+    return {
+      access_token,
+      expires_in
+    };
+  }
 }
 
 function* authorizeLoop(token) {
@@ -132,7 +133,7 @@ function* authorizeLoop(token) {
       yield call(delay, fortyFiveMinutes);
     }
   } finally {
-    if (yield cancelled()) {
+    if ( yield cancelled() ) {
       console.log("task cancelled");
     }
   }

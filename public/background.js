@@ -194,10 +194,6 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
       TokenFactory.getNewToken(true)
         .then(access_token => {
-          browser.storage.sync.set({
-            access_token
-          });
-
           sendResponse({
             access_token,
             isLoggedIn: true
@@ -215,11 +211,17 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       console.log(`background refresh — ${new Date().toLocaleString()}`);
 
       getAccessTokenWithRefreshToken().then(({ access_token, expires_in }) => {
-        sendResponse({
-          access_token,
-          expires_in,
-          isLoggedIn: true
-        });
+        if(access_token) {
+          sendResponse({
+            access_token,
+            expires_in,
+            isLoggedIn: true
+          });
+        } else {
+          sendResponse({
+            isLoggedIn: false
+          })
+        }
       });
 
       return true;
@@ -263,6 +265,7 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             })
           }
         } catch(err) {
+          console.log({err})
           sendResponse({ error: err.message });
         }
 
