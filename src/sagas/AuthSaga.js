@@ -93,9 +93,7 @@ function* verify(storedToken) {
 
   if (results.error === "Invalid Token") {
     yield put(actions.handleSignOut());
-    console.log('something to work on?')
   } else {
-    console.log('hello2?')
     if ((results.error && storedToken !== null) || results.expires_in <= 900) {
       const data = yield call(requestAuthToken, "refresh");
       yield call(storeToken, data.access_token, data.expires_in, data.isLoggedIn);

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "./App.css";
-import { extractDomainName } from "../helpers/helpers";
+import { extractDomainName, storeToken, debugMode } from "../helpers/helpers";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import loading from "./loading.svg";
@@ -19,7 +19,6 @@ import { actions as spreadsheetActions } from "../reducers/spreadsheet";
 import { actions as spreadsheetSagaActions } from "../sagas/SpreadsheetSaga";
 import { actions as noticesActions } from "../reducers/notices";
 import { getItemCategory } from "../helpers/helpers";
-import { storeToken } from '../helpers/helpers'
 import ToastMessage from "./ToastMessage";
 
 
@@ -84,6 +83,8 @@ class App extends Component {
 
         tokenInfo.then((response) => {
 
+          debugMode({ response })
+
           if(!response.error) {
             if(response.expires_in < 600) {
               const token = browser.runtime.sendMessage({
@@ -91,7 +92,9 @@ class App extends Component {
               });
 
               token.then(results => {
-                //console.log({ results })
+                
+               debugMode({message})
+               
                 storeToken(results.access_token, results.expires_in, results.isLoggedIn);
               })
             } 
@@ -102,7 +105,7 @@ class App extends Component {
             this.props.handleSignOut();
             this.flash({ data: false, message: 'Logged out due to network issues or invalid token. Please login again.' }, 'errorAutoClose');
           }
-          
+
         })
       })
   
@@ -120,7 +123,7 @@ class App extends Component {
         this.flash({ data: submitInfo.item, message: 'Boost successfully recorded' }, 'success');
         localStorage.removeItem('submitInfo');
       } else {
-        this.flash({ data: submitInfo.item, message: 'The item couldn\'t be boosted. Click the button to copy the log and paste it at:'}, 'error');
+        this.flash({ data: submitInfo.item, message: 'The item couldn\'t be boosted. Click \'Try Again\' or copy the log and paste it at:'}, 'error');
         localStorage.removeItem('submitInfo');
       }
     }

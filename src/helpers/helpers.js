@@ -66,3 +66,11 @@ export const storeToken = (access_token, expires_in, logged) => {
 	/* eslint-disable no-undef */
 	browser.storage.sync.set({ access_token, expires_in, logged })
 };
+
+export const debugMode = (message) => {
+	browser.storage.sync.get("debugModeValue").then(({ debugModeValue }) => {
+		if (debugModeValue) {
+			console.log(message)
+		}
+	});
+}

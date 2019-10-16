@@ -176,11 +176,13 @@ h4.app__title {
   min-height: 5px !important;
 }
 
-.error-flash button.copy-log {
+.error-flash button.action,
+.error-flash button.action {
   font-size: 11px;
   padding: 3px 15px;
   color: white;
   border-radius: 50px;
+  margin-right: 10px;
 }
 
 
