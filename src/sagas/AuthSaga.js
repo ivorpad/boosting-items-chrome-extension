@@ -155,8 +155,9 @@ function* authenticate() {
   });
 
   if (signOut) {
+    authLoopTask.cancel(new Error(ON_SIGN_OUT));
     yield call(removeStoredToken);
-    yield cancel(authLoopTask);
+    yield takeEvery(ON_LOGIN_ACTION, authenticate);
   }
 }
 
@@ -171,7 +172,7 @@ function* loginInit() {
 }
 
 export function* requestAuthWatcher() {
-  yield [takeLatest(ON_LOGIN_INIT, loginInit)];
+  yield takeLatest(ON_LOGIN_INIT, loginInit);
 }
 
 export const actions = {

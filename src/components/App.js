@@ -52,6 +52,14 @@ class App extends Component {
           autoClose: false
         })
         break;
+      case 'errorAutoClose':
+        toast.error(<ToastMessage data={data} isError={true} msg={message} />, {
+          className: 'error-flash',
+          closeOnClick: true,
+          autoClose: 10000,
+          hideProgressBar: true
+        })
+        break;
       default:
         console.log('Something went wrong')    
     }
@@ -78,7 +86,7 @@ class App extends Component {
 
           if(!response.error) {
 
-            console.log({ response })
+            //console.log({ response })
 
             if(response.expires_in < 600) {
               const token = browser.runtime.sendMessage({
@@ -86,25 +94,20 @@ class App extends Component {
               });
 
               token.then(results => {
-                console.log({ results })
+                //console.log({ results })
                 storeToken(results.access_token, results.expires_in, results.isLoggedIn);
               })
             } 
           } 
-          
           else {
             localStorage.removeItem('session_access_token');
-            browser.storage.sync.remove(['access_token', 'expires_in', 'logged'])
+            browser.storage.sync.remove(['access_token', 'expires_in', 'logged']);
             this.props.handleSignOut();
+            this.flash({ data: false, message: 'Logged out due to network issues or invalid token. Please login again.' }, 'errorAutoClose');
           }
         })
       })
-      
-      /* eslint-disable no-undef */
-      
-
-
-      console.log('try to refresh')
+  
     }
   }
 

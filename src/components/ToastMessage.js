@@ -4,7 +4,7 @@ import { copyToClipboard } from "../helpers/helpers";
 function ToastMessage({ data, msg, isError }) {
   return (
     <div class="toasty">
-      {isError ? (
+      {isError && data ? (
         <div>
           <h3><span>!!!ATTENTION:</span> {data.item}</h3>
           <p>{msg} <a href="slack://channel?team=T0253B9P9&id=CPFBU2MV4">#help-boosting-tool</a></p>
