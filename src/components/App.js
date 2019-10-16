@@ -85,9 +85,6 @@ class App extends Component {
         tokenInfo.then((response) => {
 
           if(!response.error) {
-
-            //console.log({ response })
-
             if(response.expires_in < 600) {
               const token = browser.runtime.sendMessage({
                 type: "refresh"
@@ -105,6 +102,7 @@ class App extends Component {
             this.props.handleSignOut();
             this.flash({ data: false, message: 'Logged out due to network issues or invalid token. Please login again.' }, 'errorAutoClose');
           }
+          
         })
       })
   
