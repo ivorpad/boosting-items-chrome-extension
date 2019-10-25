@@ -7,7 +7,6 @@ import {
   put,
   race,
   join,
-  cancel,
   cancelled
 } from "redux-saga/effects";
 import { delay } from "redux-saga";
@@ -21,9 +20,11 @@ import {
   AUTH_STATUS_CHECK
 } from "../constants/sagas";
 
-import { storeToken } from '../helpers/helpers'
+import { storeToken, debugMode } from '../helpers/helpers'
+
 
 function verifyToken(access_token) {
+
   /* eslint-disable no-undef */
   return new Promise(resolve => {
     const sending = browser.runtime.sendMessage({
@@ -85,35 +86,6 @@ function* authorize(storedToken) {
   }
 }
 
-function* verify(storedToken) {
-  let access_token, expires_in;
-  ({ access_token, expires_in } = JSON.parse(storedToken));
-
-  let results = yield call(verifyToken, access_token);
-
-  if (results.error === "Invalid Token") {
-    yield put(actions.handleSignOut());
-  } else {
-    if ((results.error && storedToken !== null) || results.expires_in <= 900) {
-      const data = yield call(requestAuthToken, "refresh");
-      yield call(storeToken, data.access_token, data.expires_in, data.isLoggedIn);
-      access_token = data.access_token;
-      expires_in = data.expires_in;
-    } else {
-      browser.storage.sync.get("debugModeValue").then(({ debugModeValue }) => {
-        if (debugModeValue) {
-          console.log(`Refresh not necessary.`);
-        }
-      });
-    }
-
-    return {
-      access_token,
-      expires_in
-    };
-  }
-}
-
 function* authorizeLoop(token) {
   try {
     while (true) {
@@ -125,16 +97,49 @@ function* authorizeLoop(token) {
         access_token = yield call(authorize, token);
         return;
       }
-
-      // const fiveSeconds = 5000; just for testing
+    
       const fortyFiveMinutes = (access_token.expires_in - 900) * 1000;
       yield call(delay, fortyFiveMinutes);
     }
   } finally {
-    if ( yield cancelled() ) {
+    if (yield cancelled()) {
       console.log("task cancelled");
     }
   }
+}
+
+function *verify(storedToken) {
+  let access_token, expires_in;
+  ({ access_token, expires_in } = JSON.parse(storedToken));
+
+  let results = yield call(verifyToken, access_token);
+  
+  if (results.expires_in <= 900) {
+    const data = yield call(requestAuthToken, "refresh");
+    yield call(storeToken, data.access_token, data.expires_in, data.isLoggedIn);
+    access_token = data.access_token;
+    expires_in = data.expires_in;
+  } else if (results.error && storedToken !== null) {
+    yield call(removeStoredToken);
+  } else {
+    debugMode(`Refresh not necessary.`)
+  }
+
+
+  // if ((results.error && storedToken !== null) || results.expires_in <= 900) {
+  //   const data = yield call(requestAuthToken, "refresh");
+  //   yield call(storeToken, data.access_token, data.expires_in, data.isLoggedIn);
+  //   access_token = data.access_token;
+  //   expires_in = data.expires_in;
+  // } else {
+  //   debugMode(`Refresh not necessary.`)
+  // }
+
+  return {
+    access_token,
+    expires_in
+  };
+
 }
 
 function* authenticate() {

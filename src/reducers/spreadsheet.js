@@ -7,7 +7,8 @@ import {
 
 const defaultState = {
   sheetId: "",
-  payload: {}
+  payload: {},
+  submitted: false
 }
 
 export default (state = defaultState, action) => {
@@ -22,12 +23,14 @@ export default (state = defaultState, action) => {
     case SEND_DATA_TO_SHEETS_SUCCESS:
       return {
         ...state,
-        buttonText: 'Submitted!'
+        buttonText: 'Submitted!',
+        submitted: true
       }
     case SEND_DATA_TO_SHEETS_FAILURE:
       return {
         ...state,
-        buttonText: 'Error. Try again.'
+        buttonText: 'Error. Try again.',
+        submitted: false
       }
     default:
       return state

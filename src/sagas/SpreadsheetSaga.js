@@ -20,13 +20,16 @@ function postDataToSpreadsheet({token, sheetId, payload}) {
   return new Promise(() => {
     // eslint-disable-next-line no-undef
     const sending = browser.runtime.sendMessage({ type: 'postApiData', baseUrl: BASE_URL, token, sheetId, range, payload });
+    
     sending.then(({ok, item}) => {
       if (ok) {
         localStorage.setItem('submitInfo', JSON.stringify({ ok, item }))
         postChannel.put(actions.sendDataToSheetsSuccess())
+        return { ok }
       } else {
         localStorage.setItem('submitInfo', JSON.stringify({ ok, item }))
         postChannel.put(actions.sendDataToSheetsFailure())
+        return { ok }
       }
     })
   })

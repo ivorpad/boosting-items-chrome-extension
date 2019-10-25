@@ -173,13 +173,18 @@ async function getAccessTokenWithRefreshToken() {
       .then(r => r.json())
       .then(results => {
         const { access_token, expires_in } = results;
-        return new Promise(resolve => {
+        return new Promise((resolve, reject) => {
           resolve({
             access_token,
             expires_in
           });
         });
       });
+  } else {
+    return  {
+      access_token: null,
+      expires_in: null
+    }
   }
 }
 
@@ -210,11 +215,12 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     case "refresh":
       console.log(`background refresh — ${new Date().toLocaleString()}`);
 
-      getAccessTokenWithRefreshToken().then(({ access_token, expires_in }) => {
-        if(access_token) {
+      getAccessTokenWithRefreshToken().then((response) => {
+
+        if(response.access_token) {
           sendResponse({
-            access_token,
-            expires_in,
+            access_token: response.access_token,
+            expires_in: response.expires_in,
             isLoggedIn: true
           });
         } else {
@@ -257,6 +263,10 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${request.access_token}`
           );
 
+          await fetch(
+            `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${request.access_token}`
+          ).then(r => r.json()).then(r => console.log(r))
+
           if(!response.ok) {
             throw new Error('Invalid Token')
           } else {
@@ -265,7 +275,7 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             })
           }
         } catch(err) {
-          console.log({err})
+          console.log(`${err} at ${new Date().toLocaleString()}`)
           sendResponse({ error: err.message });
         }
 
@@ -299,20 +309,24 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         );
 
         var columns = ["date", "author", "item", "url", "id", "category", "reviewer", "boost", "highlights", "promotions"];
-
+          console.log(request.payload)
         var result = request.payload.values[0].reduce(function (result, field, index) {
           result[columns[index]] = field;
           return result;
         }, {})
 
+        browser.storage.sync.set({
+          payload: request.payload
+        })
+
         if (response.ok) {
           response.json().then(r => sendResponse({ ok: true, item: result }));
         } else {
-          sendResponse({ ok: false, item: result })
+          sendResponse({ ok: false, item: request.payload })
         }
       })();
 
-      return true;
+      return true; 
     default:
       console.log("request wasn't found");
       break;

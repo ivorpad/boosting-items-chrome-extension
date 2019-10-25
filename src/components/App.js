@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "./App.css";
-import { extractDomainName, storeToken, debugMode } from "../helpers/helpers";
+import { extractDomainName, storeToken, debugMode, getItemCategory } from "../helpers/helpers";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import loading from "./loading.svg";
@@ -18,9 +18,8 @@ import { actions as marketplaceActions } from "../reducers/marketplace";
 import { actions as spreadsheetActions } from "../reducers/spreadsheet";
 import { actions as spreadsheetSagaActions } from "../sagas/SpreadsheetSaga";
 import { actions as noticesActions } from "../reducers/notices";
-import { getItemCategory } from "../helpers/helpers";
 import ToastMessage from "./ToastMessage";
-
+import { store } from '../index'
 
 const isAwesomeProofing = window.location.pathname.startsWith(
   "/admin/awesome_proofing"
@@ -31,25 +30,36 @@ toast.configure();
 class App extends Component {
   state = {
     isHidden: true,
-    submitButtonText: "Submit",
-    debugMode: false
+    debugMode: false  
   };
 
   flash = ({data, message}, type) => {
     switch(type) {
       case 'success':
-        toast.success(<ToastMessage data={data} isError={false} msg={message}/>, {
+        toast.success(<ToastMessage data={data} store={store} isError={false} msg={message}/>, {
           className: 'success-flash',
           autoClose: 2000,
           hideProgressBar: true
         });
         break;
       case 'error':
-        toast.error(<ToastMessage data={data} isError={true} msg={message} />, {
-          className: 'error-flash',
-          closeOnClick: false,
-          autoClose: false
-        })
+
+        const token = JSON.parse(localStorage.getItem('session_access_token')).access_token
+                
+        toast.error(
+          <ToastMessage 
+            sendDataToSheets={this.props.sendDataToSheets}
+            access_token={token}
+            data={data} 
+            store={store}
+            isError={true} 
+            msg={message}
+          />, 
+          {
+            className: 'error-flash',
+            closeOnClick: false,
+            autoClose: false
+          })
         break;
       case 'errorAutoClose':
         toast.error(<ToastMessage data={data} isError={true} msg={message} />, {
@@ -65,6 +75,7 @@ class App extends Component {
   }
 
   componentDidUpdate(prevProps, _prevState) {
+
     if(
       prevProps.boosting !== this.props.boosting || 
       prevProps.promotions.selected !== this.props.promotions.selected ||
@@ -86,20 +97,30 @@ class App extends Component {
           debugMode({ response })
 
           if(!response.error) {
-            if(response.expires_in < 600) {
+            if(response.expires_in < 900) {
               const token = browser.runtime.sendMessage({
                 type: "refresh"
               });
 
               token.then(results => {
-                
-               debugMode({message})
-               
-                storeToken(results.access_token, results.expires_in, results.isLoggedIn);
+               debugMode({message})      
+               storeToken(results.access_token, results.expires_in, results.isLoggedIn);
               })
             } 
           } 
           else {
+
+          /* eslint-disable no-undef */
+
+            const token = browser.runtime.sendMessage({
+              type: "refresh"
+            });
+
+            token.then(results => {
+              debugMode({ message })
+              storeToken(results.access_token, results.expires_in, results.isLoggedIn);
+            })
+
             localStorage.removeItem('session_access_token');
             browser.storage.sync.remove(['access_token', 'expires_in', 'logged']);
             this.props.handleSignOut();
@@ -112,6 +133,8 @@ class App extends Component {
     }
   }
 
+
+
   componentDidMount() {
 
     const { setMarketData, fetchApiData, handleLoginInit } = this.props;
@@ -123,7 +146,7 @@ class App extends Component {
         this.flash({ data: submitInfo.item, message: 'Boost successfully recorded' }, 'success');
         localStorage.removeItem('submitInfo');
       } else {
-        this.flash({ data: submitInfo.item, message: 'The item couldn\'t be boosted. Click \'Try Again\' or copy the log and paste it at:'}, 'error');
+        this.flash({ data: submitInfo, message: 'The item couldn\'t be boosted. Click \'Try Again\' or copy the log and paste it at:'}, 'error');
         localStorage.removeItem('submitInfo');
       }
     }
@@ -153,6 +176,7 @@ class App extends Component {
     handleLoginInit();
     this.checkSheetValue();
     this.checkBaseUrlValue();
+
 
     if (!isAwesomeProofing) {
       this.setState({
@@ -433,9 +457,6 @@ class App extends Component {
     }
 
     const { isHidden } = this.state;
-    // const { logged } = this.props.session;
-    // const { buttonText } = this.props.spreadsheet;
-    // const { highlights, promotions } = this.props;
 
     const { 
       highlights, 
