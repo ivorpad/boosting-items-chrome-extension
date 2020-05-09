@@ -15,18 +15,28 @@
     "storage",
     "identity",
     "background",
-    "https://docs.google.com/spreadsheets/",
-    "https://googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/*",
-    "https://www.apis.google.com/*",
-    "*://*.google.com/*",
-    "https://tfsnippets.ivorpad.com/*",
-    "https://sheets.googleapis.com/v4/spreadsheets/*"
+    "activeTab",
+    "https://themeforest.net/*",
+    "https://videohive.net/*",
+    "https://graphicriver.net/*",
+    "https://audiojungle.net/*",
+    "https://codecanyon.net/*"
   ],
   "web_accessible_resources": ["/oauth2/*", "/static/media/*"],
   "content_scripts": [
     {
-      "matches": ["*://*/*admin/awesome_proofing*", "*://*/*admin/item/edit*"],
+      "matches": [
+        "https://themeforest.net/admin/awesome_proofing/*", 
+        "https://themeforest.net/admin/item/edit/*",
+        "https://videohive.net/admin/awesome_proofing/*", 
+        "https://videohive.net/admin/item/edit/*",
+        "https://audiojungle.net/admin/awesome_proofing/*", 
+        "https://audiojungle.net/admin/item/edit/*",
+        "https://graphicriver.net/admin/awesome_proofing/*", 
+        "https://graphicriver.net/admin/item/edit/*",
+        "https://codecanyon.net/admin/awesome_proofing/*", 
+        "https://codecanyon.net/admin/item/edit/*"
+      ],
       "css": ["/static/css/main.css", "options.css"],
       "js": ["browser-polyfill.js", "/static/js/main.js"]
     }
