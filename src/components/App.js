@@ -101,40 +101,63 @@ class App extends Component {
           access_token
         });
 
+        tokenInfo
+          .then(response => {
+            console.log({response})
+          })
+          .catch(e => {
+            console.log({e})
+          })
+
+
         tokenInfo.then((response) => {
-          // debugMode({ response })
 
-          if(!response.error && response.expires_in < 900) {
+            if(response.error) {
+              throw new Error('Token expired');
+            }
 
-            const token = browser.runtime.sendMessage({
-              type: "refresh"
-            });
-            token.then(results => {
-              // debugMode({message})      
-              storeToken(results.access_token, results.expires_in, results.isLoggedIn);
-            })
-          } 
-          else {
-          /* eslint-disable no-undef */
-            const token = browser.runtime.sendMessage({
-              type: "refresh"
-            });
+            try {
+              let needsRefresh = response.expires_in < 900;
+              if (needsRefresh) {
+                const token = browser.runtime.sendMessage({
+                  type: "refresh",
+                });
+                token.then((results) => {
+                  storeToken(
+                    results.access_token,
+                    results.expires_in,
+                    results.isLoggedIn
+                  );
+                });
+              } 
+            } catch (error) {
+                const token = browser.runtime.sendMessage({
+                  type: "refresh",
+                });
 
-            token
-              .then(results => {
-                // debugMode({ message })
-                storeToken(results.access_token, results.expires_in, results.isLoggedIn);
-              })
-              .catch(err => {
-                 localStorage.removeItem("session_access_token");
-                 browser.storage.sync.remove([
-                   "access_token",
-                   "expires_in",
-                   "logged",
-                 ]);
-                 this.props.handleSignOut();
-              })
-          }
+                token
+                  .then((results) => {
+
+                    if(results.error) {
+                      throw new Error('Refresh failed.')
+                    }
+
+                    storeToken(
+                      results.access_token,
+                      results.expires_in,
+                      results.isLoggedIn
+                    );
+                  })
+                  .catch((err) => {
+                    localStorage.removeItem("session_access_token");
+                    browser.storage.sync.remove([
+                      "access_token",
+                      "expires_in",
+                      "logged",
+                    ]);
+                    this.props.handleSignOut();
+                  });
+            }
 
         })
       })

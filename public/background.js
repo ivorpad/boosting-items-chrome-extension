@@ -213,6 +213,7 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
       return true;
     case "refresh":
+
       console.log(`background refresh — ${new Date().toLocaleString()}`);
 
       getAccessTokenWithRefreshToken().then((response) => {
@@ -225,7 +226,8 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
           });
         } else {
           sendResponse({
-            isLoggedIn: false
+            isLoggedIn: false,
+            error: "Refresh unsuccessful"
           })
         }
       });
