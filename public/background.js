@@ -261,20 +261,19 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         try {
           let response = await fetch(
             `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${request.access_token}`
-          );
+          )
 
-          await fetch(
-            `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${request.access_token}`
-          ).then(r => r.json()).then(r => console.log(r))
-
-          if(!response.ok) {
-            throw new Error('Invalid Token')
+          if(response.ok) {
+             return await response.json().then(({ expires_in }) => {
+               sendResponse({ expires_in });
+             });
           } else {
             return await response.json().then(({ expires_in }) => {
               sendResponse({ expires_in });
-            })
+            });
           }
         } catch(err) {
+          // TODO: REMOVE
           console.log(`${err} at ${new Date().toLocaleString()}`)
           sendResponse({ error: err.message });
         }
@@ -309,7 +308,6 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         );
 
         var columns = ["date", "author", "item", "url", "id", "category", "reviewer", "boost", "highlights", "promotions"];
-          console.log(request.payload)
         var result = request.payload.values[0].reduce(function (result, field, index) {
           result[columns[index]] = field;
           return result;
@@ -329,15 +327,7 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       return true; 
 
     case "flaggedAuthor":
-
-      browser.storage.sync.get("baseUrlValue").then(async ({ baseUrlValue }) => {
-        const values = await fetch(`https://${baseUrlValue}/wp-json/wp/v2/post_type_author`);
-
-        values.json().then( authors => sendResponse({ authors }))
-
-
-      });
-
+      console.log('flagging author')
       return true; 
 
     default:

@@ -102,38 +102,51 @@ class App extends Component {
         });
 
         tokenInfo.then((response) => {
-
           debugMode({ response })
 
-          if(!response.error) {
-            if(response.expires_in < 900) {
-              const token = browser.runtime.sendMessage({
-                type: "refresh"
-              });
+          if(!response.error && response.expires_in < 900) {
 
-              token.then(results => {
-               debugMode({message})      
-               storeToken(results.access_token, results.expires_in, results.isLoggedIn);
-              })
-            } 
-          } 
-          else {
-
-          /* eslint-disable no-undef */
+            console.log('hit?')
 
             const token = browser.runtime.sendMessage({
               type: "refresh"
             });
-
             token.then(results => {
-              debugMode({ message })
+              debugMode({message})      
               storeToken(results.access_token, results.expires_in, results.isLoggedIn);
             })
+          } 
+          else {
+          /* eslint-disable no-undef */
+            const token = browser.runtime.sendMessage({
+              type: "refresh"
+            });
 
-            localStorage.removeItem('session_access_token');
-            browser.storage.sync.remove(['access_token', 'expires_in', 'logged']);
-            this.props.handleSignOut();
-            this.flash({ data: false, message: 'Logged out due to network issues or invalid token. Please login again.' }, 'errorAutoClose');
+            console.log({token})
+
+            token
+              .then(results => {
+                debugMode({ message })
+                storeToken(results.access_token, results.expires_in, results.isLoggedIn);
+              })
+              .catch(err => {
+                console.log(err);
+                 localStorage.removeItem("session_access_token");
+                 browser.storage.sync.remove([
+                   "access_token",
+                   "expires_in",
+                   "logged",
+                 ]);
+                 this.props.handleSignOut();
+                 this.flash(
+                   {
+                     data: false,
+                     message:
+                       "Logged out due to network issues or invalid access token. Please login again.",
+                   },
+                   "errorAutoClose"
+                 );
+              })
           }
 
         })
@@ -185,8 +198,6 @@ class App extends Component {
     handleLoginInit();
     this.checkSheetValue();
     this.checkBaseUrlValue();
-    this.isAuthorFlagged()
-
 
     if (!isAwesomeProofing) {
       this.setState({

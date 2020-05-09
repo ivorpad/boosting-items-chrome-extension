@@ -53,9 +53,10 @@ const requestAuthToken = type => {
 
 const getStoredToken = () => localStorage.getItem("session_access_token");
 
-const removeStoredToken = () => {
+function* removeStoredToken() {
   localStorage.removeItem("session_access_token");
   localStorage.removeItem("submitInfo");
+  yield put(actions.handleSignOut())
 };
 
 function* authorize(storedToken) {
@@ -113,27 +114,20 @@ function *verify(storedToken) {
   ({ access_token, expires_in } = JSON.parse(storedToken));
 
   let results = yield call(verifyToken, access_token);
+
+  console.log(results);
   
   if (results.expires_in <= 900) {
     const data = yield call(requestAuthToken, "refresh");
     yield call(storeToken, data.access_token, data.expires_in, data.isLoggedIn);
     access_token = data.access_token;
     expires_in = data.expires_in;
-  } else if (results.error && storedToken !== null) {
+  } else if ((results.error && storedToken !== null) || Object.entries(results).length === 0) {
+    console.log('Removing Token')
     yield call(removeStoredToken);
   } else {
     debugMode(`Refresh not necessary.`)
   }
-
-
-  // if ((results.error && storedToken !== null) || results.expires_in <= 900) {
-  //   const data = yield call(requestAuthToken, "refresh");
-  //   yield call(storeToken, data.access_token, data.expires_in, data.isLoggedIn);
-  //   access_token = data.access_token;
-  //   expires_in = data.expires_in;
-  // } else {
-  //   debugMode(`Refresh not necessary.`)
-  // }
 
   return {
     access_token,
