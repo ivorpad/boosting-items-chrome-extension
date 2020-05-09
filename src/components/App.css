@@ -122,17 +122,18 @@ h4.app__title {
   margin-top: 0 !important;
 }
 
-.success-flash, .error-flash {
+.error-flash, 
+.success-flash,
+.warning-flash {
+  border-radius: 3px !important;
+  background: white !important;
   top: 2em;
   font-size: 12px;
 }
 
-.error-flash, .success-flash {
-  border-radius: 3px !important;
-  background: white !important;
-}
-
-.error-flash::before, .success-flash::before {
+.error-flash::before, 
+.success-flash::before,
+.warning-flash::before {
   width: 5px;
   height: 100%;
   position: absolute;
@@ -149,28 +150,45 @@ h4.app__title {
   background: rgb(117, 187, 40)
 }
 
-.error-flash h3 {
-  font-size: 12px;
+.warning-flash::before {
+  background: rgb(228, 150, 31);;
+}
+
+.error-flash h3 span,
+.warning-flash h3 span {
+  font-weight: 800
+}
+
+
+
+.error-flash h3,
+.warning-flash h3 {
+  color: #555;
   margin: 0;
   padding: 0;
 }
 
-.error-flash h3 span {
-  font-weight: 800
-}
-
 .error-flash h3 {
-  color: #555;
+  font-size: 12px;
 }
 
-.error-flash p, .success-flash p {
+.warning-flash h3 {
+  font-size: 14px;
+  padding-top: 5px;
+  font-weight: bold;
+}
+
+.error-flash p, 
+.success-flash p,
+.warning-flash p {
   color: #555 !important;
 }
 
-.success-flash p {
+.success-flash p, .warning-flash {
   margin-top: 2px;
   padding: 0;
 }
+
 
 .Toastify__toast--success {
   min-height: 5px !important;
@@ -186,11 +204,16 @@ h4.app__title {
 }
 
 
-.error-flash .Toastify__close-button, .success-flash .Toastify__close-button {
+.error-flash .Toastify__close-button, 
+.success-flash .Toastify__close-button,
+.warning-flash .Toastify__close-button
+ {
   color: #555;
 }
 
-.error-flash .Toastify__close-button:hover, .success-flash .Toastify__close-button:hover {
+.error-flash .Toastify__close-button:hover, 
+.success-flash .Toastify__close-button:hover,
+.warning-flash .Toastify__close-button:hover {
   opacity: 1;
   color: #555;
   background: none;
@@ -199,7 +222,9 @@ h4.app__title {
 .error-flash .Toastify__close-button:focus, 
 .error-flash .Toastify__close-button:active,
 .success-flash .Toastify__close-button:focus,
-.success-flash .Toastify__close-button:active {
+.success-flash .Toastify__close-button:active,
+.warning-flash.Toastify__close-button:focus, 
+.warning-flash.Toastify__close-button:active, {
   opacity: 1;
   color: #555;
   background: none;

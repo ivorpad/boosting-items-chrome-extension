@@ -32,8 +32,9 @@ class App extends Component {
     isHidden: true,
     debugMode: false  
   };
+  
 
-  flash = ({data, message}, type) => {
+  flash = ({data, message, title}, type) => {
     switch(type) {
       case 'success':
         toast.success(<ToastMessage data={data} store={store} isError={false} msg={message}/>, {
@@ -62,10 +63,18 @@ class App extends Component {
           })
         break;
       case 'errorAutoClose':
-        toast.error(<ToastMessage data={data} isError={true} msg={message} />, {
+        toast.error(<ToastMessage store={store} data={data} isError={true} msg={message} />, {
           className: 'error-flash',
           closeOnClick: true,
           autoClose: 10000,
+          hideProgressBar: true
+        })
+        break;
+      case 'warning':
+        toast.warn(<ToastMessage title={title} store={store} data={data} msg={message} />, {
+          className: 'warning-flash',
+          closeOnClick: true,
+          autoClose: false,
           hideProgressBar: true
         })
         break;
@@ -176,6 +185,7 @@ class App extends Component {
     handleLoginInit();
     this.checkSheetValue();
     this.checkBaseUrlValue();
+    this.isAuthorFlagged()
 
 
     if (!isAwesomeProofing) {
@@ -259,6 +269,27 @@ class App extends Component {
       );
     }
   };
+
+  isAuthorFlagged() {
+
+    const author = browser.runtime.sendMessage({
+      type: "flaggedAuthor"
+    });
+
+    const authorName = document.querySelectorAll(
+      'a[title="author profile page"]'
+    )[0].innerText.toLocaleLowerCase()
+
+    author.then(({ authors }) => {
+      if (authors.length > 0) {
+        const [author] = authors.filter( author => author.title.rendered.toLowerCase() === authorName );
+        const content = author.content.rendered.replace(/<[^>]*>?/gm, '');
+
+        this.flash({ data: {}, title: "This author has been flagged!", message: content}, 'warning')
+      }
+    })
+
+  }
 
   prepareMarketData = () => {
     const name = document.getElementById("spec-user-username").textContent;

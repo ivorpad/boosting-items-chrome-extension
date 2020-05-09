@@ -46,7 +46,7 @@ class ToastMessage extends React.Component {
       localStorage.removeItem('submitInfo')
     }
 
-    const { data, msg, isError } = this.props;
+    const { data, msg, isError, title } = this.props;
     return (
       <div class="toasty">
         {isError && data.item ? (
@@ -61,7 +61,12 @@ class ToastMessage extends React.Component {
               copyToClipboard(JSON.stringify(data))
             }}>Copy Log</button>
           </div>
-        ) : <p>{msg}</p>}
+        ) : (
+            <React.Fragment>
+              {title && <h3> {title} </h3>}
+              <p>{msg}</p>
+            </React.Fragment>
+        )}
       </div>
     )
   }

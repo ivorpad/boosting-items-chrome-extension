@@ -327,6 +327,19 @@ browser.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       })();
 
       return true; 
+
+    case "flaggedAuthor":
+
+      browser.storage.sync.get("baseUrlValue").then(async ({ baseUrlValue }) => {
+        const values = await fetch(`https://${baseUrlValue}/wp-json/wp/v2/post_type_author`);
+
+        values.json().then( authors => sendResponse({ authors }))
+
+
+      });
+
+      return true; 
+
     default:
       console.log("request wasn't found");
       break;
