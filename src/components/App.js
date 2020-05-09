@@ -102,17 +102,15 @@ class App extends Component {
         });
 
         tokenInfo.then((response) => {
-          debugMode({ response })
+          // debugMode({ response })
 
           if(!response.error && response.expires_in < 900) {
-
-            console.log('hit?')
 
             const token = browser.runtime.sendMessage({
               type: "refresh"
             });
             token.then(results => {
-              debugMode({message})      
+              // debugMode({message})      
               storeToken(results.access_token, results.expires_in, results.isLoggedIn);
             })
           } 
@@ -122,15 +120,12 @@ class App extends Component {
               type: "refresh"
             });
 
-            console.log({token})
-
             token
               .then(results => {
-                debugMode({ message })
+                // debugMode({ message })
                 storeToken(results.access_token, results.expires_in, results.isLoggedIn);
               })
               .catch(err => {
-                console.log(err);
                  localStorage.removeItem("session_access_token");
                  browser.storage.sync.remove([
                    "access_token",
@@ -138,14 +133,6 @@ class App extends Component {
                    "logged",
                  ]);
                  this.props.handleSignOut();
-                 this.flash(
-                   {
-                     data: false,
-                     message:
-                       "Logged out due to network issues or invalid access token. Please login again.",
-                   },
-                   "errorAutoClose"
-                 );
               })
           }
 

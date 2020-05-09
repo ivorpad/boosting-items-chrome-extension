@@ -115,8 +115,6 @@ function *verify(storedToken) {
 
   let results = yield call(verifyToken, access_token);
 
-  console.log(results);
-  
   if (results.expires_in <= 900) {
     const data = yield call(requestAuthToken, "refresh");
     yield call(storeToken, data.access_token, data.expires_in, data.isLoggedIn);

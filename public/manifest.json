@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Envato Market Item Boosting",
-  "version": "0.4.7",
+  "version": "0.4.8",
   "description": "Envato Market Item Boosting",
   "icons": {
     "16": "/img/16.png",
@@ -13,9 +13,7 @@
   },
   "permissions": [
     "storage",
-    "tabs",
     "identity",
-    "activeTab",
     "background",
     "https://docs.google.com/spreadsheets/",
     "https://googleapis.com/auth/spreadsheets",
